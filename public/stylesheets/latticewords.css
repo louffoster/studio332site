@@ -1,0 +1,16 @@
+/*
+.latticewords canvas {
+   border:2px solid #black;
+}
+
+#latticewords {
+   margin: 0 auto;
+   width: 600px;
+   border: 5px solid #009;
+   border-radius: 5px;
+} */
+
+.studio332-site canvas {
+  display: block; 
+  margin: 0 auto;
+}
