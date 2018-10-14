@@ -134,7 +134,7 @@ class Grid  {
       }
 
       var self = this;
-      axios.post('/check', words.join(","))
+      axios.post('/api/latticewords/check', {words: words.join(",")})
       .then(function (response) {
          self.handleResults(response.data, coords, scoreHandler );
       })
