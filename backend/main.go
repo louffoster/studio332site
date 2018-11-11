@@ -23,7 +23,7 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.Use(static.Serve("/", static.LocalFile("./public", true)))
+	router.Use(static.Serve("/", static.LocalFile("./frontend", true)))
 	api := router.Group("/api")
 	lw := api.Group("/latticewords")
 	{
