@@ -14,7 +14,7 @@ import (
 func main() {
 	// Get config params
 	var port int
-	defPort, err := strconv.Atoi(os.Getenv("STUDIO_332_PORT"))
+	defPort, err := strconv.Atoi(os.Getenv("STUDIO332_PORT"))
 	if err != nil {
 		defPort = 8080
 	}
@@ -24,11 +24,19 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(static.Serve("/", static.LocalFile("./frontend", true)))
+	router.Use(static.Serve("/assets", static.LocalFile("./frontend/public", true)))
 	api := router.Group("/api")
 	lw := api.Group("/latticewords")
 	{
 		lw.POST("/check", checkHandler)
 	}
+
+	// add a catchall route that renders the index page.
+	// based on no-history config setup info here:
+	//    https://router.vuejs.org/guide/essentials/history-mode.html#example-server-configurations
+	router.NoRoute(func(c *gin.Context) {
+		c.File("./public/index.html")
+	})
 
 	portStr := fmt.Sprintf(":%d", port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)
