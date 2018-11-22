@@ -13,7 +13,7 @@ export default {
   div.header {
      background-color: white;
      color: #666;
-     padding:15px;
+     padding:2px 5px 0 5px;
      border-bottom: 3px solid red;
      text-align: left;
   }

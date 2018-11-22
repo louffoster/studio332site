@@ -6,14 +6,17 @@
     </div> -->
     <Studio332Header/>
     <router-view/>
+    <Studio332Footer/>
   </div>
 </template>
 
 <script>
   import Studio332Header from '@/components/Studio332Header.vue'
+  import Studio332Footer from '@/components/Studio332Footer.vue'
   export default {
     components: {
-      Studio332Header
+      Studio332Header,
+      Studio332Footer
     }
   }
 </script>

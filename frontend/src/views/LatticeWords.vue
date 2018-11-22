@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <div id="lwgame"></div>
 </template>
 
 <script>
@@ -8,13 +8,14 @@
   import Latticewords from '@/assets/latticewords/javascripts/latticewords'
   export default {
     name: 'LatticeWords',
-    created: function() {
+    mounted: function() {
       var config = {
         type: Phaser.AUTO,
-        parent: 'studio332',
+        parent: 'lwgame',
         width: 600,
         height: 640,
         backgroundColor: '3F51B5',
+        title: "LatticeWords",
         scene: [Menu,Latticewords]
       };
 
@@ -27,5 +28,8 @@
 </script>
 
 <style scoped>
+#lwgame {
+  margin-top: 5px;
+}
 </style>
 
