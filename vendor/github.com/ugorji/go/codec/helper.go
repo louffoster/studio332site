@@ -135,13 +135,15 @@ const (
 	wordSizeBits = 32 << (^uint(0) >> 63) // strconv.IntSize
 	wordSize     = wordSizeBits / 8
 
-	maxLevelsEmbedding = 15 // use this, so structFieldInfo fits into 8 bytes
+	maxLevelsEmbedding = 14 // use this, so structFieldInfo fits into 8 bytes
 )
 
 var (
 	oneByteArr    = [1]byte{0}
 	zeroByteSlice = oneByteArr[:0:0]
 )
+
+var codecgen bool
 
 var refBitset bitset32
 var pool pooler
@@ -156,15 +158,31 @@ func init() {
 	refBitset.set(byte(reflect.Chan))
 }
 
+type clsErr struct {
+	closed    bool  // is it closed?
+	errClosed error // error on closing
+}
+
+// type entryType uint8
+
+// const (
+// 	entryTypeBytes entryType = iota // make this 0, so a comparison is cheap
+// 	entryTypeIo
+// 	entryTypeBufio
+// 	entryTypeUnset = 255
+// )
+
 type charEncoding uint8
 
 const (
-	cRAW charEncoding = iota
+	_ charEncoding = iota // make 0 unset
 	cUTF8
 	cUTF16LE
 	cUTF16BE
 	cUTF32LE
 	cUTF32BE
+	// Deprecated: not a true char encoding value
+	cRAW charEncoding = 255
 )
 
 // valueType is the stream type
@@ -293,6 +311,30 @@ type isZeroer interface {
 	IsZero() bool
 }
 
+type codecError struct {
+	name string
+	err  interface{}
+}
+
+func (e codecError) Cause() error {
+	switch xerr := e.err.(type) {
+	case nil:
+		return nil
+	case error:
+		return xerr
+	case string:
+		return errors.New(xerr)
+	case fmt.Stringer:
+		return errors.New(xerr.String())
+	default:
+		return fmt.Errorf("%v", e.err)
+	}
+}
+
+func (e codecError) Error() string {
+	return fmt.Sprintf("%s error: %v", e.name, e.err)
+}
+
 // type byteAccepter func(byte) bool
 
 var (
@@ -327,8 +369,9 @@ var (
 	jsonMarshalerTyp   = reflect.TypeOf((*jsonMarshaler)(nil)).Elem()
 	jsonUnmarshalerTyp = reflect.TypeOf((*jsonUnmarshaler)(nil)).Elem()
 
-	selferTyp = reflect.TypeOf((*Selfer)(nil)).Elem()
-	iszeroTyp = reflect.TypeOf((*isZeroer)(nil)).Elem()
+	selferTyp         = reflect.TypeOf((*Selfer)(nil)).Elem()
+	missingFielderTyp = reflect.TypeOf((*MissingFielder)(nil)).Elem()
+	iszeroTyp         = reflect.TypeOf((*isZeroer)(nil)).Elem()
 
 	uint8TypId      = rt2id(uint8Typ)
 	uint8SliceTypId = rt2id(uint8SliceTyp)
@@ -346,7 +389,7 @@ var (
 	intBitsize  = uint8(intTyp.Bits())
 	uintBitsize = uint8(uintTyp.Bits())
 
-	bsAll0x00 = []byte{0, 0, 0, 0, 0, 0, 0, 0}
+	// bsAll0x00 = []byte{0, 0, 0, 0, 0, 0, 0, 0}
 	bsAll0xff = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
 	chkOvf checkOverflow
@@ -392,12 +435,38 @@ var immutableKindsSet = [32]bool{
 // Consequently, during (en|de)code, this takes precedence over
 // (text|binary)(M|Unm)arshal or extension support.
 //
+// By definition, it is not allowed for a Selfer to directly call Encode or Decode on itself.
+// If that is done, Encode/Decode will rightfully fail with a Stack Overflow style error.
+// For example, the snippet below will cause such an error.
+//     type testSelferRecur struct{}
+//     func (s *testSelferRecur) CodecEncodeSelf(e *Encoder) { e.MustEncode(s) }
+//     func (s *testSelferRecur) CodecDecodeSelf(d *Decoder) { d.MustDecode(s) }
+//
 // Note: *the first set of bytes of any value MUST NOT represent nil in the format*.
 // This is because, during each decode, we first check the the next set of bytes
 // represent nil, and if so, we just set the value to nil.
 type Selfer interface {
 	CodecEncodeSelf(*Encoder)
 	CodecDecodeSelf(*Decoder)
+}
+
+// MissingFielder defines the interface allowing structs to internally decode or encode
+// values which do not map to struct fields.
+//
+// We expect that this interface is bound to a pointer type (so the mutation function works).
+//
+// A use-case is if a version of a type unexports a field, but you want compatibility between
+// both versions during encoding and decoding.
+//
+// Note that the interface is completely ignored during codecgen.
+type MissingFielder interface {
+	// CodecMissingField is called to set a missing field and value pair.
+	//
+	// It returns true if the missing field was set on the struct.
+	CodecMissingField(field []byte, value interface{}) bool
+
+	// CodecMissingFields returns the set of fields which are not struct fields
+	CodecMissingFields() map[string]interface{}
 }
 
 // MapBySlice is a tag interface that denotes wrapped slice should encode as a map in the stream.
@@ -443,6 +512,18 @@ type BasicHandle struct {
 
 	RPCOptions
 
+	// TimeNotBuiltin configures whether time.Time should be treated as a builtin type.
+	//
+	// All Handlers should know how to encode/decode time.Time as part of the core
+	// format specification, or as a standard extension defined by the format.
+	//
+	// However, users can elect to handle time.Time as a custom extension, or via the
+	// standard library's encoding.Binary(M|Unm)arshaler or Text(M|Unm)arshaler interface.
+	// To elect this behavior, users can set TimeNotBuiltin=true.
+	// Note: Setting TimeNotBuiltin=true can be used to enable the legacy behavior
+	// (for Cbor and Msgpack), where time.Time was not a builtin supported type.
+	TimeNotBuiltin bool
+
 	// ---- cache line
 
 	DecodeOptions
@@ -465,11 +546,18 @@ func (x *BasicHandle) getTypeInfo(rtid uintptr, rt reflect.Type) (pti *typeInfo)
 	return x.TypeInfos.get(rtid, rt)
 }
 
-// Handle is the interface for a specific encoding format.
+// Handle defines a specific encoding format. It also stores any runtime state
+// used during an Encoding or Decoding session e.g. stored state about Types, etc.
 //
-// Typically, a Handle is pre-configured before first time use,
-// and not modified while in use. Such a pre-configured Handle
-// is safe for concurrent access.
+// Once a handle is configured, it can be shared across multiple Encoders and Decoders.
+//
+// Note that a Handle is NOT safe for concurrent modification.
+// Consequently, do not modify it after it is configured if shared among
+// multiple Encoders and Decoders in different goroutines.
+//
+// Consequently, the typical usage model is that a Handle is pre-configured
+// before first time use, and not modified while in use.
+// Such a pre-configured Handle is safe for concurrent access.
 type Handle interface {
 	Name() string
 	getBasicHandle() *BasicHandle
@@ -628,7 +716,7 @@ func (noElemSeparators) recreateEncDriver(e encDriver) (v bool) { return }
 // Users must already slice the x completely, because we will not reslice.
 type bigenHelper struct {
 	x []byte // must be correctly sliced to appropriate len. slicing is a cost.
-	w encWriter
+	w *encWriterSwitch
 }
 
 func (z bigenHelper) writeUint16(v uint16) {
@@ -814,7 +902,10 @@ type structFieldInfo struct {
 
 	is  [maxLevelsEmbedding]uint16 // (recursive/embedded) field index in struct
 	nis uint8                      // num levels of embedding. if 1, then it's not embedded.
+
+	encNameAsciiAlphaNum bool // the encName only contains ascii alphabet and numbers
 	structFieldInfoFlag
+	_ [1]byte // padding
 }
 
 func (si *structFieldInfo) setToZeroValue(v reflect.Value) {
@@ -1063,12 +1154,15 @@ type typeInfo struct {
 	jup bool // *T is a jsonUnmarshaler
 	cs  bool // T is a Selfer
 	csp bool // *T is a Selfer
+	mf  bool // T is a MissingFielder
+	mfp bool // *T is a MissingFielder
 
 	// other flags, with individual bits representing if set.
-	flags typeInfoFlag
+	flags              typeInfoFlag
+	infoFieldOmitempty bool
 
-	// _ [2]byte   // padding
-	_ [3]uint64 // padding
+	_ [6]byte   // padding
+	_ [2]uint64 // padding
 }
 
 func (ti *typeInfo) isFlag(f typeInfoFlag) bool {
@@ -1155,7 +1249,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	sp := x.infos.load()
 	var idx int
 	if sp != nil {
-		idx, pti = x.find(sp, rtid)
+		_, pti = x.find(sp, rtid)
 		if pti != nil {
 			return
 		}
@@ -1169,7 +1263,13 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 
 	// do not hold lock while computing this.
 	// it may lead to duplication, but that's ok.
-	ti := typeInfo{rt: rt, rtid: rtid, kind: uint8(rk), pkgpath: rt.PkgPath()}
+	ti := typeInfo{
+		rt:      rt,
+		rtid:    rtid,
+		kind:    uint8(rk),
+		pkgpath: rt.PkgPath(),
+		keyType: valueTypeString, // default it - so it's never 0
+	}
 	// ti.rv0 = reflect.Zero(rt)
 
 	// ti.comparable = rt.Comparable()
@@ -1182,6 +1282,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	ti.jm, ti.jmp = implIntf(rt, jsonMarshalerTyp)
 	ti.ju, ti.jup = implIntf(rt, jsonUnmarshalerTyp)
 	ti.cs, ti.csp = implIntf(rt, selferTyp)
+	ti.mf, ti.mfp = implIntf(rt, missingFielderTyp)
 
 	b1, b2 := implIntf(rt, iszeroTyp)
 	if b1 {
@@ -1199,6 +1300,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 		var omitEmpty bool
 		if f, ok := rt.FieldByName(structInfoFieldName); ok {
 			ti.toArray, omitEmpty, ti.keyType = parseStructInfo(x.structTag(f.Tag))
+			ti.infoFieldOmitempty = omitEmpty
 		} else {
 			ti.keyType = valueTypeString
 		}
@@ -1355,6 +1457,15 @@ LOOP:
 			parsed = true
 		} else if si.encName == "" {
 			si.encName = f.Name
+		}
+		si.encNameAsciiAlphaNum = true
+		for i := len(si.encName) - 1; i >= 0; i-- {
+			b := si.encName[i]
+			if (b >= '0' && b <= '9') || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') {
+				continue
+			}
+			si.encNameAsciiAlphaNum = false
+			break
 		}
 		si.fieldName = f.Name
 		si.flagSet(structFieldInfoFlagReady)
@@ -1546,7 +1657,7 @@ func isEmptyStruct(v reflect.Value, tinfos *TypeInfos, deref, checkStruct bool) 
 // 	return t
 // }
 
-func panicToErr(h errstrDecorator, err *error) {
+func panicToErr(h errDecorator, err *error) {
 	// Note: This method MUST be called directly from defer i.e. defer panicToErr ...
 	// else it seems the recover is not fully handled
 	if recoverPanicToErr {
@@ -1558,7 +1669,7 @@ func panicToErr(h errstrDecorator, err *error) {
 	}
 }
 
-func panicValToErr(h errstrDecorator, v interface{}, err *error) {
+func panicValToErr(h errDecorator, v interface{}, err *error) {
 	switch xerr := v.(type) {
 	case nil:
 	case error:
@@ -1568,18 +1679,18 @@ func panicValToErr(h errstrDecorator, v interface{}, err *error) {
 			// treat as special (bubble up)
 			*err = xerr
 		default:
-			h.wrapErrstr(xerr.Error(), err)
+			h.wrapErr(xerr, err)
 		}
 	case string:
 		if xerr != "" {
-			h.wrapErrstr(xerr, err)
+			h.wrapErr(xerr, err)
 		}
 	case fmt.Stringer:
 		if xerr != nil {
-			h.wrapErrstr(xerr.String(), err)
+			h.wrapErr(xerr, err)
 		}
 	default:
-		h.wrapErrstr(v, err)
+		h.wrapErr(v, err)
 	}
 }
 
@@ -1636,11 +1747,15 @@ func (c *codecFner) reset(hh Handle) {
 	if !hhSame {
 		// c.hh = hh
 		c.h, bh = bh, c.h // swap both
+		_ = bh
 		_, c.js = hh.(*JsonHandle)
 		c.be = hh.isBinary()
-		for i := range c.s {
-			c.s[i].fn.i.ready = false
+		if len(c.s) > 0 {
+			c.s = c.s[:0]
 		}
+		// for i := range c.s {
+		// 	c.s[i].fn.i.ready = false
+		// }
 	}
 }
 
@@ -1685,7 +1800,7 @@ func (c *codecFner) get(rt reflect.Type, checkFastpath, checkCodecSelfer bool) (
 		fi.addrF = true
 		fi.addrD = ti.csp
 		fi.addrE = ti.csp
-	} else if rtid == timeTypId {
+	} else if rtid == timeTypId && !c.h.TimeNotBuiltin {
 		fn.fe = (*Encoder).kTime
 		fn.fd = (*Decoder).kTime
 	} else if rtid == rawTypId {
@@ -1831,7 +1946,7 @@ func (c *codecFner) get(rt reflect.Type, checkFastpath, checkCodecSelfer bool) (
 				}
 				// fn.fd = (*Decoder).kArray
 			case reflect.Struct:
-				if ti.anyOmitEmpty {
+				if ti.anyOmitEmpty || ti.mf || ti.mfp {
 					fn.fe = (*Encoder).kStruct
 				} else {
 					fn.fe = (*Encoder).kStructNoOmitempty
@@ -2021,6 +2136,11 @@ func (p boolSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // ---------------------
 
+type sfiRv struct {
+	v *structFieldInfo
+	r reflect.Value
+}
+
 type intRv struct {
 	v int64
 	r reflect.Value
@@ -2181,9 +2301,11 @@ type bitset256 [32]byte
 func (x *bitset256) isset(pos byte) bool {
 	return x[pos>>3]&(1<<(pos&7)) != 0
 }
-func (x *bitset256) issetv(pos byte) byte {
-	return x[pos>>3] & (1 << (pos & 7))
-}
+
+// func (x *bitset256) issetv(pos byte) byte {
+// 	return x[pos>>3] & (1 << (pos & 7))
+// }
+
 func (x *bitset256) set(pos byte) {
 	x[pos>>3] |= (1 << (pos & 7))
 }
@@ -2239,36 +2361,63 @@ func (x *bitset32) set(pos byte) {
 type pooler struct {
 	dn                                          sync.Pool // for decNaked
 	cfn                                         sync.Pool // for codecFner
-	tiload                                      sync.Pool
+	tiload                                      sync.Pool // for type info loading
 	strRv8, strRv16, strRv32, strRv64, strRv128 sync.Pool // for stringRV
+	// buf64, buf128, buf256, buf512, buf1024      sync.Pool // for [...]byte
 }
 
 func (p *pooler) init() {
-	p.strRv8.New = func() interface{} { return new([8]stringRv) }
-	p.strRv16.New = func() interface{} { return new([16]stringRv) }
-	p.strRv32.New = func() interface{} { return new([32]stringRv) }
-	p.strRv64.New = func() interface{} { return new([64]stringRv) }
-	p.strRv128.New = func() interface{} { return new([128]stringRv) }
+	p.strRv8.New = func() interface{} { return new([8]sfiRv) }
+	p.strRv16.New = func() interface{} { return new([16]sfiRv) }
+	p.strRv32.New = func() interface{} { return new([32]sfiRv) }
+	p.strRv64.New = func() interface{} { return new([64]sfiRv) }
+	p.strRv128.New = func() interface{} { return new([128]sfiRv) }
+
+	// p.buf64.New = func() interface{} { return new([64]byte) }
+	// p.buf128.New = func() interface{} { return new([128]byte) }
+	// p.buf256.New = func() interface{} { return new([256]byte) }
+	// p.buf512.New = func() interface{} { return new([512]byte) }
+	// p.buf1024.New = func() interface{} { return new([1024]byte) }
+
 	p.dn.New = func() interface{} { x := new(decNaked); x.init(); return x }
+
 	p.tiload.New = func() interface{} { return new(typeInfoLoadArray) }
+
 	p.cfn.New = func() interface{} { return new(codecFner) }
 }
 
-func (p *pooler) stringRv8() (sp *sync.Pool, v interface{}) {
+func (p *pooler) sfiRv8() (sp *sync.Pool, v interface{}) {
 	return &p.strRv8, p.strRv8.Get()
 }
-func (p *pooler) stringRv16() (sp *sync.Pool, v interface{}) {
+func (p *pooler) sfiRv16() (sp *sync.Pool, v interface{}) {
 	return &p.strRv16, p.strRv16.Get()
 }
-func (p *pooler) stringRv32() (sp *sync.Pool, v interface{}) {
+func (p *pooler) sfiRv32() (sp *sync.Pool, v interface{}) {
 	return &p.strRv32, p.strRv32.Get()
 }
-func (p *pooler) stringRv64() (sp *sync.Pool, v interface{}) {
+func (p *pooler) sfiRv64() (sp *sync.Pool, v interface{}) {
 	return &p.strRv64, p.strRv64.Get()
 }
-func (p *pooler) stringRv128() (sp *sync.Pool, v interface{}) {
+func (p *pooler) sfiRv128() (sp *sync.Pool, v interface{}) {
 	return &p.strRv128, p.strRv128.Get()
 }
+
+// func (p *pooler) bytes64() (sp *sync.Pool, v interface{}) {
+// 	return &p.buf64, p.buf64.Get()
+// }
+// func (p *pooler) bytes128() (sp *sync.Pool, v interface{}) {
+// 	return &p.buf128, p.buf128.Get()
+// }
+// func (p *pooler) bytes256() (sp *sync.Pool, v interface{}) {
+// 	return &p.buf256, p.buf256.Get()
+// }
+// func (p *pooler) bytes512() (sp *sync.Pool, v interface{}) {
+// 	return &p.buf512, p.buf512.Get()
+// }
+// func (p *pooler) bytes1024() (sp *sync.Pool, v interface{}) {
+// 	return &p.buf1024, p.buf1024.Get()
+// }
+
 func (p *pooler) decNaked() (sp *sync.Pool, v interface{}) {
 	return &p.dn, p.dn.Get()
 }
@@ -2303,6 +2452,8 @@ func (p *pooler) tiLoad() (sp *sync.Pool, v interface{}) {
 // 	p.tiload.Put(v)
 // }
 
+// ----------------------------------------------------
+
 type panicHdl struct{}
 
 func (panicHdl) errorv(err error) {
@@ -2318,22 +2469,25 @@ func (panicHdl) errorstr(message string) {
 }
 
 func (panicHdl) errorf(format string, params ...interface{}) {
-	if format != "" {
-		if len(params) == 0 {
-			panic(format)
-		} else {
-			panic(fmt.Sprintf(format, params...))
-		}
+	if format == "" {
+	} else if len(params) == 0 {
+		panic(format)
+	} else {
+		panic(fmt.Sprintf(format, params...))
 	}
 }
 
-type errstrDecorator interface {
-	wrapErrstr(interface{}, *error)
+// ----------------------------------------------------
+
+type errDecorator interface {
+	wrapErr(in interface{}, out *error)
 }
 
-type errstrDecoratorDef struct{}
+type errDecoratorDef struct{}
 
-func (errstrDecoratorDef) wrapErrstr(v interface{}, e *error) { *e = fmt.Errorf("%v", v) }
+func (errDecoratorDef) wrapErr(v interface{}, e *error) { *e = fmt.Errorf("%v", v) }
+
+// ----------------------------------------------------
 
 type must struct{}
 
