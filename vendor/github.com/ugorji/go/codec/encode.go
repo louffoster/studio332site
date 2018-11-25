@@ -261,7 +261,7 @@ func (z *ioEncWriter) writen2(b1, b2 byte) {
 // 	}
 // }
 
-//go:noinline (so *encWriterSwitch.XXX has the bytesEncAppender.XXX inlined)
+//go:noinline - so *encWriterSwitch.XXX has the bytesEncAppender.XXX inlined
 func (z *ioEncWriter) atEndOfEncode() {
 	if z.fw != nil {
 		if err := z.fw.Flush(); err != nil {
@@ -298,7 +298,7 @@ func (z *bufioEncWriter) reset(w io.Writer, bufsize int) {
 	}
 }
 
-//go:noinline
+//go:noinline - flush only called intermittently
 func (z *bufioEncWriter) flush() {
 	n, err := z.w.Write(z.buf[:z.n])
 	z.n -= n
@@ -338,7 +338,6 @@ LOOP:
 	z.n += copy(z.buf[z.n:], s)
 }
 
-//go:noinline // TODO: allow this be inlined once mid-stack inlining done
 func (z *bufioEncWriter) writen1(b1 byte) {
 	if 1 > len(z.buf)-z.n {
 		z.flush()
@@ -731,7 +730,9 @@ func (e *Encoder) kStruct(f *codecFnInfo, rv reflect.Value) {
 	var poolv interface{}
 	var fkvs []sfiRv
 	// fmt.Printf(">>>>>>>>>>>>>> encode.kStruct: newlen: %d\n", newlen)
-	if newlen <= 8 {
+	if newlen < 0 { // bounds-check-elimination
+		// cannot happen // here for bounds-check-elimination
+	} else if newlen <= 8 {
 		spool, poolv = pool.sfiRv8()
 		fkvs = poolv.(*[8]sfiRv)[:newlen]
 	} else if newlen <= 16 {
@@ -750,10 +751,10 @@ func (e *Encoder) kStruct(f *codecFnInfo, rv reflect.Value) {
 		fkvs = make([]sfiRv, newlen)
 	}
 
-	newlen = 0
 	var kv sfiRv
 	recur := e.h.RecursiveEmptyCheck
 	sfn := structFieldNode{v: rv, update: false}
+	newlen = 0
 	for _, si := range tisfi {
 		// kv.r = si.field(rv, false)
 		kv.r = sfn.field(si)
@@ -775,6 +776,7 @@ func (e *Encoder) kStruct(f *codecFnInfo, rv reflect.Value) {
 		fkvs[newlen] = kv
 		newlen++
 	}
+	fkvs = fkvs[:newlen]
 
 	var mflen int
 	for k, v := range mf {
@@ -789,10 +791,11 @@ func (e *Encoder) kStruct(f *codecFnInfo, rv reflect.Value) {
 		mflen++
 	}
 
+	var j int
 	if toMap {
 		ee.WriteMapStart(newlen + mflen)
 		if elemsep {
-			for j := 0; j < newlen; j++ {
+			for j = 0; j < len(fkvs); j++ {
 				kv = fkvs[j]
 				ee.WriteMapElemKey()
 				// ee.EncodeStringEnc(cUTF8, kv.v)
@@ -801,7 +804,7 @@ func (e *Encoder) kStruct(f *codecFnInfo, rv reflect.Value) {
 				e.encodeValue(kv.r, nil, true)
 			}
 		} else {
-			for j := 0; j < newlen; j++ {
+			for j = 0; j < len(fkvs); j++ {
 				kv = fkvs[j]
 				// ee.EncodeStringEnc(cUTF8, kv.v)
 				e.kStructFieldKey(fti.keyType, kv.v)
@@ -819,12 +822,12 @@ func (e *Encoder) kStruct(f *codecFnInfo, rv reflect.Value) {
 	} else {
 		ee.WriteArrayStart(newlen)
 		if elemsep {
-			for j := 0; j < newlen; j++ {
+			for j = 0; j < len(fkvs); j++ {
 				ee.WriteArrayElem()
 				e.encodeValue(fkvs[j].r, nil, true)
 			}
 		} else {
-			for j := 0; j < newlen; j++ {
+			for j = 0; j < len(fkvs); j++ {
 				e.encodeValue(fkvs[j].r, nil, true)
 			}
 		}

@@ -12,7 +12,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2 // indirect
-	github.com/ugorji/go/codec v0.0.0-20181120210156-7d13b37dbec6 // indirect
+	github.com/ugorji/go/codec v0.0.0-20181125142609-66da5d561eb7 // indirect
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a // indirect
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
 	golang.org/x/sys v0.0.0-20181122145206-62eef0e2fa9b // indirect

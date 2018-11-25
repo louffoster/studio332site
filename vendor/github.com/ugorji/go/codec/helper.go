@@ -145,7 +145,7 @@ var (
 
 var codecgen bool
 
-var refBitset bitset32
+var refBitset bitset256
 var pool pooler
 var panicv panicHdl
 
@@ -992,17 +992,9 @@ func (si *structFieldInfo) parseTag(stag string) {
 
 type sfiSortedByEncName []*structFieldInfo
 
-func (p sfiSortedByEncName) Len() int {
-	return len(p)
-}
-
-func (p sfiSortedByEncName) Less(i, j int) bool {
-	return p[i].encName < p[j].encName
-}
-
-func (p sfiSortedByEncName) Swap(i, j int) {
-	p[i], p[j] = p[j], p[i]
-}
+func (p sfiSortedByEncName) Len() int           { return len(p) }
+func (p sfiSortedByEncName) Less(i, j int) bool { return p[uint(i)].encName < p[uint(j)].encName }
+func (p sfiSortedByEncName) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 const structFieldNodeNumToCache = 4
 
@@ -1172,7 +1164,7 @@ func (ti *typeInfo) isFlag(f typeInfoFlag) bool {
 func (ti *typeInfo) indexForEncName(name []byte) (index int16) {
 	var sn []byte
 	if len(name)+2 <= 32 {
-		var buf [32]byte // should not escape
+		var buf [32]byte // should not escape to heap
 		sn = buf[:len(name)+2]
 	} else {
 		sn = make([]byte, len(name)+2)
@@ -1224,30 +1216,36 @@ func (x *TypeInfos) structTag(t reflect.StructTag) (s string) {
 	return
 }
 
-func (x *TypeInfos) find(s []rtid2ti, rtid uintptr) (idx int, ti *typeInfo) {
+func (x *TypeInfos) find(s []rtid2ti, rtid uintptr) (i uint, ti *typeInfo) {
 	// binary search. adapted from sort/search.go.
+	// Note: we use goto (instead of for loop) so this can be inlined.
+
 	// if sp == nil {
 	// 	return -1, nil
 	// }
 	// s := *sp
-	h, i, j := 0, 0, len(s)
-	for i < j {
+
+	// h, i, j := 0, 0, len(s)
+	var h uint // var h, i uint
+	var j = uint(len(s))
+LOOP:
+	if i < j {
 		h = i + (j-i)/2
 		if s[h].rtid < rtid {
 			i = h + 1
 		} else {
 			j = h
 		}
+		goto LOOP
 	}
-	if i < len(s) && s[i].rtid == rtid {
-		return i, s[i].ti
+	if i < uint(len(s)) && s[i].rtid == rtid {
+		ti = s[i].ti
 	}
-	return i, nil
+	return
 }
 
 func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	sp := x.infos.load()
-	var idx int
 	if sp != nil {
 		_, pti = x.find(sp, rtid)
 		if pti != nil {
@@ -1334,6 +1332,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 		vs := []rtid2ti{{rtid, pti}}
 		x.infos.store(vs)
 	} else {
+		var idx uint
 		idx, pti = x.find(sp, rtid)
 		if pti == nil {
 			pti = &ti
@@ -1459,7 +1458,7 @@ LOOP:
 			si.encName = f.Name
 		}
 		si.encNameAsciiAlphaNum = true
-		for i := len(si.encName) - 1; i >= 0; i-- {
+		for i := len(si.encName) - 1; i >= 0; i-- { // bounds-check elimination
 			b := si.encName[i]
 			if (b >= '0' && b <= '9') || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') {
 				continue
@@ -1695,7 +1694,9 @@ func panicValToErr(h errDecorator, v interface{}, err *error) {
 }
 
 func isImmutableKind(k reflect.Kind) (v bool) {
-	return immutableKindsSet[k]
+	// return immutableKindsSet[k]
+	// since we know reflect.Kind is in range 0..31, then use the k%32 == k constraint
+	return immutableKindsSet[k%reflect.Kind(len(immutableKindsSet))] // bounds-check-elimination
 }
 
 // ----
@@ -2105,34 +2106,34 @@ type stringSlice []string
 // type bytesSlice [][]byte
 
 func (p intSlice) Len() int           { return len(p) }
-func (p intSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p intSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p intSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+func (p intSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p uintSlice) Len() int           { return len(p) }
-func (p uintSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p uintSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p uintSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+func (p uintSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // func (p uintptrSlice) Len() int           { return len(p) }
-// func (p uintptrSlice) Less(i, j int) bool { return p[i] < p[j] }
-// func (p uintptrSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+// func (p uintptrSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+// func (p uintptrSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p floatSlice) Len() int { return len(p) }
 func (p floatSlice) Less(i, j int) bool {
-	return p[i] < p[j] || isNaN(p[i]) && !isNaN(p[j])
+	return p[uint(i)] < p[uint(j)] || isNaN(p[uint(i)]) && !isNaN(p[uint(j)])
 }
-func (p floatSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p floatSlice) Swap(i, j int) { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p stringSlice) Len() int           { return len(p) }
-func (p stringSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p stringSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p stringSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+func (p stringSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // func (p bytesSlice) Len() int           { return len(p) }
-// func (p bytesSlice) Less(i, j int) bool { return bytes.Compare(p[i], p[j]) == -1 }
-// func (p bytesSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+// func (p bytesSlice) Less(i, j int) bool { return bytes.Compare(p[uint(i)], p[uint(j)]) == -1 }
+// func (p bytesSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p boolSlice) Len() int           { return len(p) }
-func (p boolSlice) Less(i, j int) bool { return !p[i] && p[j] }
-func (p boolSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p boolSlice) Less(i, j int) bool { return !p[uint(i)] && p[uint(j)] }
+func (p boolSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // ---------------------
 
@@ -2178,34 +2179,34 @@ type timeRv struct {
 type timeRvSlice []timeRv
 
 func (p intRvSlice) Len() int           { return len(p) }
-func (p intRvSlice) Less(i, j int) bool { return p[i].v < p[j].v }
-func (p intRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p intRvSlice) Less(i, j int) bool { return p[uint(i)].v < p[uint(j)].v }
+func (p intRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p uintRvSlice) Len() int           { return len(p) }
-func (p uintRvSlice) Less(i, j int) bool { return p[i].v < p[j].v }
-func (p uintRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p uintRvSlice) Less(i, j int) bool { return p[uint(i)].v < p[uint(j)].v }
+func (p uintRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p floatRvSlice) Len() int { return len(p) }
 func (p floatRvSlice) Less(i, j int) bool {
-	return p[i].v < p[j].v || isNaN(p[i].v) && !isNaN(p[j].v)
+	return p[uint(i)].v < p[uint(j)].v || isNaN(p[uint(i)].v) && !isNaN(p[uint(j)].v)
 }
-func (p floatRvSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p floatRvSlice) Swap(i, j int) { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p stringRvSlice) Len() int           { return len(p) }
-func (p stringRvSlice) Less(i, j int) bool { return p[i].v < p[j].v }
-func (p stringRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p stringRvSlice) Less(i, j int) bool { return p[uint(i)].v < p[uint(j)].v }
+func (p stringRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p bytesRvSlice) Len() int           { return len(p) }
-func (p bytesRvSlice) Less(i, j int) bool { return bytes.Compare(p[i].v, p[j].v) == -1 }
-func (p bytesRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p bytesRvSlice) Less(i, j int) bool { return bytes.Compare(p[uint(i)].v, p[uint(j)].v) == -1 }
+func (p bytesRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p boolRvSlice) Len() int           { return len(p) }
-func (p boolRvSlice) Less(i, j int) bool { return !p[i].v && p[j].v }
-func (p boolRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p boolRvSlice) Less(i, j int) bool { return !p[uint(i)].v && p[uint(j)].v }
+func (p boolRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p timeRvSlice) Len() int           { return len(p) }
-func (p timeRvSlice) Less(i, j int) bool { return p[i].v.Before(p[j].v) }
-func (p timeRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p timeRvSlice) Less(i, j int) bool { return p[uint(i)].v.Before(p[uint(j)].v) }
+func (p timeRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // -----------------
 
@@ -2217,8 +2218,8 @@ type bytesI struct {
 type bytesISlice []bytesI
 
 func (p bytesISlice) Len() int           { return len(p) }
-func (p bytesISlice) Less(i, j int) bool { return bytes.Compare(p[i].v, p[j].v) == -1 }
-func (p bytesISlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p bytesISlice) Less(i, j int) bool { return bytes.Compare(p[uint(i)].v, p[uint(j)].v) == -1 }
+func (p bytesISlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // -----------------
 
@@ -2292,7 +2293,12 @@ func (s *set) remove(v uintptr) (exists bool) {
 
 // bitset types are better than [256]bool, because they permit the whole
 // bitset array being on a single cache line and use less memory.
-
+//
+// Also, since pos is a byte (0-255), there's no bounds checks on indexing (cheap).
+//
+// We previously had bitset128 [16]byte, and bitset32 [4]byte, but those introduces
+// bounds checking, so we discarded them, and everyone uses bitset256.
+//
 // given x > 0 and n > 0 and x is exactly 2^n, then pos/x === pos>>n AND pos%x === pos&(x-1).
 // consequently, pos/32 === pos>>5, pos/16 === pos>>4, pos/8 === pos>>3, pos%8 == pos&7
 
@@ -2311,32 +2317,6 @@ func (x *bitset256) set(pos byte) {
 }
 
 // func (x *bitset256) unset(pos byte) {
-// 	x[pos>>3] &^= (1 << (pos & 7))
-// }
-
-type bitset128 [16]byte
-
-func (x *bitset128) isset(pos byte) bool {
-	return x[pos>>3]&(1<<(pos&7)) != 0
-}
-func (x *bitset128) set(pos byte) {
-	x[pos>>3] |= (1 << (pos & 7))
-}
-
-// func (x *bitset128) unset(pos byte) {
-// 	x[pos>>3] &^= (1 << (pos & 7))
-// }
-
-type bitset32 [4]byte
-
-func (x *bitset32) isset(pos byte) bool {
-	return x[pos>>3]&(1<<(pos&7)) != 0
-}
-func (x *bitset32) set(pos byte) {
-	x[pos>>3] |= (1 << (pos & 7))
-}
-
-// func (x *bitset32) unset(pos byte) {
 // 	x[pos>>3] &^= (1 << (pos & 7))
 // }
 
