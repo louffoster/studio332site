@@ -8,5 +8,6 @@ clean:
 	rm -r ./public/
 
 web:
+	echo 'building web front end'
 	cd ./frontend/; yarn install; yarn build
 	mv ./frontend/dist ./public
