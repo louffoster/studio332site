@@ -1,1 +1,1 @@
-web: studio332srv
+web: studio332site
