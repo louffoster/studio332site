@@ -15,9 +15,11 @@ import (
 func main() {
 	// Get config params
 	var port int
-	defPort, err := strconv.Atoi(os.Getenv("STUDIO332_PORT"))
+	defPort, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		defPort = 8080
+	} else {
+		log.Printf("GOT PORT %d", defPort)
 	}
 	flag.IntVar(&port, "port", defPort, "Site Server port (default 8080)")
 	flag.Parse()
