@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -26,6 +27,7 @@ func main() {
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 	// router.Use(static.Serve("/assets", static.LocalFile("./frontend/public", true)))
 	api := router.Group("/api")
+	api.GET("/test", testHandler)
 	lw := api.Group("/latticewords")
 	{
 		lw.POST("/check", checkHandler)
@@ -41,4 +43,8 @@ func main() {
 	portStr := fmt.Sprintf(":%d", port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)
 	log.Fatal(router.Run(portStr))
+}
+
+func testHandler(c *gin.Context) {
+	c.String(http.StatusOK, "hello world")
 }
