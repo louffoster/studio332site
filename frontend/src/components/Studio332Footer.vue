@@ -18,8 +18,8 @@ footer {
     position: relative;
     width: 100%;
     border-top: 3px solid red;
-    margin-top: 20px;
-    padding-top:20px;
+    margin-top: 50px;
+    padding-top: 20px;
     height: 90px;
     background-color: white;
 }

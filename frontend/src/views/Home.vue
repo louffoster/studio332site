@@ -1,31 +1,40 @@
 <template>
-  <div class="content">
-    <h2>Welcome</h2>
-    <p>
-      Studio332 is dedicated to the creation of high quality apps for the web and mobile devices. We have
-      decades of experience in a wide range of technologies including
-      gaming, backend services, database desgn, educational software and web app development. Some of our core
-      skills are: Go, Ruby on Rails, Vue.js, Java, Andriod development, Neo4j, MySQL and PostgresSQL.
-    </p>
-    <p>
-      Check out some of our publicly released code here:
-      <ul>
-        <li><a href="https://github.com/louffoster/BlastWords">Android game: BlastWords</a></li>
-        <li><a href="https://github.com/louffoster/flickit">Android game: FlickIt Alley</a></li>
-        <li><a href="https://github.com/louffoster/studio332-site">This site</a></li>
-      </ul>
-    </p>
-    <p>
-      Do you have an idea for an app, and need an experienced team to make your idea a reality? 
-      We can help. Contact us at louffoster@gmail.com for more information.
-    </p>
-    <router-link :to="{ name: 'latticewords'}"><span>Play LatticeWords</span></router-link>
+  <div>
+    <Studio332Header page="home"/>
+    <div class="content">
+      <h2>Welcome</h2>
+      <p>
+        Studio332 is dedicated to the creation of high quality apps for the web and mobile devices. We have
+        decades of experience in a wide range of technologies including
+        gaming, backend services, database desgn, educational software and web app development. Some of our core
+        skills include:
+      </p>
+      <p class="list">
+        Go, Ruby on Rails, Vue.js, Java, Andriod development, Neo4j, MySQL and PostgresSQL
+      </p>
+      <p>
+        Check out some of our publicly released code here:
+        <ul>
+          <li><a href="https://github.com/louffoster/BlastWords">Android game: BlastWords</a></li>
+          <li><a href="https://github.com/louffoster/flickit">Android game: FlickIt Alley</a></li>
+          <li><a href="https://github.com/louffoster/studio332-site">This site</a></li>
+        </ul>
+      </p>
+      <p>
+        Do you have an idea for an app, and need an experienced team to make your idea a reality? 
+        We can help. Contact us at <a href="mailto:louffoster@gmail.com">louffoster@gmail.com</a> for more information.
+      </p>
+    </div>
   </div>
 </template>
 
 <script>
+  import Studio332Header from '@/components/Studio332Header.vue'
   export default {
     name: 'home',
+    components: {
+      Studio332Header
+    }
   }
 </script>
 
@@ -50,6 +59,11 @@ a {
 }
 a:hover {
   text-decoration: underline;
+}
+p.list {
+  margin: 5px 40px;
+  font-size: 0.8em;
+  font-style: italic;
 }
 </style>
 

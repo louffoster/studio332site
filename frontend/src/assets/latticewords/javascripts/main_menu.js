@@ -33,7 +33,7 @@ export default class Menu extends Phaser.Scene {
       play.setOrigin(0.5)
       play.setFontSize(32)
       play.setInteractive()
-      play.on('pointerup', function(_pointer,_x,_y) {
+      play.on('pointerup', function(/*_pointer, _x, _y*/) {
           this.scene.start('latticewords')
       }, this)
 

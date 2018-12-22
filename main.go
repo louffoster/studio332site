@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -13,23 +12,21 @@ import (
 )
 
 func main() {
-	// Get config params
+	// Get config params. Heroku defines env PORT for each app. See
+	// if it is present and bind to it if so. Default to 8085 which is
+	// the port the dev front end expects to communicate with the back end on
 	var port int
 	defPort, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
-		defPort = 8080
-	} else {
-		log.Printf("GOT PORT %d", defPort)
+		defPort = 8085
 	}
-	flag.IntVar(&port, "port", defPort, "Site Server port (default 8080)")
+	flag.IntVar(&port, "port", defPort, "Site Server port (default 8085)")
 	flag.Parse()
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
-	// router.Use(static.Serve("/assets", static.LocalFile("./frontend/public", true)))
 	api := router.Group("/api")
-	api.GET("/test", testHandler)
 	lw := api.Group("/latticewords")
 	{
 		lw.POST("/check", checkHandler)
@@ -45,8 +42,4 @@ func main() {
 	portStr := fmt.Sprintf(":%d", port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)
 	log.Fatal(router.Run(portStr))
-}
-
-func testHandler(c *gin.Context) {
-	c.String(http.StatusOK, "hello world")
 }

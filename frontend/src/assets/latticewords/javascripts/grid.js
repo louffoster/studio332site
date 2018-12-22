@@ -377,7 +377,7 @@ export default class Grid  {
       for (var i=0; i<this.cols; i++) {
          targets.push(tiles[i].letter)
       }
-      var tween = this.scene.tweens.add({
+      this.scene.tweens.add({
          targets: targets,
          x: '-='+this.tileSize,
          duration: ANIMATE_SPEED,
@@ -411,7 +411,7 @@ export default class Grid  {
       var standIn = this.addTile( firstTile.letter.text, this.rows, col, firstTile.selected, true)
       targets.push( standIn.letter)
 
-      var tween = this.scene.tweens.add({
+      this.scene.tweens.add({
          targets: targets,
          y: '-='+this.tileSize,
          duration: ANIMATE_SPEED,
@@ -444,7 +444,7 @@ export default class Grid  {
       var standIn = this.addTile( lastTile.letter.text, -1, col, lastTile.selected, true)
       targets.push( standIn.letter)
 
-      var tween = this.scene.tweens.add({
+      this.scene.tweens.add({
          targets: targets,
          y: '+='+this.tileSize,
          duration: ANIMATE_SPEED,

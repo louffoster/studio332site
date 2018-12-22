@@ -1,13 +1,21 @@
 <template>
-  <div id="lwgame"></div>
+  <div>
+    <Studio332Header page="games"/>
+    <div id="lwgame"></div>
+  </div>
 </template>
 
 <script>
   import Phaser from 'phaser'
   import Menu from '@/assets/latticewords/javascripts/main_menu'
   import Latticewords from '@/assets/latticewords/javascripts/latticewords'
+  import Studio332Header from '@/components/Studio332Header.vue'
+
   export default {
     name: 'LatticeWords',
+    components: {
+      Studio332Header
+    },
     mounted: function() {
       var config = {
         type: Phaser.AUTO,
