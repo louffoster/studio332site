@@ -13,6 +13,10 @@
         at time to score bonus points. Score as high as possible before time runs out.
         <router-link :to="{ name: 'latticewords'}"><span>Play Now!</span></router-link>
       </p>
+      <p>
+        <b>Squares</b>: 
+        <router-link :to="{ name: 'squares'}"><span>Play Now!</span></router-link>
+      </p>
     </div>
   </div>
 </template>

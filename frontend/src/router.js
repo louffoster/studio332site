@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from '@/views/Home.vue'
 import Games from '@/views/Games.vue'
 import LatticeWords from '@/views/LatticeWords.vue'
+import Squares from '@/views/Squares.vue'
 
 Vue.use(Router)
 
@@ -23,6 +24,11 @@ export default new Router({
       path: '/latticewords',
       name: 'latticewords',
       component: LatticeWords
+    },
+    {
+      path: '/squares',
+      name: 'squares',
+      component: Squares
     }
   ]
 })
