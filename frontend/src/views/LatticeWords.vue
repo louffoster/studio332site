@@ -18,8 +18,10 @@
     },
     mounted: function() {
       var config = {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
+        scale: {
+          mode: Phaser.Scale.FIT,
+          autoCenter: Phaser.Scale.NO_CENTER
+        },
         parent: 'lwgame',
         width: 600,
         height: 640,
@@ -38,8 +40,7 @@
 
 <style scoped>
 #lwgame {
-  margin-top: 5px;
-  text-align: left;
+  margin:0;
 }
 </style>
 

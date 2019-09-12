@@ -75,7 +75,7 @@ a:hover {
    text-decoration: underline;
 }
 p.list {
-   margin: 5px 40px;
+   margin: 0 40px;
    font-size: 0.8em;
    font-style: italic;
 }

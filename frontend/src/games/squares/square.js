@@ -39,11 +39,11 @@ export default class Square  {
         graphics.lineStyle(1, 0x000000)
         graphics.fillRectShape(this.rect)
 
-        if (this.active) {
-            graphics.lineStyle( 1, 0x00ff00)
-            graphics.lineBetween(this.rect.centerX - 25, this.rect.centerY, this.rect.centerX + 25, this.rect.centerY);
-            graphics.lineBetween(this.rect.centerX, this.rect.centerY - 25, this.rect.centerX, this.rect.centerY + 25);
-        }
+        // if (this.active) {
+        //     graphics.lineStyle( 1, 0x00ff00)
+        //     graphics.lineBetween(this.rect.centerX - 25, this.rect.centerY, this.rect.centerX + 25, this.rect.centerY);
+        //     graphics.lineBetween(this.rect.centerX, this.rect.centerY - 25, this.rect.centerX, this.rect.centerY + 25);
+        // }
         
         graphics.strokeRectShape(this.rect);
     }

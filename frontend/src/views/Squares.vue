@@ -17,7 +17,10 @@
     },
     mounted: function() {
       var config = {
-        type: Phaser.AUTO,
+        scale: {
+          mode: Phaser.Scale.FIT,
+          autoCenter: Phaser.Scale.NO_CENTER
+        },
         parent: 'squaresgame',
         width: 600,
         height: 640,
@@ -35,7 +38,7 @@
 
 <style scoped>
 #squaresgame {
-  margin-top: 5px;
+  margin-top: 0;
 }
 </style>
 
