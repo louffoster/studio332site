@@ -1,6 +1,6 @@
 <template>
    <div>
-      <Studio332Header page="home"/>
+      <Studio332Header page="home" />
       <div class="content">
          <h2>Welcome</h2>
          <p>
@@ -9,15 +9,19 @@
             gaming, backend services, database desgn, educational software and web app development. Some of our core
             skills include:
          </p>
-         <p class="list">
-            Go, Vue.js, Ruby on Rails, Java, Neo4j, MySQL and PostgresSQL
-         </p>
+         <p class="list">Go, Vue.js, Ruby on Rails, Java, Neo4j, MySQL and PostgresSQL</p>
          <p>Check out some of our publicly released code here:</p>
-            <ul>
-               <li><a href="https://github.com/louffoster/BlastWords">Android game: BlastWords</a></li>
-               <li><a href="https://github.com/louffoster/flickit">Android game: FlickIt Alley</a></li>
-               <li><a href="https://github.com/louffoster/studio332-site">This site</a></li>
-            </ul>
+         <ul>
+            <li>
+               <a href="https://github.com/louffoster/BlastWords">Android game: BlastWords</a>
+            </li>
+            <li>
+               <a href="https://github.com/louffoster/flickit">Android game: FlickIt Alley</a>
+            </li>
+            <li>
+               <a href="https://github.com/louffoster/studio332-site">This site</a>
+            </li>
+         </ul>
          <p>
             Do you have an idea for an app, and need an experienced team to make your idea a reality?
             We can help. Contact us at
@@ -42,10 +46,19 @@ export default {
 <style scoped>
 div.content {
    text-align: left;
-   width: 60%;
    margin: 0 auto;
    color: #444;
    font-size: 1.1em;
+}
+@media only screen and (min-width: 768px) {
+   div.content {
+      width: 60%;
+   }
+}
+@media only screen and (max-width: 768px) {
+   div.content {
+      width: 90%;
+   }
 }
 h2 {
    text-align: center;

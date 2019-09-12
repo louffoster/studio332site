@@ -4,7 +4,7 @@
     <div class="content">
       <h2>Games</h2>
       <p>
-        FUCK Lately, Studio332 has been experimenting with browser-based games using
+        Lately, Studio332 has been experimenting with browser-based games using
         <a href="https://phaser.io/" target="_blank">Phaser</a>. The first sample is a bit rough, 
         but is up and working. Play it at the link below. More to some soon!
       </p>
@@ -14,8 +14,8 @@
         <router-link :to="{ name: 'latticewords'}"><span>Play Now!</span></router-link>
       </p>
       <p>
-        <b>Squares</b>: 
-        <router-link :to="{ name: 'squares'}"><span>Play Now!</span></router-link>
+        <b>Squares</b>: Prototype game with rotating clusters of squares. No gameplay, just an experiment.
+        <router-link :to="{ name: 'squares'}"><span>View Now!</span></router-link>
       </p>
     </div>
   </div>
@@ -34,10 +34,19 @@
 <style scoped>
 div.content {
   text-align: left;
-  width: 60%;
   margin: 0 auto;
   color: #444;
   font-size: 1.1em;
+}
+@media only screen and (min-width: 768px) {
+   div.content {
+      width: 60%;
+   }
+}
+@media only screen and (max-width: 768px) {
+   div.content {
+      width: 90%;
+   }
 }
 h2 {
   text-align: center;
