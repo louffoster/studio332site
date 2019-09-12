@@ -33,25 +33,24 @@ export default class Square  {
 
     draw(graphics) {
         if ( this.invisible) return
-        graphics.fillStyle(0x22223f)
-        if (this.color === 1) {
-            graphics.fillStyle(0xffffff)
-        }
-        graphics.fillRectShape(this.rect);
+        let colors = [0x212121, 0xe0f7fa, 0x003c8f, 0x5e92f3]
+        graphics.fillStyle( colors[this.color] )
+        graphics.fillRectShape(this.rect)
+        graphics.lineStyle(1, 0x000000)
+        graphics.fillRectShape(this.rect)
 
         if (this.active) {
-            graphics.lineStyle( 2, 0xff5555)
-            graphics.lineBetween(this.rect.centerX - 10, this.rect.centerY, this.rect.centerX + 10, this.rect.centerY);
-            graphics.lineBetween(this.rect.centerX, this.rect.centerY - 10, this.rect.centerX, this.rect.centerY + 10);
+            graphics.lineStyle( 1, 0x00ff00)
+            graphics.lineBetween(this.rect.centerX - 25, this.rect.centerY, this.rect.centerX + 25, this.rect.centerY);
+            graphics.lineBetween(this.rect.centerX, this.rect.centerY - 25, this.rect.centerX, this.rect.centerY + 25);
         }
+        
+        graphics.strokeRectShape(this.rect);
     }
 
     hit(x,y) {
         if ( this.invisible || this.inactive) return false
         this.active = this.rect.contains(x,y)
-        if (this.active) {
-            console.log(this.rect)
-        }
         return this.active
     }
 }

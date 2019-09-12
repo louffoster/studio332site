@@ -7,7 +7,7 @@
 
 <script>
   import Phaser from 'phaser'
-  import Squares from '@/assets/squares/javascripts/squares'
+  import Squares from '@/games/squares/main'
   import Studio332Header from '@/components/Studio332Header.vue'
 
   export default {

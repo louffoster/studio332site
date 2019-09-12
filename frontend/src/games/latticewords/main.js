@@ -8,8 +8,8 @@ const START_TIME = 180
 
 import Phaser from 'phaser'
 import Cookies from 'js-cookie'
-import Grid from '@/assets/latticewords/javascripts/grid'
-import Pool from '@/assets/latticewords/javascripts/pool'
+import Grid from './grid'
+import Pool from './pool'
 
 export default  class Latticewords extends Phaser.Scene {
    constructor ()   {

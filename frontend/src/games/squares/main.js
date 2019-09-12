@@ -1,12 +1,8 @@
 import Phaser from 'phaser'
-import Square from '@/assets/squares/javascripts/square'
+import Square from './square'
 
 
 export default  class Squares extends Phaser.Scene {
-    static get Y_OFF() {
-        return 49
-    }
-
     constructor ()   {
        super({ key: 'squares' })
     }
@@ -15,11 +11,7 @@ export default  class Squares extends Phaser.Scene {
         // create an even set of color identifiers 
         let colors = []
         for ( let i=0; i<64; i++ ) {
-            if ( i < 32) {
-                colors.push(1)
-            } else {
-                colors.push(0)
-            }
+            colors.push( i%4)
         }
 
         // ... and shuffle them. This is the starting set of square colors
@@ -35,8 +27,8 @@ export default  class Squares extends Phaser.Scene {
         for ( let r=0; r<=7; r++) {
             let row = []
             for ( let c=0; c<=7; c++) {
-                let x = 50+((Square.SIZE+1)*c)
-                let y = 50+((Square.SIZE+1)*r)
+                let x = ((Square.SIZE+1)*c)+1
+                let y = ((Square.SIZE+1)*r)+1
                 let sq = new Square(colors.pop(), x,y )
                 row.push( sq )
                 if ( r==0 || r==7 || c==0 || c==7) {
@@ -45,57 +37,64 @@ export default  class Squares extends Phaser.Scene {
             }
             this.grid.push(row)
         }
-       
+        this.border = new Phaser.Geom.Rectangle(51, 51, (50+1)*6, (50+1)*6)
+        this.showBorder = true
         this.redraw()
-        this.input.on('pointermove', function (pointer) {
-            let y = pointer.y-Squares.Y_OFF
+        this.input.on('pointermove', pointer=> {
+            let y = pointer.y
             let x = pointer.x
-            // console.log(`${x}, ${y}`)
             for ( let r=0; r<=7; r++) {
                 for ( let c=0; c<=7; c++) {     
-                    if (this.grid[r][c].hit( x, y) ) {
-                        
-                    }
+                    this.grid[r][c].hit( x, y)
                 }
             }
             this.redraw()
-        }, this)
-        this.input.on('pointerup', function (pointer) {
-            let y = pointer.y-Squares.Y_OFF
+        })
+        this.input.on('pointerup', pointer => {
+            let y = pointer.y
             let x = pointer.x
-            var textureManager = this.textures
-            var tweenMgr = this.tweens
-            var self = this
             for ( let r=0; r<=7; r++) {
                 for ( let c=0; c<=7; c++) {     
                     if (this.grid[r][c].hit( x, y) ) {
+                        // this.showBorder = false
+                        // this.drawBorder()
                         let selCenter = this.grid[r][c].getCenter()
                         let sqSz = (Square.SIZE+1)*1.5
                         let left = selCenter.x - sqSz
                         let top = selCenter.y - sqSz
                         let w = (Square.SIZE+1)*3
                         let h = (Square.SIZE+1)*3
-                        this.game.renderer.snapshotArea(left,top,w,h, function (image) {
+                        this.game.renderer.snapshotArea(left,top,w,h, image => {
+                            // this.showBorder = true
+                            // this.drawBorder()
                             let rect = new Phaser.Geom.Rectangle(left,top,w,h)
-                            self.graphics.fillStyle(0x000000)
-                            self.graphics.fillRectShape(rect);
-                            textureManager.addImage('snap', image);
-                            var snapImg = self.add.image(selCenter.x,selCenter.y, 'snap')
-                            tweenMgr.add({targets: [snapImg],  rotation:+1.5708,
+                            this.graphics.fillStyle(0x000000)
+                            this.graphics.fillRectShape(rect)
+                            this.textures.addImage('snap', image);
+                            var snapImg = this.add.image(selCenter.x,selCenter.y, 'snap')
+                            this.tweens.add({targets: [snapImg],  rotation:+1.5708,
                                 duration: 500, ease: 'Linear',
-                                onCompleteParams: [ self ],
-                                onComplete: function (tween, targets, self) {
-                                    textureManager.remove('snap')
+                                onCompleteParams: [ this ],
+                                onComplete: () => {
+                                     this.textures.remove('snap')
                                     snapImg.destroy()
-                                    self.rotateAround(r,c)
-                                    self.redraw()
+                                    this.rotateAround(r,c)
+                                    this.redraw()
                                 }}
                             )
                         })
                     }
                 }
             }
-        }, this)
+        })
+    }
+
+    drawBorder() {
+        this.graphics.lineStyle(2, 0x000000)
+        if (this.showBorder) {
+            this.graphics.lineStyle(2, 0xaa5555)
+        }
+        this.graphics.strokeRectShape(this.border)
     }
 
     // rotate the 8 squares centered around r,c by 90 degrees
@@ -140,5 +139,7 @@ export default  class Squares extends Phaser.Scene {
                 this.grid[r][c].draw(this.graphics)
             }
         }
+
+        this.drawBorder()
     }
 }

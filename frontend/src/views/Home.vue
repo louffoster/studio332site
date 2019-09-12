@@ -10,7 +10,7 @@
             skills include:
          </p>
          <p class="list">
-            Go, Ruby on Rails, Vue.js, Java, Andriod development, Neo4j, MySQL and PostgresSQL
+            Go, Vue.js, Ruby on Rails, Java, Neo4j, MySQL and PostgresSQL
          </p>
          <p>Check out some of our publicly released code here:</p>
             <ul>

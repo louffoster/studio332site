@@ -1,5 +1,5 @@
 {
-  "name": "latticewords",
+  "name": "studio332",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "js-cookie": "^2.2.0",
-    "phaser": " 3.17.0",
+    "phaser": " 3.19.0",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3"
   },

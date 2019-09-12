@@ -7,8 +7,8 @@
 
 <script>
   import Phaser from 'phaser'
-  import Menu from '@/assets/latticewords/javascripts/main_menu'
-  import Latticewords from '@/assets/latticewords/javascripts/latticewords'
+  import Menu from '@/games/latticewords/main_menu'
+  import Latticewords from '@/games/latticewords/main'
   import Studio332Header from '@/components/Studio332Header.vue'
 
   export default {
@@ -18,7 +18,8 @@
     },
     mounted: function() {
       var config = {
-        type: Phaser.AUTO,
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'lwgame',
         width: 600,
         height: 640,
@@ -38,6 +39,7 @@
 <style scoped>
 #lwgame {
   margin-top: 5px;
+  text-align: left;
 }
 </style>
 
