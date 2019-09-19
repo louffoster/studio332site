@@ -1,7 +1,7 @@
-// Manage the pool of tiles
+import Phaser from 'phaser'
+
 export default class Pool {
    constructor ()   {
-      console.log("Create Tile Pool")
       this.pool = []
    }
 

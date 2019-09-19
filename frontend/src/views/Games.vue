@@ -17,6 +17,10 @@
         <b>Squares</b>: Prototype game with rotating clusters of squares. No gameplay, just an experiment.
         <router-link :to="{ name: 'squares'}"><span>View Now!</span></router-link>
       </p>
+       <p>
+        <b>Word Puzzle</b>: Prototype game combining word finding with a spatial puzzle.
+        <router-link :to="{ name: 'wordpuzzle'}"><span>View Now!</span></router-link>
+      </p>
     </div>
   </div>
 </template>
