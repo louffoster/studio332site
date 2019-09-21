@@ -36,7 +36,7 @@ func checkHandler(c *gin.Context) {
 	letterValues := [6]int{0, 2, 5, 10, 15, 25}
 	for _, word := range words {
 		log.Printf("Is %s valid?", word)
-		if isValidWord(word, dictWords) {
+		if IsValidWord(word, dictWords) {
 			score := letterValues[len(word)-1] * len(word)
 			log.Printf("Yes. Score %d", score)
 			validCnt++
@@ -56,13 +56,4 @@ func checkHandler(c *gin.Context) {
 		}
 	}
 	c.String(http.StatusOK, "%d", total)
-}
-
-func isValidWord(value string, dict []string) bool {
-	for _, v := range dict {
-		if v == value {
-			return true
-		}
-	}
-	return false
 }

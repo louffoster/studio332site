@@ -31,6 +31,11 @@ func main() {
 	{
 		lw.POST("/check", checkHandler)
 	}
+	wd := api.Group("/wordomino")
+	{
+		wd.GET("/shapes", wordominoShapes)
+		wd.POST("/check", wordominoCheck)
+	}
 
 	// add a catchall route that renders the index page.
 	// based on no-history config setup info here:
