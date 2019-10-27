@@ -1,264 +1,240 @@
 {
 	"cards": [{
-			"shape": {
-				"name": "Straight 5",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0,
-					1, 1, 1, 1, 1,
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0
-				]
-			},
+			"name": "Straight 5",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				1, 1, 1, 1, 1,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0
+			],
 			"words": [{
 				"row": 2,
 				"col": 0,
 				"direction": "right",
-				"length": 5
+				"wordLength": 5
 			}]
 		},
 		{
-			"shape": {
-				"name": "Straight 4",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0,
-					1, 1, 1, 1, 0,
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0
-				]
-			},
+			"name": "Straight 4",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				1, 1, 1, 1, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0
+			],
 			"words": [{
 				"row": 2,
 				"col": 0,
 				"direction": "right",
-				"length": 4
+				"wordLength": 4
 			}]
 		},
 		{
-			"shape": {
-				"name": "Straight 3",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0,
-					1, 1, 1, 0, 0,
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0
-				]
-			},
+			"name": "Straight 3",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				1, 1, 1, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0
+			],
 			"words": [{
 				"row": 2,
 				"col": 0,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}]
 		}, {
-			"shape": {
-				"name": "Small L",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0,
-					1, 0, 0, 0, 0,
-					1, 0, 0, 0, 0,
-					1, 1, 1, 0, 0
-				]
-			},
+			"name": "Small L",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				1, 0, 0, 0, 0,
+				1, 0, 0, 0, 0,
+				1, 1, 1, 0, 0
+			],
 			"words": [{
 				"row": 2,
 				"col": 0,
 				"direction": "down",
-				"length": 3
+				"wordLength": 3
 			}, {
 				"row": 4,
 				"col": 0,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}]
 		}, {
-			"shape": {
-				"name": "Big L",
-				"layout": [
-					0, 0, 0, 0, 0,
-					1, 0, 0, 0, 0,
-					1, 0, 0, 0, 0,
-					1, 0, 0, 0, 0,
-					1, 1, 1, 1, 0
-				]
-			},
+			"name": "Big L",
+			"layout": [
+				0, 0, 0, 0, 0,
+				1, 0, 0, 0, 0,
+				1, 0, 0, 0, 0,
+				1, 0, 0, 0, 0,
+				1, 1, 1, 1, 0
+			],
 			"words": [{
 				"row": 1,
 				"col": 0,
 				"direction": "down",
-				"length": 4
+				"wordLength": 4
 			}, {
 				"row": 4,
 				"col": 0,
 				"direction": "right",
-				"length": 4
+				"wordLength": 4
 			}]
 		}, {
-			"shape": {
-				"name": "Small Plus",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 1, 0, 0,
-					0, 1, 1, 1, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 0, 0, 0
-				]
-			},
+			"name": "Small Plus",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 1, 1, 1, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 0, 0, 0
+			],
 			"words": [{
 				"row": 1,
 				"col": 2,
 				"direction": "down",
-				"length": 3
+				"wordLength": 3
 			}, {
 				"row": 2,
 				"col": 1,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}]
 		}, {
-			"shape": {
-				"name": "Big Plus",
-				"layout": [
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0,
-					1, 1, 1, 1, 1,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0
-				]
-			},
+			"name": "Big Plus",
+			"layout": [
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0,
+				1, 1, 1, 1, 1,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0
+			],
 			"words": [{
 				"row": 0,
 				"col": 2,
 				"direction": "down",
-				"length": 5
+				"wordLength": 5
 			}, {
 				"row": 2,
 				"col": 0,
 				"direction": "right",
-				"length": 5
+				"wordLength": 5
 			}]
 		}, {
-			"shape": {
-				"name": "Chair",
-				"layout": [
-					0, 0, 0, 0, 0,
-					1, 0, 0, 0, 0,
-					1, 1, 1, 1, 0,
-					1, 0, 0, 1, 0,
-					1, 0, 0, 1, 0
-				]
-			},
+			"name": "Chair",
+			"layout": [
+				0, 0, 0, 0, 0,
+				1, 0, 0, 0, 0,
+				1, 1, 1, 1, 0,
+				1, 0, 0, 1, 0,
+				1, 0, 0, 1, 0
+			],
 			"words": [{
 				"row": 1,
 				"col": 0,
 				"direction": "down",
-				"length": 4
+				"wordLength": 4
 			}, {
 				"row": 2,
 				"col": 0,
 				"direction": "right",
-				"length": 4
+				"wordLength": 4
 			}, {
 				"row": 2,
 				"col": 3,
 				"direction": "down",
-				"length": 3
+				"wordLength": 3
 			}]
 		}, {
-			"shape": {
-				"name": "Steps",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 0, 0, 0,
-					1, 1, 1, 0, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 1, 1
-				]
-			},
+			"name": "Steps",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				1, 1, 1, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 1, 1
+			],
 			"words": [{
 				"row": 2,
 				"col": 0,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}, {
 				"row": 2,
 				"col": 2,
 				"direction": "down",
-				"length": 3
+				"wordLength": 3
 			}, {
 				"row": 4,
 				"col": 2,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}]
 		}, {
-			"shape": {
-				"name": "Small Tee",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 1, 1, 1, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0
-				]
-			},
+			"name": "Small Tee",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 1, 1, 1, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0
+			],
 			"words": [{
 				"row": 1,
 				"col": 1,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}, {
 				"row": 1,
 				"col": 2,
 				"direction": "down",
-				"length": 4
+				"wordLength": 4
 			}]
 		}, {
-			"shape": {
-				"name": "Big Tee",
-				"layout": [
-					1, 1, 1, 1, 1,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0
-				]
-			},
+			"name": "Big Tee",
+			"layout": [
+				1, 1, 1, 1, 1,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0
+			],
 			"words": [{
 				"row": 0,
 				"col": 0,
 				"direction": "right",
-				"length": 5
+				"wordLength": 5
 			}, {
 				"row": 0,
 				"col": 2,
 				"direction": "down",
-				"length": 5
+				"wordLength": 5
 			}]
 		}, {
-			"shape": {
-				"name": "Lower Tee",
-				"layout": [
-					0, 0, 0, 0, 0,
-					0, 0, 1, 0, 0,
-					0, 1, 1, 1, 0,
-					0, 0, 1, 0, 0,
-					0, 0, 1, 0, 0
-				]
-			},
+			"name": "Lower Tee",
+			"layout": [
+				0, 0, 0, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 1, 1, 1, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 1, 0, 0
+			],
 			"words": [{
 				"row": 1,
 				"col": 2,
 				"direction": "down",
-				"length": 4
+				"wordLength": 4
 			}, {
 				"row": 2,
 				"col": 1,
 				"direction": "right",
-				"length": 3
+				"wordLength": 3
 			}]
 		}
 	]

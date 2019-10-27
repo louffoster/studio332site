@@ -16,20 +16,16 @@ type cardsFile struct {
 }
 
 type card struct {
-	Shape shape      `json:"shape"`
-	Words []wordInfo `json:"words"`
-}
-
-type shape struct {
-	Name   string `json:"name"`
-	Layout []int  `json:"layout"`
+	Name   string     `json:"name"`
+	Layout []int      `json:"layout"`
+	Words  []wordInfo `json:"words"`
 }
 
 type wordInfo struct {
 	Row       int    `json:"row"`
 	Col       int    `json:"col"`
 	Direction string `json:"direction"`
-	Length    int    `json:"length"`
+	Length    int    `json:"wordLength"`
 }
 
 type wordsSubmission struct {

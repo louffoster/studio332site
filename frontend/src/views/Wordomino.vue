@@ -1,17 +1,17 @@
 <template>
   <div>
     <Studio332Header page="games"></Studio332Header>
-    <div id="wordpuzzle"></div>
+    <div id="wordomino"></div>
   </div>
 </template>
 
 <script>
   import Phaser from 'phaser'
-  import WordPuzzle from '@/games/wordpuzzle/main'
+  import Wordomino from '@/games/wordomino/main'
   import Studio332Header from '@/components/Studio332Header.vue'
 
   export default {
-    name: 'WordPuzzle',
+    name: 'Wordomino',
     components: {
       Studio332Header
     },
@@ -21,12 +21,12 @@
           mode: Phaser.Scale.FIT,
           autoCenter: Phaser.Scale.NO_CENTER
         },
-        parent: 'wordpuzzle',
+        parent: 'wordomino',
         width: 490,
         height: 490,
-        title: "WordPuzzle",
+        title: "Wordomino",
         backgroundColor: '000a12',
-        scene: [WordPuzzle]
+        scene: [Wordomino]
       };
 
       window.game = new Phaser.Game(config);

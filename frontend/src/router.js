@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Home from '@/views/Home.vue'
 import Games from '@/views/Games.vue'
 import LatticeWords from '@/views/LatticeWords.vue'
-import WordPuzzle from '@/views/WordPuzzle.vue'
+import Wordomino from '@/views/Wordomino.vue'
 import Squares from '@/views/Squares.vue'
 
 Vue.use(Router)
@@ -32,9 +32,9 @@ export default new Router({
       component: Squares
     },
     {
-      path: '/wordpuzzle',
-      name: 'wordpuzzle',
-      component: WordPuzzle
+      path: '/wordomino',
+      name: 'wordomino',
+      component: Wordomino
     }
   ]
 })
