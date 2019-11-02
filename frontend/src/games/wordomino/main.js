@@ -3,6 +3,7 @@ import * as letters from './letters'
 import * as cards from './cards'
 import Puzzle from './puzzle'
 import Words from './words'
+import MessageBox from './messages'
 
 export default class Wordomino extends Phaser.Scene {
    constructor() {
@@ -13,23 +14,36 @@ export default class Wordomino extends Phaser.Scene {
       this.helpTiles = [1,1]
 
       this.graphics = this.add.graphics()
-      this.graphics.lineStyle(1, 0xffffff)
       
       this.letterPool = new letters.Pool(this, 10,10)
       this.letterPool.fillGrid()
       
       this.cardPool = new cards.Pool(this)
       this.cardPool.setChoiceCoordinates( 10,255, 125,255)
+      this.msgBox = new MessageBox(this,10,380)
+      this.msgBox.setMessage("Pick a puzzle shape card")
 
       this.words = new Words(this, 255, 10)
       this.puzzle = new Puzzle(this,255,255)
       
       this.draw()
+
+      this.input.on('pointermove', pointer => {
+         if ( this.cardPool.isActive()) {
+            this.cardPool.mouseMove(pointer.x, pointer.y)
+         }
+      });
+      this.input.on('pointerdown', pointer => {
+         if (this.cardPool.isActive()) {
+            this.cardPool.mouseDown(pointer.x, pointer.y)
+         }
+      });
    }
 
    draw() {
       this.letterPool.draw()
       this.cardPool.draw()
+      this.msgBox.draw()
       this.words.draw()
       this.puzzle.draw()
 

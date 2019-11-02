@@ -46,6 +46,9 @@ class MiniCard {
       this.scene = scene
       this.x = x 
       this.y = y
+      this.mouseOver = false
+      this.selected = false 
+      this.disabled = false
       this.fullRect = new Phaser.Geom.Rectangle(x, y, this.size*5, this.size*5)
    }
 
@@ -53,6 +56,29 @@ class MiniCard {
       this.layout = info.layout
       this.name = info.name 
       this.words = info.words
+      this.mouseOver = false
+      this.seleced = false 
+      this.disabled = false
+   }
+
+   mouseMove(x,y) {
+      let old = this.mouseOver
+      this.mouseOver = this.fullRect.contains(x, y)
+      if ( this.mouseOver != old) {
+         this.draw()
+      }
+   }
+
+   mouseDown(x, y) {
+      if (this.fullRect.contains(x, y)) {
+         this.seleced = true 
+         this.draw()
+      }
+      return this.selected
+   }
+
+   disable() {
+      this.disabled = true
    }
 
    draw() {
@@ -70,7 +96,16 @@ class MiniCard {
 
    drawLayout() {
       this.scene.graphics.fillStyle(0xdadada)
+      if (this.mouseOver) {
+         this.scene.graphics.fillStyle(0x00aaff)
+      } else if (this.selected) {
+         this.scene.graphics.fillStyle(0x0088ff)
+      }
       this.scene.graphics.lineStyle(1, 0x444444)
+      if ( this.disabled) {
+         this.scene.graphics.lineStyle(1, 0x333333)
+         this.scene.graphics.fillStyle(0x888888)
+      }
       for (let r=0; r<5; r++) {
          for (let c = 0; c < 5; c++) { 
             let tx = this.x + (this.size * c)
@@ -83,6 +118,9 @@ class MiniCard {
          }
       }
       this.scene.graphics.lineStyle(1, 0xffffff)
+      if ( this.mouseOver) {
+         this.scene.graphics.lineStyle(1, 0x0066ff)
+      }
       this.scene.graphics.strokeRectShape(this.fullRect)
    }
 }
@@ -95,6 +133,7 @@ export class Pool {
       this.cards = []
       this.choices = []
       this.scene = scene
+      this.active = false
       axios.get("/api/wordomino/shapes").then( response => {
          this.createCards(response.data.cards)
          this.refill()
@@ -119,6 +158,7 @@ export class Pool {
          let card = this.cards.pop()
          choice.setCardInfo( card )
       })
+      this.active = true
    }
 
    setChoiceCoordinates( x1,y1, x2,y2 ) {
@@ -140,9 +180,32 @@ export class Pool {
    isLoaded() {
       return this.loaded
    }
+   isActive() {
+      return this.active
+   }
 
    failed() {
       return this.error != null
+   }
+
+   mouseMove(x,y) {
+      if ( this.active) {
+         this.choices.forEach(c => {
+            c.mouseMove(x,y)
+         })
+      }
+   }
+   mouseDown(x, y) {
+      if (this.active) {
+         this.choices.forEach(c => {
+            let hit = c.mouseDown(x, y)
+            console.log("MOUSE DOWN HIT" + hit)
+            if ( hit) {
+               this.active = false
+               console.log("DEACTIVATE CARDS")
+            }
+         })
+      }
    }
 
    draw() {
