@@ -22,13 +22,6 @@
                <a href="https://github.com/louffoster/studio332-site">This site</a>
             </li>
          </ul>
-         <p>
-            Do you have an idea for an app, and need an experienced team to make your idea a reality?
-            We can help. Contact us at
-            <a
-               href="mailto:louffoster@gmail.com"
-            >louffoster@gmail.com</a> for more information.
-         </p>
       </div>
    </div>
 </template>
