@@ -11,6 +11,7 @@ export default class Wordomino extends Phaser.Scene {
    }
 
    create() {
+      this.gameState = "PICK_CARD"
       this.helpTiles = [1,1]
 
       this.graphics = this.add.graphics()
@@ -27,6 +28,7 @@ export default class Wordomino extends Phaser.Scene {
       this.puzzle = new Puzzle(this,255,255)
       
       this.draw()
+      this.gameTimer = this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true })
 
       this.input.on('pointermove', pointer => {
          if ( this.cardPool.isActive()) {
@@ -38,6 +40,19 @@ export default class Wordomino extends Phaser.Scene {
             this.cardPool.mouseDown(pointer.x, pointer.y)
          }
       });
+   }
+
+   tick() {
+      if (this.gameState == "PICK_CARD") {
+         let cardInfo = this.cardPool.cardPicked() 
+         if ( cardInfo ) {
+            this.gameState = "PICK_LETTERS"
+            this.msgBox.setMessage("Fill shape with letters")
+            this.msgBox.draw()
+            this.words.setCard( cardInfo )
+            this.words.draw()
+         }
+      }
    }
 
    draw() {

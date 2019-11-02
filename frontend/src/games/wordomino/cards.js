@@ -38,10 +38,9 @@ class Card {
 }
 
 class MiniCard {
-   layout = []
+   cardInfo = null
    size = 22
-   name = ""
-   words = []
+   
    constructor(scene, x, y) {
       this.scene = scene
       this.x = x 
@@ -53,9 +52,7 @@ class MiniCard {
    }
 
    setCardInfo( info ) {
-      this.layout = info.layout
-      this.name = info.name 
-      this.words = info.words
+      this.cardInfo = info
       this.mouseOver = false
       this.seleced = false 
       this.disabled = false
@@ -71,8 +68,7 @@ class MiniCard {
 
    mouseDown(x, y) {
       if (this.fullRect.contains(x, y)) {
-         this.seleced = true 
-         this.draw()
+         this.selected = true 
       }
       return this.selected
    }
@@ -82,7 +78,7 @@ class MiniCard {
    }
 
    draw() {
-      if (this.layout.length == 0) {
+      if (this.cardInfo == null) {
          this.drawLoading()
       } else {
          this.drawLayout()
@@ -96,22 +92,22 @@ class MiniCard {
 
    drawLayout() {
       this.scene.graphics.fillStyle(0xdadada)
-      if (this.mouseOver) {
+      if (this.selected) {
+         this.scene.graphics.fillStyle(0x0077ff)
+      } else if (this.mouseOver) {
          this.scene.graphics.fillStyle(0x00aaff)
-      } else if (this.selected) {
-         this.scene.graphics.fillStyle(0x0088ff)
       }
       this.scene.graphics.lineStyle(1, 0x444444)
       if ( this.disabled) {
-         this.scene.graphics.lineStyle(1, 0x333333)
-         this.scene.graphics.fillStyle(0x888888)
+         this.scene.graphics.lineStyle(1, 0x222222)
+         this.scene.graphics.fillStyle(0x333333)
       }
       for (let r=0; r<5; r++) {
          for (let c = 0; c < 5; c++) { 
             let tx = this.x + (this.size * c)
             let ty = this.y + (this.size * r)
             let rect = new Phaser.Geom.Rectangle(tx, ty, this.size, this.size)
-            if (this.layout[r][c] == 1) {
+            if (this.cardInfo.layout[r][c] == 1) {
                this.scene.graphics.fillRectShape(rect)
             }
             this.scene.graphics.strokeRectShape(rect)
@@ -120,6 +116,9 @@ class MiniCard {
       this.scene.graphics.lineStyle(1, 0xffffff)
       if ( this.mouseOver) {
          this.scene.graphics.lineStyle(1, 0x0066ff)
+      }
+      if (this.disabled) {
+         this.scene.graphics.lineStyle(1, 0x333333)
       }
       this.scene.graphics.strokeRectShape(this.fullRect)
    }
@@ -197,15 +196,32 @@ export class Pool {
    }
    mouseDown(x, y) {
       if (this.active) {
+         let hit = false
          this.choices.forEach(c => {
-            let hit = c.mouseDown(x, y)
-            console.log("MOUSE DOWN HIT" + hit)
-            if ( hit) {
+            if (c.mouseDown(x, y) ) {
+               hit = true
                this.active = false
-               console.log("DEACTIVATE CARDS")
             }
          })
+         if (hit) {
+            this.choices.forEach(c => {
+               if (c.selected == false) {
+                  c.disable()
+               }
+            })
+            this.draw()
+         }
       }
+   }
+
+   cardPicked() {
+      let pick = null
+      this.choices.forEach(c => {
+         if (c.selected == true) {
+            pick = c.cardInfo
+         }
+      })
+      return pick
    }
 
    draw() {
