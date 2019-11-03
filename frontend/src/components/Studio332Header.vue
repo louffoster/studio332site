@@ -1,16 +1,14 @@
 <template>
    <div class="header">
       <router-link :to="{ name: 'home'}">
-         <span>
-            <img class="s332" src="../assets/s332logotype.png" />
-         </span>
+         <img class="s332" src="../assets/s332logotype.png" />
       </router-link>
       <ul class="menu">
-         <router-link :to="{ name: 'home'}">
-            <li :class="className('home')">Home</li>
+         <router-link to="/home">
+            <li>Home</li>
          </router-link>
-         <router-link :to="{ name: 'games'}">
-            <li :class="className('games')">Games</li>
+         <router-link to="/games">
+            <li>Games</li>
          </router-link>
       </ul>
    </div>
@@ -19,17 +17,6 @@
 <script>
 export default {
    name: "Studio332Header",
-   props: {
-      page: String
-   },
-   methods: {
-      className: function(menu) {
-         console.log("classNme: page =[" + this.page + "]");
-         if (menu === this.page) {
-            return "active";
-         }
-      }
-   }
 };
 </script>
 
@@ -61,7 +48,7 @@ div.header {
    color: #444;
    border-bottom: 1px solid white;
 }
-.menu li.active {
+.menu .router-link-active li {
    border-bottom: 1px solid crimson;
 }
 .menu li a {
@@ -75,7 +62,9 @@ a {
    color: #444;
    text-decoration: none;
 }
-div.header img.s332 {
-   position: relative;
+img.s332 {
+   display: inline-block;
+   box-sizing: border-box;
+   height: 65px;
 }
 </style>

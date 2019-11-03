@@ -30,6 +30,7 @@ export default class Wordomino extends Phaser.Scene {
       this.draw()
       this.gameTimer = this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true })
 
+      this.input.setPollAlways()
       this.input.on('pointermove', pointer => {
          if ( this.cardPool.isActive()) {
             this.cardPool.mouseMove(pointer.x, pointer.y)

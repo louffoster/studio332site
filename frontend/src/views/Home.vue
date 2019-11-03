@@ -1,6 +1,5 @@
 <template>
    <div>
-      <Studio332Header page="home" />
       <div class="content">
          <h2>Welcome</h2>
          <p>
@@ -27,11 +26,9 @@
 </template>
 
 <script>
-import Studio332Header from "@/components/Studio332Header.vue";
 export default {
    name: "home",
    components: {
-      Studio332Header
    }
 };
 </script>

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Studio332Header page="games"></Studio332Header>
     <div id="squaresgame"></div>
   </div>
 </template>
@@ -8,12 +7,10 @@
 <script>
   import Phaser from 'phaser'
   import Squares from '@/games/squares/main'
-  import Studio332Header from '@/components/Studio332Header.vue'
 
   export default {
     name: 'Squares',
     components: {
-      Studio332Header
     },
     mounted: function() {
       var config = {

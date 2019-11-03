@@ -1,6 +1,5 @@
 <template>
   <div>
-   <Studio332Header page="games"/>
     <div class="content">
       <h2>Games</h2>
       <p>
@@ -11,26 +10,24 @@
       <p>
         <b>LatticeWords</b>: Shift rows and columns of letters to form words. Make several at 
         at time to score bonus points. Score as high as possible before time runs out.
-        <router-link :to="{ name: 'latticewords'}"><span>Play Now!</span></router-link>
+        <router-link to="/games/latticewords"><span>Play Now!</span></router-link>
       </p>
       <p>
         <b>Squares</b>: Prototype game with rotating clusters of squares. No gameplay, just an experiment.
-        <router-link :to="{ name: 'squares'}"><span>View Now!</span></router-link>
+        <router-link to="/games/squares"><span>View Now!</span></router-link>
       </p>
        <p>
         <b>Wordomino</b>: Prototype game combining word finding with a pentomino puzzle.
-        <router-link :to="{ name: 'wordomino'}"><span>View Now!</span></router-link>
+        <router-link to="/games/wordomino"><span>View Now!</span></router-link>
       </p>
     </div>
   </div>
 </template>
 
 <script>
-  import Studio332Header from '@/components/Studio332Header.vue'
   export default {
     name: 'games',
     components: {
-      Studio332Header
     }
   }
 </script>

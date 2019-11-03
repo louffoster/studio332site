@@ -13,6 +13,7 @@ export default new Router({
   routes: [
     {
       path: '/',
+      alias: '/home',
       name: 'home',
       component: Home
     },
@@ -22,17 +23,17 @@ export default new Router({
       component: Games
     },
     {
-      path: '/latticewords',
+      path: '/games/latticewords',
       name: 'latticewords',
       component: LatticeWords
     },
     {
-      path: '/squares',
+      path: '/games/squares',
       name: 'squares',
       component: Squares
     },
     {
-      path: '/wordomino',
+      path: '/games/wordomino',
       name: 'wordomino',
       component: Wordomino
     }

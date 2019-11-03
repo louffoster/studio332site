@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Studio332Header page="games"/>
     <div id="lwgame"></div>
   </div>
 </template>
@@ -9,12 +8,10 @@
   import Phaser from 'phaser'
   import Menu from '@/games/latticewords/main_menu'
   import Latticewords from '@/games/latticewords/main'
-  import Studio332Header from '@/components/Studio332Header.vue'
 
   export default {
     name: 'LatticeWords',
     components: {
-      Studio332Header
     },
     mounted: function() {
       var config = {
