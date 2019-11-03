@@ -1,4 +1,5 @@
 import axios from 'axios'
+import Phaser from 'phaser'
 
 class Word {
    startRow = 0
@@ -91,16 +92,14 @@ class MiniCard {
    }
 
    drawLayout() {
-      this.scene.graphics.fillStyle(0xdadada)
-      if (this.selected) {
-         this.scene.graphics.fillStyle(0x0077ff)
-      } else if (this.mouseOver) {
-         this.scene.graphics.fillStyle(0x00aaff)
-      }
+      this.scene.graphics.fillStyle(0x9a9a9a)
+      if (this.selected || this.mouseOver) {
+         this.scene.graphics.fillStyle(0x0277bd)
+      } 
       this.scene.graphics.lineStyle(1, 0x444444)
       if ( this.disabled) {
          this.scene.graphics.lineStyle(1, 0x222222)
-         this.scene.graphics.fillStyle(0x333333)
+         this.scene.graphics.fillStyle(0x222222)
       }
       for (let r=0; r<5; r++) {
          for (let c = 0; c < 5; c++) { 
@@ -113,12 +112,12 @@ class MiniCard {
             this.scene.graphics.strokeRectShape(rect)
          }
       }
-      this.scene.graphics.lineStyle(1, 0xffffff)
+      this.scene.graphics.lineStyle(1, 0xdadada)
       if ( this.mouseOver) {
-         this.scene.graphics.lineStyle(1, 0x0066ff)
+         this.scene.graphics.lineStyle(1, 0x0277bd)
       }
       if (this.disabled) {
-         this.scene.graphics.lineStyle(1, 0x333333)
+         this.scene.graphics.lineStyle(1, 0x222222)
       }
       this.scene.graphics.strokeRectShape(this.fullRect)
    }
@@ -195,8 +194,8 @@ export class Pool {
       }
    }
    mouseDown(x, y) {
+      let hit = false
       if (this.active) {
-         let hit = false
          this.choices.forEach(c => {
             if (c.mouseDown(x, y) ) {
                hit = true
@@ -212,6 +211,7 @@ export class Pool {
             this.draw()
          }
       }
+      return hit
    }
 
    cardPicked() {

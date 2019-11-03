@@ -25,7 +25,7 @@ export default class Wordomino extends Phaser.Scene {
       this.msgBox.setMessage("Pick a puzzle shape card")
 
       this.words = new Words(this, 255, 10)
-      this.puzzle = new Puzzle(this,255,255)
+      this.puzzle = new Puzzle(this, 255,255)
       
       this.draw()
       this.gameTimer = this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true })
@@ -33,25 +33,50 @@ export default class Wordomino extends Phaser.Scene {
       this.input.on('pointermove', pointer => {
          if ( this.cardPool.isActive()) {
             this.cardPool.mouseMove(pointer.x, pointer.y)
+         } else if (this.letterPool.isActive()) {
+            this.letterPool.mouseMove(pointer.x, pointer.y)
+         }
+         if (this.words.isActive()) {
+            this.words.mouseMove(pointer.x, pointer.y)
          }
       });
       this.input.on('pointerdown', pointer => {
          if (this.cardPool.isActive()) {
-            this.cardPool.mouseDown(pointer.x, pointer.y)
+            if (this.cardPool.mouseDown(pointer.x, pointer.y)) {
+               this.checkGameState()
+            }
+         }
+         if (this.letterPool.isActive()) {
+            if (this.letterPool.mouseDown(pointer.x, pointer.y)) {
+               this.gameState = "LETTER_PICKED"  
+               this.checkGameState() 
+            }
          }
       });
    }
 
    tick() {
+      this.checkGameState()
+   }
+
+   checkGameState() {
       if (this.gameState == "PICK_CARD") {
-         let cardInfo = this.cardPool.cardPicked() 
-         if ( cardInfo ) {
+         let cardInfo = this.cardPool.cardPicked()
+         if (cardInfo) {
             this.gameState = "PICK_LETTERS"
-            this.msgBox.setMessage("Fill shape with letters")
+            this.msgBox.setMessage("Fill card with words")
             this.msgBox.draw()
-            this.words.setCard( cardInfo )
+            this.words.setCard(cardInfo)
             this.words.draw()
+            this.letterPool.activate()
          }
+      } else if (this.gameState == "LETTER_PICKED") {
+         this.gameState = "PLACE_LETTER"
+         this.msgBox.setMessage("Place letter on card")
+         this.msgBox.draw()
+         this.words.setNewLetter(this.letterPool.selectedLetter)
+         this.words.draw()
+         this.words.activate()
       }
    }
 

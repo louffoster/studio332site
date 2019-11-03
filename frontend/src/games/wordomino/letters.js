@@ -1,51 +1,11 @@
-import Phaser from 'phaser'
-
-export class Tile {
-   static get SIZE() {
-      return 45
-   }
-   constructor(scene, x, y, letter) {
-      let sz = Tile.SIZE
-      this.scene = scene
-      this.rect = new Phaser.Geom.Rectangle(x, y, sz, sz)
-      this.letter = letter
-      this.selected = false
-   }
-
-   isEmpty() {
-      return this.letter == ""
-   }
-
-   setLetter(l) {
-      this.letter = l
-      var cfg = {
-         fontFamily: 'Josefin Slab',
-         fontSize: '24px',
-      }
-
-      var text = this.scene.add.text(this.rect.left + 22, this.rect.top + 23, this.letter, cfg)
-      text.setOrigin(0.5)
-   }
-
-   hit(x, y) {
-      let clicked = this.rect.contains(x, y)
-      if (clicked) {
-         this.selected = !this.selected
-      }
-      return clicked
-   }
-
-   draw() {
-      this.scene.graphics.lineStyle(1, 0xffffff)
-      this.scene.graphics.strokeRectShape(this.rect)
-   }
-}
-
+import Tile from './tile'
 
 export class Pool {
    constructor (scene, x,y)   {
       this.pool = []
       this.tiles = []
+      this.active = false
+      this.selectedLetter = ""
 
       let SZ = Tile.SIZE
       for (let r = 0; r < 5; r++) {
@@ -57,6 +17,40 @@ export class Pool {
             this.tiles[r].push(tile)
          }
       }
+   }
+
+   isActive() {
+      return this.active
+   }
+   activate() {
+      this.active = true
+   }
+   deactivate() {
+      this.active = false
+   }
+
+   mouseMove(x, y) {
+      if (this.active) {
+         for(let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+               this.tiles[r][c].mouseMove(x,y)
+            }
+         }
+      }
+   }
+   mouseDown(x, y) {
+      let hit = false
+      if (this.active) {
+         for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+               if (this.tiles[r][c].mouseDown(x, y)) {
+                  this.selectedLetter = this.tiles[r][c].letter.text
+                  hit = true
+               }
+            }
+         }
+      }
+      return hit
    }
 
    draw() {

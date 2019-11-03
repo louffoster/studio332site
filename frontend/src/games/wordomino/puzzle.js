@@ -37,7 +37,7 @@ export default class Puzzle {
          }
       }
 
-      this.scene.graphics.lineStyle(1, 0xFFFFFF)
+      this.scene.graphics.lineStyle(1, 0xdadada)
       let rect = new Phaser.Geom.Rectangle(this.x, this.y, sz*9, sz*9)
       this.scene.graphics.strokeRectShape(rect)
    }
