@@ -68,9 +68,7 @@ class MiniCard {
    }
 
    mouseDown(x, y) {
-      if (this.fullRect.contains(x, y)) {
-         this.selected = true 
-      }
+      this.selected = this.fullRect.contains(x, y)
       return this.selected
    }
 
@@ -181,6 +179,12 @@ export class Pool {
    isActive() {
       return this.active
    }
+   deactivate() {
+      this.active = false 
+   }
+   activate() {
+      this.active = true
+   }
 
    failed() {
       return this.error != null
@@ -200,6 +204,7 @@ export class Pool {
             if (c.mouseDown(x, y) ) {
                hit = true
                this.active = false
+               this.scene.eventBus.emit("cardPicked", c.cardInfo)
             }
          })
          if (hit) {
@@ -211,17 +216,6 @@ export class Pool {
             this.draw()
          }
       }
-      return hit
-   }
-
-   cardPicked() {
-      let pick = null
-      this.choices.forEach(c => {
-         if (c.selected == true) {
-            pick = c.cardInfo
-         }
-      })
-      return pick
    }
 
    draw() {

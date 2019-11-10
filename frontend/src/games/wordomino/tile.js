@@ -10,6 +10,7 @@ export default class Tile {
       this.rect = new Phaser.Geom.Rectangle(x, y, sz, sz)
       this.selected = false
       this.mouseOver = false
+      this.used = false
       var cfg = {
          fontFamily: 'Josefin Slab',
          fontSize: '24px',
@@ -28,26 +29,39 @@ export default class Tile {
    }
 
    mouseMove(x, y) {
+      if (this.used) return
       let old = this.mouseOver
       this.mouseOver = this.rect.contains(x, y)
       if (this.mouseOver != old) {
          this.draw()
       }
+      return this.mouseOver
+   }
+
+   deselect() {
+      if (this.selected) {
+         this.selected = false
+         this.letter.setFill("#ffffff")  
+         this.draw()
+      }
+   }
+
+   markUsed() {
+      this.used = true
+      this.letter.setVisible(false)
+      this.draw()
    }
 
    mouseDown(x, y) {
+      let hit = false
+      if ( this.used) return false
       if (this.rect.contains(x, y)) {
+         hit = true
          this.selected = true
          this.letter.setFill("#1565c0")
-      } else {
-         let old = this.selected
-         this.selected = false
-         this.letter.setFill("#ffffff")    
-         if (old != this.selected) {
-            this.draw()
-         }
-      }
-      return this.selected
+         this.draw()
+      } 
+      return hit
    }
 
    draw() {

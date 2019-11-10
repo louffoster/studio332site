@@ -1,22 +1,25 @@
 import Tile from './tile'
+import Phaser from 'phaser'
 
 export class Pool {
    constructor (scene, x,y)   {
       this.pool = []
       this.tiles = []
       this.active = false
-      this.selectedLetter = ""
+      this.selectedLetter = {srcRow:-1, srsCol:-1, letter: ""}
+      this.eventBus = scene.eventBus
 
-      let SZ = Tile.SIZE
+      let sz = Tile.SIZE
       for (let r = 0; r < 5; r++) {
          this.tiles.push([])
          for (let c = 0; c < 5; c++) {
-            let tx = x + (SZ * c)
-            let ty = y + (SZ * r)
+            let tx = x + (sz * c)
+            let ty = y + (sz * r)
             let tile = new Tile(scene, tx,ty,'')
             this.tiles[r].push(tile)
          }
       }
+      this.boardRect = new Phaser.Geom.Rectangle(x, y, sz*5, sz*5)
    }
 
    isActive() {
@@ -39,13 +42,27 @@ export class Pool {
       }
    }
    mouseDown(x, y) {
+      if (this.boardRect.contains(x, y) == false) {
+         return false
+      }
       let hit = false
       if (this.active) {
          for (let r = 0; r < 5; r++) {
             for (let c = 0; c < 5; c++) {
                if (this.tiles[r][c].mouseDown(x, y)) {
-                  this.selectedLetter = this.tiles[r][c].letter.text
+                  this.selectedLetter = {srcRow:r, srcCol:c, letter: this.tiles[r][c].letter.text}
+                  this.eventBus.emit("letterPicked", this.selectedLetter)
                   hit = true
+               }
+            }
+         }
+      }
+
+      if (hit) {
+         for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+               if (r != this.selectedLetter.srcRow && c != this.selectedLetter.srcCol) {
+                  this.tiles[r][c].deselect()  
                }
             }
          }
@@ -53,6 +70,11 @@ export class Pool {
       return hit
    }
 
+   letterUsed(letterInfo) {
+      let r = letterInfo.srcRow 
+      let c = letterInfo.srcCol
+      this.tiles[r][c].markUsed()
+   }
    draw() {
       for (let r = 0; r < 5; r++) {
          for (let c = 0; c < 5; c++) {

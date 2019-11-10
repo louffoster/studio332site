@@ -1,31 +1,65 @@
 import Tile from './tile'
+import Phaser from 'phaser'
 
+// WordTile is a single tile used on the words board
+//
 class WordTile extends Tile {
    constructor(scene, x, y) {
       super(scene,x,y,'')
-      this.active = false
+      this.placed = false 
+      this.srcRow = -1
+      this.srcCol = -1
    }
 
    reset() {
       this.setLetter('')
-      this.active = false
+      this.placed = false
+      this.srcRow = -1
+      this.srcCol = -1
+      this.draw()
    }
 
-   hit(x, y) {
+   place(letterInfo) {
+      this.placed = true
+      this.srcRow = letterInfo.srcRow
+      this.srcCol = letterInfo.srcCol
+      this.draw()
+   }
+
+   mouseDown(x, y) {
       return this.rect.contains(x, y)
    }
 
    draw() {
+      if (this.placed) {
+         this.scene.graphics.fillStyle(0x000a12)
+         this.scene.graphics.lineStyle(1, 0xdadada)
+         this.letter.setFill("#ffffff") 
+         return
+      } 
+
       this.scene.graphics.fillStyle(0x162238)
       this.scene.graphics.lineStyle(1, 0xdadada)
-      this.scene.graphics.strokeRectShape(this.rect)
-      if ( this.active ) {
-         this.scene.graphics.fillStyle(0x1565c0)//(0x000a12)
+      if (this.active) {
+         this.scene.graphics.fillStyle(0x1565c0)
+         this.letter.setFill("#ffffff")   
+         if (this.mouseOver) {
+            this.scene.graphics.fillStyle(0x003c8f)
+         }  
+      } else {
+         this.letter.setFill("#cc0000") 
+         if (this.mouseOver) {
+            this.scene.graphics.fillStyle(0x162238)
+         } 
       }
+
       this.scene.graphics.fillRectShape(this.rect)
+      this.scene.graphics.strokeRectShape(this.rect) 
    }
 }
 
+// Words is the board where letter tiles are arranged to form words
+//
 export default class Words {
    constructor(scene, x, y) {
       this.active = false
@@ -33,9 +67,10 @@ export default class Words {
       this.y = y
       this.cardInfo = null
       this.tiles = []
-      this.targetRow = -1
-      this.targetCol = -1
+      this.clearActiveLetter()
+      this.eventBus = scene.eventBus
       let sz = Tile.SIZE
+      this.boardRect = new Phaser.Geom.Rectangle(x, y, sz * 5, sz * 5)
       for (let r = 0; r < 5; r++) {
          this.tiles.push([])
          for (let c = 0; c < 5; c++) {
@@ -48,14 +83,25 @@ export default class Words {
       this.reset()
    }
 
-   setNewLetter(letter) {
-      if ( this.active ) {
+   setNewLetter(letterInfo) {
+      if (this.targetRow > -1 && this.targetCol > -1) { 
          this.tiles[this.targetRow][this.targetCol].setLetter("")
+         this.tiles[this.targetRow][this.targetCol].draw()
       }
-      this.active = true
       this.targetRow = 0
       this.targetCol = 0
-      this.tiles[0][0].setLetter(letter)
+      this.tiles[0][0].setLetter(letterInfo.letter)
+      this.activeLetterInfo = letterInfo
+      this.tiles[this.targetRow][this.targetCol].draw()
+   }
+
+   clearActiveLetter() {
+      this.targetRow = -1
+      this.targetCol = -1   
+      this.activeLetterInfo = null
+   }
+   isPlacingLetter() {
+      return this.activeLetterInfo != null
    }
 
    isActive() {
@@ -70,6 +116,7 @@ export default class Words {
 
    reset() {
       this.cardInfo = null
+      this.clearActiveLetter()
       for (let r = 0; r < 5; r++) {
          for (let c = 0; c < 5; c++) {
             this.tiles[r][c].reset()
@@ -94,10 +141,16 @@ export default class Words {
 
    mouseMove(x, y) {
       if (this.active) {
+         if (this.boardRect.contains(x, y) == false) {
+            return false
+         }
+         if (this.isPlacingLetter() == false ) {
+            return false
+         }
          for (let r = 0; r < 5; r++) {
             for (let c = 0; c < 5; c++) {
-               if (this.tiles[r][c].hit(x, y)) {
-                  if ( r != this.targetRow || c != this.targetCol ) {
+               if (this.tiles[r][c].mouseMove(x,y)) {
+                  if (r != this.targetRow || c != this.targetCol) {
                      let letter = this.tiles[this.targetRow][this.targetCol].letter.text
                      this.tiles[this.targetRow][this.targetCol].setLetter("")   
                      this.tiles[r][c].setLetter(letter)   
@@ -105,6 +158,42 @@ export default class Words {
                      this.targetCol = c
                   }
                }
+            }
+         }
+      }
+      return false
+   }
+
+   mouseDown(x, y) {
+      if (this.active) {
+         if (this.boardRect.contains(x, y) == false) {
+            return
+         }
+         if (this.isPlacingLetter() == false) {
+            return
+         }
+         let clicked = {r: -1, c: -1, tile: null}
+         for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+               if (this.tiles[r][c].mouseDown(x, y)) {
+                  clicked = { r: r, c: c, tile: this.tiles[r][c]}
+                  break
+               }
+            }
+            if (clicked.tile != null) {
+               break
+            }
+         }
+
+         // If placing a letter, targetRow/Col will be set. See if it was the tile clicked...
+         if (clicked.tile != null) {
+            if (clicked.r == this.targetRow && clicked.c == this.targetCol && clicked.tile.active) {
+               clicked.tile.place(this.activeLetterInfo)    
+               this.eventBus.emit("letterPlaced", this.activeLetterInfo)
+               this.clearActiveLetter()
+               return 
+            } else {
+               // See if a tile is already placed here. If so, return to pool
             }
          }
       }

@@ -11,10 +11,15 @@ export default class Wordomino extends Phaser.Scene {
    }
 
    create() {
+      this.eventBus = new Phaser.Events.EventEmitter();
       this.gameState = "PICK_CARD"
       this.helpTiles = [1,1]
-
       this.graphics = this.add.graphics()
+
+      // Even listeners
+      this.eventBus.on("cardPicked", this.handleCardPicked, this)
+      this.eventBus.on("letterPicked", this.handleLetterPicked, this)
+      this.eventBus.on("letterPlaced", this.handleLetterPlaced, this)
       
       this.letterPool = new letters.Pool(this, 10,10)
       this.letterPool.fillGrid()
@@ -30,54 +35,52 @@ export default class Wordomino extends Phaser.Scene {
       this.draw()
       this.gameTimer = this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true })
 
-      this.input.setPollAlways()
       this.input.on('pointermove', pointer => {
-         if ( this.cardPool.isActive()) {
-            this.cardPool.mouseMove(pointer.x, pointer.y)
-         } else if (this.letterPool.isActive()) {
-            this.letterPool.mouseMove(pointer.x, pointer.y)
-         }
-         if (this.words.isActive()) {
-            this.words.mouseMove(pointer.x, pointer.y)
-         }
+         this.cardPool.mouseMove(pointer.x, pointer.y)
+         this.letterPool.mouseMove(pointer.x, pointer.y)
+         this.words.mouseMove(pointer.x, pointer.y)
       });
       this.input.on('pointerdown', pointer => {
-         if (this.cardPool.isActive()) {
-            if (this.cardPool.mouseDown(pointer.x, pointer.y)) {
-               this.checkGameState()
-            }
-         }
-         if (this.letterPool.isActive()) {
-            if (this.letterPool.mouseDown(pointer.x, pointer.y)) {
-               this.gameState = "LETTER_PICKED"  
-               this.checkGameState() 
-            }
-         }
+         this.cardPool.mouseDown(pointer.x, pointer.y)
+         this.letterPool.mouseDown(pointer.x, pointer.y)
+         this.words.mouseDown(pointer.x, pointer.y)
       });
    }
 
    tick() {
-      this.checkGameState()
+      // this.checkGameState()
    }
 
-   checkGameState() {
+   handleCardPicked(cardInfo) {
       if (this.gameState == "PICK_CARD") {
-         let cardInfo = this.cardPool.cardPicked()
-         if (cardInfo) {
-            this.gameState = "PICK_LETTERS"
-            this.msgBox.setMessage("Fill card with words")
-            this.msgBox.draw()
-            this.words.setCard(cardInfo)
-            this.words.draw()
-            this.letterPool.activate()
-         }
-      } else if (this.gameState == "LETTER_PICKED") {
-         this.gameState = "PLACE_LETTER"
-         this.msgBox.setMessage("Place letter on card")
+         this.gameState = "PICK_LETTERS"
+         this.msgBox.setMessage("Fill card with words")
          this.msgBox.draw()
-         this.words.setNewLetter(this.letterPool.selectedLetter)
+         this.words.setCard(cardInfo)
          this.words.draw()
-         this.words.activate()
+         this.letterPool.activate()
+         this.words.activate()   
+         this.cardPool.deactivate()
+      }
+   }
+
+   handleLetterPicked(letterInfo) {
+      this.gameState = "PLACE_LETTER"
+      this.msgBox.setMessage("Place letter on card")
+      this.msgBox.draw()
+      this.words.setNewLetter(letterInfo)
+      this.words.draw()
+   }
+
+   handleLetterPlaced(letterInfo) {
+      if(this.gameState == "PLACE_LETTER") {
+         this.gameState = "PICK_LETTERS"
+         this.msgBox.setMessage("Fill card with words")
+         this.msgBox.draw()
+         this.words.draw()
+         this.letterPool.letterUsed(letterInfo)
+         this.letterPool.draw()
+         // TODO check for all words filled in
       }
    }
 
