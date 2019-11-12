@@ -26,6 +26,7 @@ export default class Tile {
 
    setLetter(l) {
       this.letter.setText(l)
+      this.draw()
    }
 
    mouseMove(x, y) {
@@ -42,14 +43,22 @@ export default class Tile {
       if (this.selected) {
          this.selected = false
          this.letter.setFill("#ffffff")  
-         this.draw()
       }
    }
 
    markUsed() {
       this.used = true
+      this.selected = false
       this.letter.setVisible(false)
       this.draw()
+   }
+
+   restoreLetter() {
+      this.used = false
+      this.selected = false
+      this.letter.setVisible(true)
+      this.letter.setFill("#ffffff")  
+      this.draw()  
    }
 
    mouseDown(x, y) {

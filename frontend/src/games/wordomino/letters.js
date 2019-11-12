@@ -66,6 +66,7 @@ export class Pool {
                }
             }
          }
+         this.draw()
       }
       return hit
    }
@@ -75,6 +76,13 @@ export class Pool {
       let c = letterInfo.srcCol
       this.tiles[r][c].markUsed()
    }
+
+   returnLetter(letterInfo) {
+      let r = letterInfo.srcRow
+      let c = letterInfo.srcCol
+      this.tiles[r][c].restoreLetter()
+   }
+
    draw() {
       for (let r = 0; r < 5; r++) {
          for (let c = 0; c < 5; c++) {

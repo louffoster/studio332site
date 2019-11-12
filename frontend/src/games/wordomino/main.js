@@ -20,6 +20,7 @@ export default class Wordomino extends Phaser.Scene {
       this.eventBus.on("cardPicked", this.handleCardPicked, this)
       this.eventBus.on("letterPicked", this.handleLetterPicked, this)
       this.eventBus.on("letterPlaced", this.handleLetterPlaced, this)
+      this.eventBus.on("letterReturned", this.handleLetterReturned, this)
       
       this.letterPool = new letters.Pool(this, 10,10)
       this.letterPool.fillGrid()
@@ -82,6 +83,10 @@ export default class Wordomino extends Phaser.Scene {
          this.letterPool.draw()
          // TODO check for all words filled in
       }
+   }
+
+   handleLetterReturned(letterInfo) {
+      this.letterPool.returnLetter(letterInfo)
    }
 
    draw() {

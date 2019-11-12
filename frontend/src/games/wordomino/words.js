@@ -7,23 +7,44 @@ class WordTile extends Tile {
    constructor(scene, x, y) {
       super(scene,x,y,'')
       this.placed = false 
-      this.srcRow = -1
-      this.srcCol = -1
+      this.placedLetterInfo = null
    }
 
    reset() {
       this.setLetter('')
       this.placed = false
-      this.srcRow = -1
-      this.srcCol = -1
+      this.placedLetterInfo = null
+      this.draw()
+   }
+
+   replacePriorLetter() {
+      if (this.placed ) {
+         this.letter.setText(this.placedLetterInfo.letter)  
+      } else {
+         this.letter.setText("")  
+      }
       this.draw()
    }
 
    place(letterInfo) {
       this.placed = true
-      this.srcRow = letterInfo.srcRow
-      this.srcCol = letterInfo.srcCol
+      this.placedLetterInfo = letterInfo
       this.draw()
+   }
+
+   clearPlacedetter() {
+      this.placed = false
+      this.selected = false
+      this.mouseOver = false
+      let info = this.placedLetterInfo
+      this.placedLetterInfo = null
+      this.letter.setText("")  
+      this.draw()
+      return info
+   }
+
+   isAvailable() {
+      return this.active && !this.placed
    }
 
    mouseDown(x, y) {
@@ -31,16 +52,20 @@ class WordTile extends Tile {
    }
 
    draw() {
-      if (this.placed) {
+      if (this.placed ) {
          this.scene.graphics.fillStyle(0x000a12)
          this.scene.graphics.lineStyle(1, 0xdadada)
-         this.letter.setFill("#ffffff") 
+         if (this.placedLetterInfo.letter == this.letter.text) {
+            this.letter.setFill("#ffffff") 
+         } else {
+            this.letter.setFill("#cc0000") 
+         }
          return
       } 
 
       this.scene.graphics.fillStyle(0x162238)
       this.scene.graphics.lineStyle(1, 0xdadada)
-      if (this.active) {
+      if (this.active && !this.placed) {
          this.scene.graphics.fillStyle(0x1565c0)
          this.letter.setFill("#ffffff")   
          if (this.mouseOver) {
@@ -150,9 +175,11 @@ export default class Words {
          for (let r = 0; r < 5; r++) {
             for (let c = 0; c < 5; c++) {
                if (this.tiles[r][c].mouseMove(x,y)) {
+                  // if placing a letter and mouse moves into a new location
+                  // clear out the old tile and set target letter in new
                   if (r != this.targetRow || c != this.targetCol) {
                      let letter = this.tiles[this.targetRow][this.targetCol].letter.text
-                     this.tiles[this.targetRow][this.targetCol].setLetter("")   
+                     this.tiles[this.targetRow][this.targetCol].replacePriorLetter()  
                      this.tiles[r][c].setLetter(letter)   
                      this.targetRow = r
                      this.targetCol = c
@@ -167,9 +194,6 @@ export default class Words {
    mouseDown(x, y) {
       if (this.active) {
          if (this.boardRect.contains(x, y) == false) {
-            return
-         }
-         if (this.isPlacingLetter() == false) {
             return
          }
          let clicked = {r: -1, c: -1, tile: null}
@@ -187,13 +211,18 @@ export default class Words {
 
          // If placing a letter, targetRow/Col will be set. See if it was the tile clicked...
          if (clicked.tile != null) {
-            if (clicked.r == this.targetRow && clicked.c == this.targetCol && clicked.tile.active) {
-               clicked.tile.place(this.activeLetterInfo)    
-               this.eventBus.emit("letterPlaced", this.activeLetterInfo)
-               this.clearActiveLetter()
-               return 
+            if (this.isPlacingLetter()) {
+               if (clicked.r == this.targetRow && clicked.c == this.targetCol && clicked.tile.isAvailable()) {
+                  clicked.tile.place(this.activeLetterInfo)    
+                  this.eventBus.emit("letterPlaced", this.activeLetterInfo)
+                  this.clearActiveLetter()
+               }
             } else {
                // See if a tile is already placed here. If so, return to pool
+               if (clicked.tile.placed) {
+                  let letterInfo = clicked.tile.clearPlacedetter()
+                  this.eventBus.emit("letterReturned", letterInfo)
+               }
             }
          }
       }

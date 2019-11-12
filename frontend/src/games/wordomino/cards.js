@@ -50,6 +50,16 @@ class MiniCard {
       this.selected = false 
       this.disabled = false
       this.fullRect = new Phaser.Geom.Rectangle(x, y, this.size*5, this.size*5)
+      this.tiles = [] 
+      for (let r = 0; r < 5; r++) {
+         this.tiles.push([])
+         for (let c = 0; c < 5; c++) {
+            let tx = this.x + (this.size * c)
+            let ty = this.y + (this.size * r)
+            let rect = new Phaser.Geom.Rectangle(tx, ty, this.size, this.size)
+            this.tiles[r].push(rect)
+         }
+      }
    }
 
    setCardInfo( info ) {
@@ -90,32 +100,33 @@ class MiniCard {
    }
 
    drawLayout() {
-      this.scene.graphics.fillStyle(0x9a9a9a)
-      if (this.selected || this.mouseOver) {
-         this.scene.graphics.fillStyle(0x0277bd)
-      } 
-      this.scene.graphics.lineStyle(1, 0x444444)
-      if ( this.disabled) {
-         this.scene.graphics.lineStyle(1, 0x222222)
-         this.scene.graphics.fillStyle(0x222222)
-      }
       for (let r=0; r<5; r++) {
          for (let c = 0; c < 5; c++) { 
-            let tx = this.x + (this.size * c)
-            let ty = this.y + (this.size * r)
-            let rect = new Phaser.Geom.Rectangle(tx, ty, this.size, this.size)
-            if (this.cardInfo.layout[r][c] == 1) {
-               this.scene.graphics.fillRectShape(rect)
+            if (this.disabled || this.selected) {
+               this.scene.graphics.lineStyle(1, 0x111111)
+               this.scene.graphics.fillStyle(0x111111)
+            } else {
+               if (this.cardInfo.layout[r][c] == 1) {
+                  this.scene.graphics.fillStyle(0x9a9a9a)
+                  this.scene.graphics.lineStyle(1, 0x444444)
+                  if (this.mouseOver || this.selected) {
+                     this.scene.graphics.fillStyle(0x1565c0)
+                  }
+               } else {
+                  this.scene.graphics.fillStyle(0x000a12)
+                  this.scene.graphics.lineStyle(1, 0x444444)
+                  if (this.mouseOver ) {
+                     this.scene.graphics.fillStyle(0x162238)
+                  }
+               }
             }
-            this.scene.graphics.strokeRectShape(rect)
+            this.scene.graphics.fillRectShape(this.tiles[r][c])
+            this.scene.graphics.strokeRectShape(this.tiles[r][c])
          }
       }
       this.scene.graphics.lineStyle(1, 0xdadada)
-      if ( this.mouseOver) {
-         this.scene.graphics.lineStyle(1, 0x0277bd)
-      }
-      if (this.disabled) {
-         this.scene.graphics.lineStyle(1, 0x222222)
+      if (this.disabled || this.selected) {
+         this.scene.graphics.lineStyle(1, 0x111111)
       }
       this.scene.graphics.strokeRectShape(this.fullRect)
    }
