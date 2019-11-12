@@ -1,10 +1,10 @@
 build: web backend
 
 backend:
-	GOOS=darwin GOARCH=amd64 go build -a -o studio332srv cmd/*.go
+	GOOS=darwin GOARCH=amd64 go build -a -o studio332site cmd/*.go
 
 clean:
-	rm -r studio332srv
+	rm -r studio332site
 	rm -r ./public/
 
 web:
