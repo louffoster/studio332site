@@ -103,8 +103,8 @@ class MiniCard {
       for (let r=0; r<5; r++) {
          for (let c = 0; c < 5; c++) { 
             if (this.disabled || this.selected) {
-               this.scene.graphics.lineStyle(1, 0x111111)
-               this.scene.graphics.fillStyle(0x111111)
+               this.scene.graphics.lineStyle(1, 0x000a12)
+               this.scene.graphics.fillStyle(0x000a12)
             } else {
                if (this.cardInfo.layout[r][c] == 1) {
                   this.scene.graphics.fillStyle(0x9a9a9a)
@@ -126,7 +126,7 @@ class MiniCard {
       }
       this.scene.graphics.lineStyle(1, 0xdadada)
       if (this.disabled || this.selected) {
-         this.scene.graphics.lineStyle(1, 0x111111)
+         this.scene.graphics.lineStyle(1, 0x444444)
       }
       this.scene.graphics.strokeRectShape(this.fullRect)
    }

@@ -9,6 +9,5 @@ clean:
 
 web:
 	echo 'building web front end'
-	rm -r ./public/
 	cd ./frontend/; yarn install; yarn build
 	mv ./frontend/dist ./public
