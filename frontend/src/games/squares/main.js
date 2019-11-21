@@ -27,8 +27,8 @@ export default  class Squares extends Phaser.Scene {
         for ( let r=0; r<=7; r++) {
             let row = []
             for ( let c=0; c<=7; c++) {
-                let x = ((Square.SIZE+1)*c)+1
-                let y = ((Square.SIZE+1)*r)+1
+                let x = Square.SIZE*c
+                let y = Square.SIZE*r
                 let sq = new Square(colors.pop(), x,y )
                 row.push( sq )
                 if ( r==0 || r==7 || c==0 || c==7) {
@@ -37,7 +37,8 @@ export default  class Squares extends Phaser.Scene {
             }
             this.grid.push(row)
         }
-        this.border = new Phaser.Geom.Rectangle(51, 51, (50+1)*6, (50+1)*6)
+        this.border = new Phaser.Geom.Rectangle(Square.SIZE, Square.SIZE, 
+            Square.SIZE * 6, Square.SIZE*6)
         this.showBorder = true
         this.redraw()
         this.input.on('pointermove', pointer=> {
@@ -56,17 +57,15 @@ export default  class Squares extends Phaser.Scene {
             for ( let r=0; r<=7; r++) {
                 for ( let c=0; c<=7; c++) {     
                     if (this.grid[r][c].hit( x, y) ) {
-                        // this.showBorder = false
-                        // this.drawBorder()
+                        this.showBorder = false
+                        this.drawBorder()
                         let selCenter = this.grid[r][c].getCenter()
-                        let sqSz = (Square.SIZE+1)*1.5
+                        let sqSz = (Square.SIZE)*1.5
                         let left = selCenter.x - sqSz
                         let top = selCenter.y - sqSz
-                        let w = (Square.SIZE+1)*3
-                        let h = (Square.SIZE+1)*3
+                        let w = (Square.SIZE)*3
+                        let h = (Square.SIZE)*3
                         this.game.renderer.snapshotArea(left,top,w,h, image => {
-                            // this.showBorder = true
-                            // this.drawBorder()
                             let rect = new Phaser.Geom.Rectangle(left,top,w,h)
                             this.graphics.fillStyle(0x000000)
                             this.graphics.fillRectShape(rect)
@@ -80,6 +79,8 @@ export default  class Squares extends Phaser.Scene {
                                     snapImg.destroy()
                                     this.rotateAround(r,c)
                                     this.redraw()
+                                    this.showBorder = true
+                                    this.drawBorder()
                                 }}
                             )
                         })
@@ -90,9 +91,9 @@ export default  class Squares extends Phaser.Scene {
     }
 
     drawBorder() {
-        this.graphics.lineStyle(2, 0x000000)
+        this.graphics.lineStyle(1, 0x000000)
         if (this.showBorder) {
-            this.graphics.lineStyle(2, 0xaa5555)
+            this.graphics.lineStyle(1, 0xff0033)
         }
         this.graphics.strokeRectShape(this.border)
     }

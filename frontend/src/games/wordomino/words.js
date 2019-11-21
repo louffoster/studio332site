@@ -1,5 +1,6 @@
 import Tile from './tile'
 import Phaser from 'phaser'
+import axios from 'axios'
 
 // WordTile is a single tile used on the words board
 //
@@ -125,6 +126,7 @@ export default class Words {
       this.targetCol = -1   
       this.activeLetterInfo = null
    }
+
    isPlacingLetter() {
       return this.activeLetterInfo != null
    }
@@ -158,6 +160,54 @@ export default class Words {
             }
          }
       }
+   }
+
+   isCardFull() {
+      let totalLen = 0
+      this.cardInfo.words.forEach( w=> {
+         totalLen += w.wordLength
+      })   
+      let placedLen = 0
+      for (let r = 0; r < 5; r++) {
+         for (let c = 0; c < 5; c++) {
+            if (this.tiles[r][c].placed) {
+               placedLen++
+            }
+         }
+      }
+      return placedLen == totalLen
+   }
+
+   submitWords() {
+      let submit = []
+      this.cardInfo.words.forEach(w => {
+         let sr = w.startRow
+         let sc = w.startCol
+         let len = w.wordLength
+         let word = ""
+         if (w.direction == "right") {
+            for (let c=sc; c<(sc+len); c++) {
+               word = word + this.tiles[sr][c].getLetter()
+            }
+         } else {
+            for (let r = sr; r < (sr + len); r++) {
+               word = word + this.tiles[r][sc].getLetter()
+            }
+         }
+         submit.push(word)
+      }) 
+      
+      let data = { words: words.join(",") }
+      this.eventBus.emit("wordsSubmitted")
+      axios.post('/api/wordomino/check', data).then( response => {
+         this.handleWordResults(response.data)
+      }).catch(error => {
+         console.log(error)
+      })
+   }
+
+   handleWordResults(data) {
+      alert(JSON.stringify(data))
    }
 
    isCardSelected() {

@@ -56,19 +56,26 @@ func wordominoCheck(c *gin.Context) {
 	// Read list of words from post body
 	log.Printf("Got words: %s", postData.Words)
 
-	// Read the disctionary into an array for checking word valididty
+	// Read the dictionary into an array for checking word valididty
 	dict, err := ioutil.ReadFile("data/dict.txt")
 	if err != nil {
 		log.Printf("Unable to load distionary: %s", err.Error())
-		c.String(http.StatusInternalServerError, "Unable to read distionary")
+		c.String(http.StatusInternalServerError, "Unable to read dictionary")
 		return
+	}
+	var resp struct {
+		Success    bool   `json:"name"`
+		WordStatus []bool `json:"wordStatus"`
 	}
 	dictWords := strings.Split(string(dict), "\n")
 	for _, word := range postData.Words {
 		if IsValidWord(word, dictWords) == false {
-			c.String(http.StatusNotFound, "%s is not a valid word", word)
-			return
+			resp.Success = false
+			log.Printf("%s is not a valid word", word)
+			resp.WordStatus = append(resp.WordStatus, false)
+		} else {
+			resp.WordStatus = append(resp.WordStatus, true)
 		}
 	}
-	c.String(http.StatusOK, "success")
+	c.JSON(http.StatusOK, resp)
 }

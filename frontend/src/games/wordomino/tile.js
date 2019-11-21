@@ -29,6 +29,10 @@ export default class Tile {
       this.draw()
    }
 
+   getLetter() {
+      return this.letter.text 
+   }
+
    mouseMove(x, y) {
       if (this.used) return
       let old = this.mouseOver
