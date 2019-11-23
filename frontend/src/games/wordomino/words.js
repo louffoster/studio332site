@@ -84,6 +84,45 @@ class WordTile extends Tile {
    }
 }
 
+// Button used to control words card; clear and submit
+class CardButton {
+   constructor(scene, x, y, text) {
+      var cfg = {
+         fontFamily: 'Josefin Sans',
+         fontSize: '14px',
+         align: 'center',
+         color: '#ffffff'
+      }
+
+      this.rect = new Phaser.Geom.Rectangle(x, y, 90, 30)
+      this.text = scene.add.text(x + 45, y + 15, text, cfg)
+      this.text.setOrigin(0.5);
+      this.graphics = scene.graphics
+      this.enabled = false
+   }
+
+   mouseDown(x,y) {
+      if (this.enabled == false) return false
+      return (this.rect.contains(x, y)) 
+   }
+   
+   draw() {
+      if ( this.enabled) {
+         this.graphics.lineStyle(1, 0xdadada)
+         this.graphics.fillStyle(0x1565c0)
+         this.text.setFill("#ffffff") 
+      } else {
+         this.graphics.lineStyle(1, 0xdadada)
+         this.graphics.fillStyle(0x000013)
+         this.text.setFill("#333333")    
+      }
+      this.graphics.fillRoundedRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height,
+         { tl: 0, tr: 0, bl: 10, br: 10 })
+      this.graphics.strokeRoundedRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height,
+         { tl: 0, tr: 0, bl: 10, br: 10 })
+   }
+}
+
 // Words is the board where letter tiles are arranged to form words
 //
 export default class Words {
@@ -95,6 +134,7 @@ export default class Words {
       this.tiles = []
       this.clearActiveLetter()
       this.eventBus = scene.eventBus
+      this.graphics = scene.graphics
       let sz = Tile.SIZE
       this.boardRect = new Phaser.Geom.Rectangle(x, y, sz * 5, sz * 5)
       for (let r = 0; r < 5; r++) {
@@ -106,6 +146,11 @@ export default class Words {
             this.tiles[r].push(tile)
          }
       }
+
+      
+      this.clearBtn = new CardButton(scene, 255,235, "Clear")
+      this.submitBtn = new CardButton(scene, 390, 235, "Submit")
+
       this.reset()
    }
 
@@ -136,9 +181,14 @@ export default class Words {
    }
    activate() {
       this.active = true
+      this.clearBtn.enabled = true
+      this.draw()
    }
    deactivate() {
       this.active = false
+      this.submitBtn.enabled = false
+      this.clearBtn.enabled = false
+      this.draw()
    }
 
    reset() {
@@ -175,7 +225,26 @@ export default class Words {
             }
          }
       }
-      return placedLen == totalLen
+      if ( placedLen == totalLen) {
+         this.submitBtn.enabled = true 
+         this.draw()
+         return true
+      }
+      this.submitBtn.enabled = false
+      this.draw()
+      return false
+   }
+
+   clearWords() {
+      for (let r = 0; r < 5; r++) {
+         for (let c = 0; c < 5; c++) {
+            let tile = this.tiles[r][c]
+            if (tile.placed) {
+               let letterInfo = tile.clearPlacedetter()
+               this.eventBus.emit("letterReturned", letterInfo)
+            }
+         }
+      }
    }
 
    submitWords() {
@@ -197,7 +266,7 @@ export default class Words {
          submit.push(word)
       }) 
       
-      let data = { words: words.join(",") }
+      let data = { words: submit.join(",") }
       this.eventBus.emit("wordsSubmitted")
       axios.post('/api/wordomino/check', data).then( response => {
          this.handleWordResults(response.data)
@@ -243,6 +312,14 @@ export default class Words {
 
    mouseDown(x, y) {
       if (this.active) {
+         if (this.submitBtn.mouseDown(x,y)) {
+            this.submitWords()
+            return
+         }
+         if (this.clearBtn.mouseDown(x, y)) {
+            this.clearWords()
+            return
+         }
          if (this.boardRect.contains(x, y) == false) {
             return
          }
@@ -266,6 +343,7 @@ export default class Words {
                   clicked.tile.place(this.activeLetterInfo)    
                   this.eventBus.emit("letterPlaced", this.activeLetterInfo)
                   this.clearActiveLetter()
+                  this.isCardFull()
                }
             } else {
                // See if a tile is already placed here. If so, return to pool
@@ -284,5 +362,8 @@ export default class Words {
             this.tiles[r][c].draw()
          }
       }
+
+     this.clearBtn.draw() 
+     this.submitBtn.draw()
    }
 }

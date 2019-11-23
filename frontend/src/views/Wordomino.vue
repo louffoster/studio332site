@@ -20,7 +20,7 @@
         },
         parent: 'wordomino',
         width: 490,
-        height: 490,
+        height: 520,
         title: "Wordomino",
         backgroundColor: '000a12',
         scene: [Wordomino]

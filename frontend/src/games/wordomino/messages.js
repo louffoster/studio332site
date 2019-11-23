@@ -4,14 +4,14 @@ export default class MessageBox {
    constructor(scene, x, y) {
       this.scene = scene
       this.message = ""
-      this.rect = new Phaser.Geom.Rectangle(x, y, 170, 26)
+      this.rect = new Phaser.Geom.Rectangle(x, y, 225, 30)
       var cfg = {
-         fontFamily: 'Josefin Slab',
+         fontFamily: 'Josefin Sans',
          fontSize: '14px',
          align: 'center',
          color: '#ffffff'
       }
-      this.msgDisplay = this.scene.add.text(this.rect.left+85, this.rect.top + 13, this.message, cfg)
+      this.msgDisplay = this.scene.add.text(this.rect.left+113, this.rect.top + 15, this.message, cfg)
       this.msgDisplay.setOrigin(0.5);
       this.draw()
    }

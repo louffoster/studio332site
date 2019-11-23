@@ -25,14 +25,16 @@ export default class Wordomino extends Phaser.Scene {
       
       this.letterPool = new letters.Pool(this, 10,10)
       this.letterPool.fillGrid()
+
+      this.msgBox = new MessageBox(this, 10, 245)
+      this.msgBox.setMessage("Pick a puzzle shape card")
       
       this.cardPool = new cards.Pool(this)
-      this.cardPool.setChoiceCoordinates( 10,255, 125,255)
-      this.msgBox = new MessageBox(this,10,380)
-      this.msgBox.setMessage("Pick a puzzle shape card")
+      this.cardPool.setChoiceCoordinates( 10,285, 125,285)
+     
 
       this.words = new Words(this, 255, 10)
-      this.puzzle = new Puzzle(this, 255,255)
+      this.puzzle = new Puzzle(this, 255,285)
       
       this.draw()
       this.gameTimer = this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true })
@@ -82,9 +84,6 @@ export default class Wordomino extends Phaser.Scene {
          this.words.draw()
          this.letterPool.letterUsed(letterInfo)
          this.letterPool.draw()
-         if (this.words.isCardFull() ) {
-            this.words.submitWords()
-         }
       }
    }
 
@@ -109,7 +108,7 @@ export default class Wordomino extends Phaser.Scene {
       this.graphics.fillStyle(0xdadada)
       for (let i=0; i<this.helpTiles.length; i++) {
          let x = 190 
-         let y = 380+ (sz * i) + (10*i)
+         let y = 410+ (sz * i) + (10*i)
          let rect = new Phaser.Geom.Rectangle(x, y, sz, sz)
          this.graphics.strokeRectShape(rect)
          if (this.helpTiles[i] == 1) {
