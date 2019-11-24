@@ -9,10 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type checkWords struct {
-	Words string `json:"words" binding:"required"`
-}
-
 func checkHandler(c *gin.Context) {
 	var postData checkWords
 	c.Bind(&postData)

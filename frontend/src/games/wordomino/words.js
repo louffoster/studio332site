@@ -213,26 +213,18 @@ export default class Words {
    }
 
    isCardFull() {
-      let totalLen = 0
-      this.cardInfo.words.forEach( w=> {
-         totalLen += w.wordLength
-      })   
-      let placedLen = 0
       for (let r = 0; r < 5; r++) {
          for (let c = 0; c < 5; c++) {
-            if (this.tiles[r][c].placed) {
-               placedLen++
+            if (this.tiles[r][c].isAvailable()) {
+               this.submitBtn.enabled = false
+               this.draw()
+               return false
             }
          }
       }
-      if ( placedLen == totalLen) {
-         this.submitBtn.enabled = true 
-         this.draw()
-         return true
-      }
-      this.submitBtn.enabled = false
+      this.submitBtn.enabled = true 
       this.draw()
-      return false
+      return true
    }
 
    clearWords() {

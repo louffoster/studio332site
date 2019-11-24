@@ -28,10 +28,6 @@ type wordInfo struct {
 	Length    int    `json:"wordLength"`
 }
 
-type wordsSubmission struct {
-	Words []string `json:"words" binding:"required"`
-}
-
 func wordominoShapes(c *gin.Context) {
 	jsonStr, err := ioutil.ReadFile("data/cards.json")
 	if err != nil {
@@ -50,7 +46,7 @@ func wordominoShapes(c *gin.Context) {
 }
 
 func wordominoCheck(c *gin.Context) {
-	var postData wordsSubmission
+	var postData checkWords
 	c.Bind(&postData)
 
 	// Read list of words from post body
@@ -64,11 +60,12 @@ func wordominoCheck(c *gin.Context) {
 		return
 	}
 	var resp struct {
-		Success    bool   `json:"name"`
+		Success    bool   `json:"success"`
 		WordStatus []bool `json:"wordStatus"`
 	}
+	resp.Success = true
 	dictWords := strings.Split(string(dict), "\n")
-	for _, word := range postData.Words {
+	for _, word := range strings.Split(postData.Words, ",") {
 		if IsValidWord(word, dictWords) == false {
 			resp.Success = false
 			log.Printf("%s is not a valid word", word)
