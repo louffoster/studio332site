@@ -96,7 +96,6 @@ export default  class Latticewords extends Phaser.Scene {
       }, this)
 
       this.input.on('pointerup', function () {
-         console.log("GRID UP")
          this.pointerDown = false
          if (this.paused || this.gameOver ) return
          this.grid.handlePointerUp()

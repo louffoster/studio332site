@@ -262,8 +262,8 @@ export default class Words {
       this.eventBus.emit("wordsSubmitted")
       axios.post('/api/wordomino/check', data).then( response => {
          this.handleWordResults(response.data)
-      }).catch(error => {
-         console.log(error)
+      }).catch( () => {
+         // console.log(error)
       })
    }
 

@@ -140,8 +140,8 @@ export default class Grid  {
       .then(function (response) {
          self.handleResults(response.data, coords, scoreHandler )
       })
-      .catch(function (error) {
-         console.log(error)
+      .catch(function () {
+         // console.log(error)
       })
    }
 
@@ -294,7 +294,7 @@ export default class Grid  {
    handlePointerDown(screenX, screenY) {
       var gridX = screenX - 70
       var gridY = screenY - 110
-      console.log("W: "+this.width)
+      // console.log("W: "+this.width)
       if ( gridX <10 || gridY <10 || gridX >= this.width-20 || gridY >= this.height-20) {
          this.priorTile = null
          return
@@ -302,7 +302,7 @@ export default class Grid  {
 
       var col = Math.floor( gridX / this.tileSize)
       var row = Math.floor( gridY / this.tileSize)
-      console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
+      // console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
       var tile = this.grid[row][col]
       if ( this.priorTile != tile ) {
          this.priorTile = tile
