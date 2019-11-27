@@ -44,6 +44,23 @@ class WordTile extends Tile {
       return info
    }
 
+   showError() {
+      this.letter.setFill("#cc0000") 
+      this.scene.tweens.add({
+         targets: this.letter,
+         alpha: 0.7,
+         duration: 100,
+         angle: { from: -20, to: 20 },
+         ease: 'Linear',
+         yoyo: true,
+         repeat: 2,
+         delay: 0,
+         onComplete: ()=> {
+            this.letter.angle = 0  
+         }
+      })
+   }
+
    isAvailable() {
       return this.active && !this.placed
    }
@@ -133,6 +150,7 @@ export default class Words {
       this.cardInfo = null
       this.tiles = []
       this.clearActiveLetter()
+      this.tweens = scene.tweens
       this.eventBus = scene.eventBus
       this.graphics = scene.graphics
       let sz = Tile.SIZE
@@ -218,11 +236,13 @@ export default class Words {
             if (this.tiles[r][c].isAvailable()) {
                this.submitBtn.enabled = false
                this.draw()
+               this.eventBus.emit("cardNotFull")
                return false
             }
          }
       }
       this.submitBtn.enabled = true 
+      this.eventBus.emit("cardFull")
       this.draw()
       return true
    }
@@ -263,12 +283,44 @@ export default class Words {
       axios.post('/api/wordomino/check', data).then( response => {
          this.handleWordResults(response.data)
       }).catch( () => {
-         // console.log(error)
+         this.showFailedSubmit()
       })
    }
 
    handleWordResults(data) {
-      alert(JSON.stringify(data))
+      if ( data.success == false ) {
+         this.showFailedSubmit()
+      }
+   }
+
+   showFailedSubmit() {
+      let letters = []
+      for (let r = 0; r < 5; r++) {
+         for (let c = 0; c < 5; c++) {
+            let tile = this.tiles[r][c]
+            if (tile.placed) {
+               tile.letter.setFill("#cc0000") 
+               letters.push( tile.letter )
+            }
+         }
+      }
+      this.tweens.add({
+         targets: letters,
+         alpha: 0.7,
+         duration: 100,
+         angle: { from: -20, to: 20 },
+         ease: 'Linear',
+         yoyo: true,
+         repeat: 2,
+         delay: 0,
+         onComplete: ()=> {
+            letters.forEach(l => {
+               l.angle = 0
+               l.setFill("#ffffff")
+            })
+            this.eventBus.emit("wordsFailed")
+         }
+      })
    }
 
    isCardSelected() {
@@ -336,6 +388,8 @@ export default class Words {
                   this.eventBus.emit("letterPlaced", this.activeLetterInfo)
                   this.clearActiveLetter()
                   this.isCardFull()
+               } else {
+                  clicked.tile.showError()    
                }
             } else {
                // See if a tile is already placed here. If so, return to pool

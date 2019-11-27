@@ -22,6 +22,9 @@ export default class Wordomino extends Phaser.Scene {
       this.eventBus.on("letterPlaced", this.handleLetterPlaced, this)
       this.eventBus.on("letterReturned", this.handleLetterReturned, this)
       this.eventBus.on("wordsSubmitted", this.handleWordsSubmitted, this)
+      this.eventBus.on("wordsFailed", this.handleWordsFailed, this)
+      this.eventBus.on("cardFull", this.handleCardFull, this)
+      this.eventBus.on("cardNotFull", this.handleCardNotFull, this)
       
       this.letterPool = new letters.Pool(this, 10,10)
       this.letterPool.fillGrid()
@@ -94,6 +97,21 @@ export default class Wordomino extends Phaser.Scene {
    handleWordsSubmitted() {
       this.msgBox.setMessage("Checking words...")
       this.msgBox.draw()  
+   }
+
+   handleWordsFailed() {
+      this.msgBox.setMessage("Failed! Fix words on card")
+      this.msgBox.draw()
+   }
+
+   handleCardNotFull() {
+      this.msgBox.setMessage("Fill card with words")
+      this.msgBox.draw()   
+   }
+
+   handleCardFull() {
+      this.msgBox.setMessage("Submit words!")
+      this.msgBox.draw()
    }
 
    draw() {
