@@ -290,6 +290,8 @@ export default class Words {
    handleWordResults(data) {
       if ( data.success == false ) {
          this.showFailedSubmit()
+      } else {
+         this.eventBus.emit("wordsValid", this.cardInfo)
       }
    }
 

@@ -11,9 +11,8 @@ export default class Wordomino extends Phaser.Scene {
    }
 
    create() {
-      this.eventBus = new Phaser.Events.EventEmitter();
+      this.eventBus = new Phaser.Events.EventEmitter()
       this.gameState = "PICK_CARD"
-      this.helpTiles = [1,1]
       this.graphics = this.add.graphics()
 
       // Even listeners
@@ -25,6 +24,7 @@ export default class Wordomino extends Phaser.Scene {
       this.eventBus.on("wordsFailed", this.handleWordsFailed, this)
       this.eventBus.on("cardFull", this.handleCardFull, this)
       this.eventBus.on("cardNotFull", this.handleCardNotFull, this)
+      this.eventBus.on("wordsValid", this.handleWordsValid, this)
       
       this.letterPool = new letters.Pool(this, 10,10)
       this.letterPool.fillGrid()
@@ -46,6 +46,7 @@ export default class Wordomino extends Phaser.Scene {
          this.cardPool.mouseMove(pointer.x, pointer.y)
          this.letterPool.mouseMove(pointer.x, pointer.y)
          this.words.mouseMove(pointer.x, pointer.y)
+         this.puzzle.mouseMove(pointer.x, pointer.y)
       });
       this.input.on('pointerdown', pointer => {
          this.cardPool.mouseDown(pointer.x, pointer.y)
@@ -113,6 +114,16 @@ export default class Wordomino extends Phaser.Scene {
       this.msgBox.setMessage("Submit words!")
       this.msgBox.draw()
    }
+   
+   handleWordsValid(card) {
+      this.msgBox.setMessage("Place shape in puzzle")
+      this.msgBox.draw() 
+      this.letterPool.deactivate()
+      this.words.deactivate()
+      this.cardPool.deactivate()
+      this.puzzle.setNewShape(card.layout)
+      this.puzzle.activate()
+   }
 
    draw() {
       this.letterPool.draw()
@@ -120,19 +131,5 @@ export default class Wordomino extends Phaser.Scene {
       this.msgBox.draw()
       this.words.draw()
       this.puzzle.draw()
-
-      let sz = 45
-      this.graphics.lineStyle(1, 0x444444)
-      this.graphics.fillStyle(0xdadada)
-      for (let i=0; i<this.helpTiles.length; i++) {
-         let x = 190 
-         let y = 410+ (sz * i) + (10*i)
-         let rect = new Phaser.Geom.Rectangle(x, y, sz, sz)
-         this.graphics.strokeRectShape(rect)
-         if (this.helpTiles[i] == 1) {
-            this.graphics.fillRectShape(rect)
-         }
-
-      }
    }
 }
