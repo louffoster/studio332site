@@ -45,28 +45,20 @@ func wordominoShapes(c *gin.Context) {
 	c.JSON(http.StatusOK, cf)
 }
 
-func wordominoCheck(c *gin.Context) {
+func (svc *WordGameService) wordominoCheck(c *gin.Context) {
 	var postData checkWords
 	c.Bind(&postData)
 
 	// Read list of words from post body
 	log.Printf("Got words: %s", postData.Words)
 
-	// Read the dictionary into an array for checking word valididty
-	dict, err := ioutil.ReadFile("data/dict.txt")
-	if err != nil {
-		log.Printf("Unable to load distionary: %s", err.Error())
-		c.String(http.StatusInternalServerError, "Unable to read dictionary")
-		return
-	}
 	var resp struct {
 		Success    bool   `json:"success"`
 		WordStatus []bool `json:"wordStatus"`
 	}
 	resp.Success = true
-	dictWords := strings.Split(string(dict), "\n")
 	for _, word := range strings.Split(postData.Words, ",") {
-		if IsValidWord(word, dictWords) == false {
+		if svc.IsValidWord(word) == false {
 			resp.Success = false
 			log.Printf("%s is not a valid word", word)
 			resp.WordStatus = append(resp.WordStatus, false)

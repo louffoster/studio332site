@@ -23,18 +23,25 @@ func main() {
 	flag.IntVar(&port, "port", defPort, "Site Server port (default 8085)")
 	flag.Parse()
 
+	// setup word game context
+	wordSvc, err := InitWordGame()
+	if err != nil {
+		log.Fatalf("Unable to setup word game context: %s", err.Error())
+	}
+
 	gin.SetMode(gin.ReleaseMode)
+	gin.DisableConsoleColor()
 	router := gin.Default()
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 	api := router.Group("/api")
 	lw := api.Group("/latticewords")
 	{
-		lw.POST("/check", checkHandler)
+		lw.POST("/check", wordSvc.checkHandler)
 	}
 	wd := api.Group("/wordomino")
 	{
 		wd.GET("/shapes", wordominoShapes)
-		wd.POST("/check", wordominoCheck)
+		wd.POST("/check", wordSvc.wordominoCheck)
 	}
 
 	// add a catchall route that renders the index page.

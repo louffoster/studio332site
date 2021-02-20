@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -9,21 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func checkHandler(c *gin.Context) {
+func (svc *WordGameService) checkHandler(c *gin.Context) {
 	var postData checkWords
 	c.Bind(&postData)
 
 	// Read list of words from post body
+	postData.Words = strings.ToLower(postData.Words)
 	log.Printf("Got words: %s", postData.Words)
-
-	// Read the disctionary into an array for checking word valididty
-	dict, err := ioutil.ReadFile("data/dict.txt")
-	if err != nil {
-		log.Printf("Unable to load distionary: %s", err.Error())
-		c.String(http.StatusInternalServerError, "Unable to read distionary")
-		return
-	}
-	dictWords := strings.Split(string(dict), "\n")
 
 	// Split words into list and check each one
 	words := strings.Split(string(postData.Words), ",")
@@ -31,8 +22,8 @@ func checkHandler(c *gin.Context) {
 	total := 0
 	letterValues := [6]int{0, 2, 5, 10, 15, 25}
 	for _, word := range words {
-		log.Printf("Is %s valid?", word)
-		if IsValidWord(word, dictWords) {
+		log.Printf("Is '%s' valid?", word)
+		if svc.IsValidWord(word) {
 			score := letterValues[len(word)-1] * len(word)
 			log.Printf("Yes. Score %d", score)
 			validCnt++
