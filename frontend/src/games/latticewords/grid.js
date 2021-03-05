@@ -1,8 +1,6 @@
 const ANIMATE_SPEED = 250
 const LETTER_COLOR = '#0e267f'
 const SELECT_COLOR = '#2f95ff'
-const BONUS_COLOR = '#dd5'
-const BONUS_STROKE = '#139'
 
 import axios from 'axios'
 
@@ -14,18 +12,23 @@ export default class Grid  {
       this.tileSize = tileSize
       this.red = false
       this.animating = false
-      this.priorTile = null
       this.pool = pool
 
-      this.bkg = this.scene.add.image(0,0,  'grid-bkg')
+      this.bkg = this.scene.add.rectangle(0, 0, tileSize*cols, tileSize*rows, 0xffffff)
       this.bkg.setOrigin(0,0)
       this.width =  this.bkg.width
       this.height = this.bkg.height
-      this.tilesGroup = this.scene.add.container(70,40+70, [this.bkg])
-
-      var grid = this.scene.add.sprite(0,40, 'grid')
+      this.tilesGroup = this.scene.add.container(0,40)
+      var grid = this.scene.add.sprite(0,0, 'grid')
       grid.setOrigin(0,0)
+
+      this.tilesGroup.add(this.bkg)
+      this.tilesGroup.add(grid)
       this.grid = [ ]
+   }
+
+   setVisible( vis) {
+      this.tilesGroup.setVisible(vis)
    }
 
    empty(  ) {
@@ -88,6 +91,8 @@ export default class Grid  {
       var coords = []
       var r,c
 
+      // FIXME MAke sure letters are consecutive
+
       // first find words in rows
       for (r=0; r<this.rows; r++ ) {
          for ( c=0;c<this.cols; c++) {
@@ -146,7 +151,6 @@ export default class Grid  {
    }
 
    handleResults(total, coords, scoreHandler) {
-
       // If total > 0, all letters score and are replaced
       // otherwise, the whole submission fails
       if (total === 0) {
@@ -159,9 +163,6 @@ export default class Grid  {
       for (var j=0; j<coords.length;j++) {
          var loc = coords[j].split(",")
          var tile = this.grid[loc[0]][loc[1]]
-         if (tile.bonus == true) {
-            addTime = 20
-         }
          tiles.push(tile.letter)
       }
 
@@ -231,16 +232,15 @@ export default class Grid  {
    flash() {
       this.red = !this.red
       if ( this.red == false) {
-         this.bkg.clearTint()
+         this.bkg.setFillStyle(0xffffff)
       } else {
-         this.bkg.setTint('0xccffff')
+         this.bkg.setFillStyle(0xddffff)
       }
    }
 
    addTile(letter, row, col, selected, clone) {
       var tileX = 42+this.tileSize*col
       var tileY = 43+this.tileSize*row
-      var bonus = false
 
       var cfg = {
          fontSize: '52px',
@@ -258,81 +258,56 @@ export default class Grid  {
          text.alpha = 0
          this.scene.tweens.add({targets: text,alpha:1,
             duration: 250, ease: 'Linear'})
-         if ( this.hasBonus() == false ) {
-            var chance = Math.floor(Math.random() * 100)
-            if ( chance > 96 ) {
-               text.setFill(BONUS_COLOR)
-               text.setStroke(BONUS_STROKE,4)
-               bonus = true
-            }
-         }
       }
 
       this.tilesGroup.add(text)
-      return {letter: text, selected: selected, bonus: bonus}
+      return {letter: text, selected: selected}
    }
 
-   hasBonus() {
-      var cnt = 0
-      for (var r=0; r<this.rows; r++) {
-         for (var c=0; c<this.cols; c++) {
-            var letter = this.grid[r][c]
-            if (typeof letter === "undefined") return false
-            if (letter.bonus == true ) {
-               cnt++
-               if ( cnt === 3) return true
-            }
-         }
-      }
-      return false
+   getClickedCol(screenX) {
+      var gridX = screenX - 0    
+      return Math.floor(gridX / this.tileSize)
+   }
+   getClickedRow(screenY) {
+      var gridY = screenY - 40
+      return Math.floor(gridY / this.tileSize)
    }
 
-   handlePointerUp() {
-      this.priorTile = null
-   }
-
-   handlePointerDown(screenX, screenY) {
-      var gridX = screenX - 70
-      var gridY = screenY - 110
-      // console.log("W: "+this.width)
-      if ( gridX <10 || gridY <10 || gridX >= this.width-20 || gridY >= this.height-20) {
-         this.priorTile = null
+   handlePointerUp(screenX, screenY) {
+      var gridX = screenX - 0
+      var gridY = screenY - 40
+      if ( gridX <=-10 || gridY <=-10 || gridX >= this.width-10 || gridY >= this.height-10) {
          return
       }
+
+      // TODO click first, then click last in work. Auto select all in between
 
       var col = Math.floor( gridX / this.tileSize)
       var row = Math.floor( gridY / this.tileSize)
       // console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
       var tile = this.grid[row][col]
-      if ( this.priorTile != tile ) {
-         this.priorTile = tile
-         if (tile.selected == false ) {
-            tile.selected = true
-            tile.letter.setFill(SELECT_COLOR)
-         } else {
-            tile.selected = false
-            if ( tile.bonus ) {
-               tile.letter.setFill(BONUS_COLOR)
-            } else {
-               tile.letter.setFill(LETTER_COLOR)
-            }
-         }
+      if (tile.selected == false ) {
+         tile.selected = true
+         tile.letter.setFill(SELECT_COLOR)
+      } else {
+         tile.selected = false
+         tile.letter.setFill(LETTER_COLOR)
       }
    }
 
-   shiftTiles(activeButton) {
-      switch (activeButton[0]) {
+   shiftTiles(dir, activeRowCol) {
+      switch (dir) {
          case "R":
-            this.shiftRight( parseInt(activeButton[1],10) )
+            this.shiftRight(activeRowCol )
             break
          case "L":
-            this.shiftLeft( parseInt(activeButton[1],10) )
+            this.shiftLeft(activeRowCol)
             break
          case "U":
-            this.shiftUp( parseInt(activeButton[1],10) )
+            this.shiftUp(activeRowCol)
             break
          case "D":
-            this.shiftDown( parseInt(activeButton[1],10) )
+            this.shiftDown(activeRowCol)
             break
       }
    }

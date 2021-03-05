@@ -3,13 +3,9 @@
       <div class="content">
          <h2>Welcome</h2>
          <p>
-            Studio332 is dedicated to the creation of high quality apps for the web and mobile devices. We have
-            decades of experience in a wide range of technologies including
-            gaming, backend services, database desgn, educational software and web app development. Some of our core
-            skills include:
+            Studio332 likes to make games for mobile and web, but mostly web.
          </p>
-         <p class="list">Go, Vue.js, Ruby on Rails, Java, Neo4j, MySQL and PostgresSQL</p>
-         <p>Check out some of our publicly released code here:</p>
+         <p>Check out some old mobile game code here (and this site):</p>
          <ul>
             <li>
                <a href="https://github.com/louffoster/BlastWords">Android game: BlastWords</a>

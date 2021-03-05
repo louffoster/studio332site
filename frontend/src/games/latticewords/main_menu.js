@@ -17,7 +17,7 @@ export default class Menu extends Phaser.Scene {
          stroke: "#448AFF",
          strokeThickness:10
       }
-      var title = this.add.text( 300,120, "LatticeWords",cfg)
+      var title = this.add.text( 230,120, "LatticeWords",cfg)
       title.setOrigin(0.5)
       title.setShadow(3,3, "#222", 2, true, false)
 
@@ -29,7 +29,7 @@ export default class Menu extends Phaser.Scene {
          strokeThickness:4,
          inputEnabled: true
       }
-      var play = this.add.text( 300,220, "Play Now!", btnCfg)
+      var play = this.add.text( 230,220, "Play Now!", btnCfg)
       play.setOrigin(0.5)
       play.setFontSize(32)
       play.setInteractive()
@@ -44,9 +44,9 @@ export default class Menu extends Phaser.Scene {
          gameObject.clearTint()
       })
 
-      var bestLabel = this.add.text( 300,400, "Best Score", btnCfg)
+      var bestLabel = this.add.text( 230,400, "Best Score", btnCfg)
       bestLabel.setOrigin(0.5)
-      var best = this.add.text( 300,440, "0", btnCfg)
+      var best = this.add.text( 230,440, "0", btnCfg)
       best.setOrigin(0.5)
       var bestScore = Cookies.get('bestScore')
       if ( bestScore ) {

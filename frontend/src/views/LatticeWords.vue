@@ -15,13 +15,13 @@
     },
     mounted: function() {
       var config = {
+        type: Phaser.AUTO,
         scale: {
+          parent: 'lwgame',
           mode: Phaser.Scale.FIT,
-          autoCenter: Phaser.Scale.NO_CENTER
+          width: 460,
+          height: 550,
         },
-        parent: 'lwgame',
-        width: 600,
-        height: 640,
         backgroundColor: '3F51B5',
         title: "LatticeWords",
         scene: [Menu,Latticewords]
@@ -37,7 +37,20 @@
 
 <style scoped>
 #lwgame {
-  margin:0;
+  margin:10px 0;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+@media only screen and (min-width: 768px) {
+   #lwgame {
+     height: auto;
+   }
+}
+@media only screen and (max-width: 768px) {
+   #lwgame {
+    max-height: 550px;   
+   }
 }
 </style>
 

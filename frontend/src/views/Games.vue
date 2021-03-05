@@ -12,14 +12,6 @@
         at time to score bonus points. Score as high as possible before time runs out.
         <router-link to="/games/latticewords"><span>Play Now!</span></router-link>
       </p>
-      <p>
-        <b>Squares</b>: Prototype game with rotating clusters of squares. No gameplay, just an experiment.
-        <router-link to="/games/squares"><span>View Now!</span></router-link>
-      </p>
-       <p>
-        <b>Wordomino</b>: Prototype game combining word finding with a pentomino puzzle.
-        <router-link to="/games/wordomino"><span>View Now!</span></router-link>
-      </p>
     </div>
   </div>
 </template>

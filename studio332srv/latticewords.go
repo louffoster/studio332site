@@ -20,11 +20,11 @@ func (svc *WordGameService) checkHandler(c *gin.Context) {
 	words := strings.Split(string(postData.Words), ",")
 	validCnt := 0
 	total := 0
-	letterValues := [6]int{0, 2, 5, 10, 15, 25}
+	letterValues := [6]int{0, 10, 20, 50, 100, 200}
 	for _, word := range words {
 		log.Printf("Is '%s' valid?", word)
 		if svc.IsValidWord(word) {
-			score := letterValues[len(word)-1] * len(word)
+			score := letterValues[len(word)-1]
 			log.Printf("Yes. Score %d", score)
 			validCnt++
 			total += score
