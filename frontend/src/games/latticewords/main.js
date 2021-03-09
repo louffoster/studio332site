@@ -115,19 +115,19 @@ export default  class Latticewords extends Phaser.Scene {
          var pointer = this.input.activePointer
          let dx = pointer.x - this.downX
          let dy = pointer.y - this.downY
-         if ( dx >= 15 && (this.slideDir == "" ||  this.slideDir == "H")) {
+         if ( dx >= 20 && (this.slideDir == "" ||  this.slideDir == "H")) {
             this.grid.shiftTiles('R', this.downRow)   
             this.downX = pointer.x
             this.slideDir = "H"
-         } else if (dx <= -15 && (this.slideDir == "" || this.slideDir == "H")) {
+         } else if (dx <= -20 && (this.slideDir == "" || this.slideDir == "H")) {
             this.grid.shiftTiles('L', this.downRow)
             this.downX = pointer.x
             this.slideDir = "H"
-         } else if (dy <= -15 && (this.slideDir == "" || this.slideDir == "V")) {
+         } else if (dy <= -20 && (this.slideDir == "" || this.slideDir == "V")) {
             this.grid.shiftTiles('U', this.downCol)
             this.downY = pointer.y
             this.slideDir = "V"
-         } else if (dy >= 15 && (this.slideDir == "" || this.slideDir == "V")) {
+         } else if (dy >= 20 && (this.slideDir == "" || this.slideDir == "V")) {
             this.grid.shiftTiles('D', this.downCol)
             this.downY = pointer.y
             this.slideDir = "V"

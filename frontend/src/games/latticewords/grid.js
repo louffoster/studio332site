@@ -13,6 +13,8 @@ export default class Grid  {
       this.red = false
       this.animating = false
       this.pool = pool
+      this.lastR = -1
+      this.lastC = -1
 
       this.bkg = this.scene.add.rectangle(0, 0, tileSize*cols, tileSize*rows, 0xffffff)
       this.bkg.setOrigin(0,0)
@@ -280,18 +282,46 @@ export default class Grid  {
          return
       }
 
-      // TODO click first, then click last in work. Auto select all in between
-
       var col = Math.floor( gridX / this.tileSize)
       var row = Math.floor( gridY / this.tileSize)
       // console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
       var tile = this.grid[row][col]
       if (tile.selected == false ) {
-         tile.selected = true
-         tile.letter.setFill(SELECT_COLOR)
+         if (row == this.lastR) {
+            let c0 = Math.min(col, this.lastC)
+            let c1 = Math.max(col, this.lastC)
+            for ( let c=c0; c<= c1; c++) {
+               tile = this.grid[row][c]
+               tile.selected = true
+               tile.letter.setFill(SELECT_COLOR)
+            }
+         } else if ( col == this.lastC) {
+            let r0 = Math.min(row, this.lastR)
+            let r1 = Math.max(row, this.lastR)
+            for (let r = r0; r <= r1; r++) {
+               tile = this.grid[r][col]
+               tile.selected = true
+               tile.letter.setFill(SELECT_COLOR)
+            }
+         } else {
+            tile.selected = true
+            tile.letter.setFill(SELECT_COLOR)
+         }
+         this.lastC = col
+         this.lastR = row
       } else {
-         tile.selected = false
-         tile.letter.setFill(LETTER_COLOR)
+         for (let c = 0; c < this.cols; c++) {
+            tile = this.grid[row][c]
+            tile.selected = false
+            tile.letter.setFill(LETTER_COLOR)
+         }
+         for (let r = 0; r < this.rows; r++) {
+            tile = this.grid[r][col]
+            tile.selected = false
+            tile.letter.setFill(LETTER_COLOR)
+         }
+         this.lastC = -1
+         this.lastR = -1
       }
    }
 
