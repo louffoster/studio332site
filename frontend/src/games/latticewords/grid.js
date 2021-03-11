@@ -92,49 +92,45 @@ export default class Grid  {
       var word = ""
       var coords = []
       var r,c
+      this.lastC = -1
+      this.lastR = -1
 
-      // FIXME MAke sure letters are consecutive
-
-      // first find words in rows
+      // first find words in rows. 1 word per row
       for (r=0; r<this.rows; r++ ) {
+         let rowCoords = []
          for ( c=0;c<this.cols; c++) {
             if ( this.grid[r][c].selected === true ) {
                word +=  this.grid[r][c].letter.text
-               coords.push( r+","+c )
-            } else {
-               if (word.length > 1 ) {
-                  words.push(word)
-               }
-               word = ""
+               rowCoords.push( r+","+c )
+            } else if (word.length > 0 ) {
+               break
             }
          }
          if (word.length > 1 ) {
             words.push(word)
-            word = ""
+            coords = coords.concat(rowCoords)
          }
+         word = ""
       }
 
       // Now in columns...
       word = ""
       for ( c=0; c<this.cols; c++ ) {
+         let colCoords = []
          for ( r=0;r<this.rows; r++) {
             if ( this.grid[r][c].selected === true ) {
                word +=  this.grid[r][c].letter.text
                var coord = r+","+c
-               if (coords.includes(coord) == false )  {
-                  coords.push(coord)
-               }
-            } else {
-               if (word.length > 1 ) {
-                  words.push(word)
-               }
-               word = ""
+               colCoords.push(coord)
+            } else if (word.length > 0 ) {
+               break
             }
          }
          if (word.length > 1 ) {
             words.push(word)
-            word = ""
+            coords = coords.concat(colCoords)
          }
+         word = ""
       }
 
       // If no words, bail
@@ -142,10 +138,10 @@ export default class Grid  {
          return
       }
 
-      var self = this
+      coords = [...new Set(coords)]
       axios.post('/api/latticewords/check', {words: words.join(",")})
-      .then(function (response) {
-         self.handleResults(response.data, coords, scoreHandler )
+      .then( (response) => {
+         this.handleResults(response.data, coords, scoreHandler )
       })
       .catch(function () {
          // console.log(error)
@@ -286,16 +282,92 @@ export default class Grid  {
       var row = Math.floor( gridY / this.tileSize)
       // console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
       var tile = this.grid[row][col]
-      if (tile.selected == false ) {
+      console.log(`r ${row} c ${col}: selected=${tile.selected}, lastR,C ${this.lastR},${this.lastC}`)
+      if (tile.selected === true ) {
+         // deselect selected tile
+         tile = this.grid[row][col]
+         tile.selected = false
+         tile.letter.setFill(LETTER_COLOR)
+         this.lastC = -1
+         this.lastR = -1 
+
+         // Expand out left and right clearing all until a non-selected tile is hit
+         let dL = -1
+         let dR = 1
+         while (dL != 0 || dR != 0) {
+            if (dR != 0) {
+               if (col + dR >= this.cols) {
+                  dR = 0
+               } else {
+                  tile = this.grid[row][col + dR]
+                  if (tile.selected) {
+                     tile.selected = false
+                     tile.letter.setFill(LETTER_COLOR)
+                     dR++
+                  } else {
+                     dR = 0
+                  }
+               }
+            }
+            if (dL != 0) {
+               if (col + dL < 0) {
+                  dL = 0
+               } else {
+                  tile = this.grid[row][col + dL]
+                  if (tile.selected) {
+                     tile.selected = false
+                     tile.letter.setFill(LETTER_COLOR)
+                     dL--
+                  } else {
+                     dL = 0
+                  }
+               }
+            }
+         }
+
+         let dU = -1
+         let dD = 1
+         while (dU != 0 || dD != 0) {
+            if (dD != 0) {
+               if (row + dD >= this.rows) {
+                  dD = 0
+               } else {
+                  tile = this.grid[row + dD][col]
+                  if (tile.selected) {
+                     tile.selected = false
+                     tile.letter.setFill(LETTER_COLOR)
+                     dD++
+                  } else {
+                     dD = 0
+                  }
+               }
+            }
+            if (dU != 0) {
+               if (row + dU < 0) {
+                  dU = 0
+               } else {
+                  tile = this.grid[row + dU][col]
+                  if (tile.selected) {
+                     tile.selected = false
+                     tile.letter.setFill(LETTER_COLOR)
+                     dU--
+                  } else {
+                     dU = 0
+                  }
+               }
+            }
+         }  
+      } else {
          if (row == this.lastR) {
+            // auto select everythign between the last selected tile
             let c0 = Math.min(col, this.lastC)
             let c1 = Math.max(col, this.lastC)
-            for ( let c=c0; c<= c1; c++) {
+            for (let c = c0; c <= c1; c++) {
                tile = this.grid[row][c]
                tile.selected = true
                tile.letter.setFill(SELECT_COLOR)
             }
-         } else if ( col == this.lastC) {
+         } else if (col == this.lastC) {
             let r0 = Math.min(row, this.lastR)
             let r1 = Math.max(row, this.lastR)
             for (let r = r0; r <= r1; r++) {
@@ -309,19 +381,6 @@ export default class Grid  {
          }
          this.lastC = col
          this.lastR = row
-      } else {
-         for (let c = 0; c < this.cols; c++) {
-            tile = this.grid[row][c]
-            tile.selected = false
-            tile.letter.setFill(LETTER_COLOR)
-         }
-         for (let r = 0; r < this.rows; r++) {
-            tile = this.grid[r][col]
-            tile.selected = false
-            tile.letter.setFill(LETTER_COLOR)
-         }
-         this.lastC = -1
-         this.lastR = -1
       }
    }
 

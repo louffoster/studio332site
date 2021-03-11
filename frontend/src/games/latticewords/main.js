@@ -2,7 +2,7 @@
 const TILE_SIZE= 75
 const ROWS = 6
 const COLS = 6
-const START_TIME = 180
+const START_TIME = 240
 
 import Phaser from 'phaser'
 import Cookies from 'js-cookie'
@@ -26,8 +26,6 @@ export default  class Latticewords extends Phaser.Scene {
       this.paused = false
       this.downX = -1
       this.downY = -1
-      this.downRow = -1
-      this.downCol = -1
       this.slideDir = ""
 
       this.textCfg = {
@@ -89,8 +87,6 @@ export default  class Latticewords extends Phaser.Scene {
          this.pointerDown = true
          this.downX = pointer.x 
          this.downY = pointer.y
-         this.downRow = this.grid.getClickedRow(pointer.y)
-         this.downCol = this.grid.getClickedCol(pointer.x)
          this.slideDir = ""
       })
 
@@ -99,8 +95,6 @@ export default  class Latticewords extends Phaser.Scene {
          this.pointerDown = false
          this.downX = -1
          this.downY = -1
-         this.downRow = -1
-         this.downCol = -1
          if ( this.slideDir == "") {
             this.grid.handlePointerUp(pointer.x, pointer.y)
          }
@@ -111,24 +105,32 @@ export default  class Latticewords extends Phaser.Scene {
    update() {
       if (this.gameOver == true || this.paused == true) return
 
+      var pointer = this.input.activePointer
+      if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 510) {
+         console.log("OUT")
+         this.pointerDown = false
+         this.downX = -1
+         this.downY = -1
+      }
       if ( this.pointerDown) {
-         var pointer = this.input.activePointer
          let dx = pointer.x - this.downX
          let dy = pointer.y - this.downY
-         if ( dx >= 20 && (this.slideDir == "" ||  this.slideDir == "H")) {
-            this.grid.shiftTiles('R', this.downRow)   
+         let tgtRow = this.grid.getClickedRow(pointer.y)
+         let tgtCol = this.grid.getClickedCol(pointer.x)
+         if ( dx >= 25 ) {
+            this.grid.shiftTiles('R', tgtRow)   
             this.downX = pointer.x
             this.slideDir = "H"
-         } else if (dx <= -20 && (this.slideDir == "" || this.slideDir == "H")) {
-            this.grid.shiftTiles('L', this.downRow)
+         } else if (dx <= -25 ) {
+            this.grid.shiftTiles('L', tgtRow)
             this.downX = pointer.x
             this.slideDir = "H"
-         } else if (dy <= -20 && (this.slideDir == "" || this.slideDir == "V")) {
-            this.grid.shiftTiles('U', this.downCol)
+         } else if (dy <= -25 ) {
+            this.grid.shiftTiles('U', tgtCol)
             this.downY = pointer.y
             this.slideDir = "V"
-         } else if (dy >= 20 && (this.slideDir == "" || this.slideDir == "V")) {
-            this.grid.shiftTiles('D', this.downCol)
+         } else if (dy >= 25 ) {
+            this.grid.shiftTiles('D', tgtCol)
             this.downY = pointer.y
             this.slideDir = "V"
          }
@@ -234,7 +236,7 @@ export default  class Latticewords extends Phaser.Scene {
 
       this.scoreDisplay = this.add.text( 10,3, "000000", this.textCfg)
       this.scoreDisplay.setFontSize(26)
-      this.timerDisplay =  this.add.text( 450,3, "03:00", this.textCfg)
+      this.timerDisplay =  this.add.text( 450,3, "04:00", this.textCfg)
       this.timerDisplay.setFontSize(26)
       this.timerDisplay.setOrigin(1,0)
       this.gameTimer = this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true })
