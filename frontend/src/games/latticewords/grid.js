@@ -24,6 +24,10 @@ export default class Grid  {
       var grid = this.scene.add.sprite(0,0, 'grid')
       grid.setOrigin(0,0)
 
+      this.lastTileMark = this.scene.add.circle(200, 200, 4, 0xff7700)
+      this.lastTileMark.setOrigin(0,0)
+      this.lastTileMark.setVisible(false)
+
       this.tilesGroup.add(this.bkg)
       this.tilesGroup.add(grid)
       this.grid = [ ]
@@ -94,6 +98,7 @@ export default class Grid  {
       var r,c
       this.lastC = -1
       this.lastR = -1
+      this.lastTileMark.setVisible(false)
 
       // first find words in rows. 1 word per row
       for (r=0; r<this.rows; r++ ) {
@@ -282,7 +287,7 @@ export default class Grid  {
       var row = Math.floor( gridY / this.tileSize)
       // console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
       var tile = this.grid[row][col]
-      console.log(`r ${row} c ${col}: selected=${tile.selected}, lastR,C ${this.lastR},${this.lastC}`)
+      // console.log(`r ${row} c ${col}: selected=${tile.selected}, lastR,C ${this.lastR},${this.lastC}`)
       if (tile.selected === true ) {
          // deselect selected tile
          tile = this.grid[row][col]
@@ -290,6 +295,7 @@ export default class Grid  {
          tile.letter.setFill(LETTER_COLOR)
          this.lastC = -1
          this.lastR = -1 
+         this.lastTileMark.setVisible(false)
 
          // Expand out left and right clearing all until a non-selected tile is hit
          let dL = -1
@@ -381,6 +387,9 @@ export default class Grid  {
          }
          this.lastC = col
          this.lastR = row
+         this.lastTileMark.setVisible(true)
+         this.lastTileMark.x = this.tileSize * col + 10
+         this.lastTileMark.y = this.tileSize * row + 50
       }
    }
 

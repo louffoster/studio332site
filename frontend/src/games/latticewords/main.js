@@ -107,7 +107,6 @@ export default  class Latticewords extends Phaser.Scene {
 
       var pointer = this.input.activePointer
       if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 510) {
-         console.log("OUT")
          this.pointerDown = false
          this.downX = -1
          this.downY = -1
