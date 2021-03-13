@@ -24,9 +24,9 @@ export default  class Latticewords extends Phaser.Scene {
       this.gameOver = false
       this.pointerDown = false
       this.paused = false
-      this.downX = -1
-      this.downY = -1
-      this.slideDir = ""
+      this.currRow = -1
+      this.currCol = -1
+      this.dragged = false
       this.clickCount = 0
 
       this.textCfg = {
@@ -86,17 +86,17 @@ export default  class Latticewords extends Phaser.Scene {
       this.input.on('pointerdown', pointer => {
          if (this.paused || this.gameOver ) return
          this.pointerDown = true
-         this.downX = pointer.x
-         this.downY = pointer.y
-         this.slideDir = ""
+         this.currRow = this.grid.getClickedRow(pointer.y)
+         this.currCol = this.grid.getClickedCol(pointer.x)
+         this.dragged = false
       })
 
       this.input.on('pointerup',  pointer => {
          if (this.paused || this.gameOver) return
          this.pointerDown = false
-         this.downX = -1
-         this.downY = -1
-         if ( this.slideDir == "") {
+         this.currRow = -1
+         this.currCol = -1
+         if ( this.dragged == false) {
 
             this.clickCount++
             if ( this.clickCount == 1) {
@@ -106,7 +106,7 @@ export default  class Latticewords extends Phaser.Scene {
                }})
             }
          }
-         this.slideDir = ""
+         this.dragged = false
       })
    }
 
@@ -116,31 +116,31 @@ export default  class Latticewords extends Phaser.Scene {
       var pointer = this.input.activePointer
       if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 490) {
          this.pointerDown = false
-         this.downX = -1
-         this.downY = -1
+         this.currRow = -1
+         this.currCol = -1
+         this.dragged = false
          return
       }
+
       if ( this.pointerDown) {
-         let dx = pointer.x - this.downX
-         let dy = pointer.y - this.downY
-         let tgtRow = this.grid.getClickedRow(pointer.y)
-         let tgtCol = this.grid.getClickedCol(pointer.x)
-         if (dx >= 25) {
-            this.grid.shiftTiles('R', tgtRow)
-            this.downX = pointer.x
-            this.slideDir = "H"
-         } else if (dx <= -25) {
-            this.grid.shiftTiles('L', tgtRow)
-            this.downX = pointer.x
-            this.slideDir = "H"
-         } else if (dy <= -25) {
-            this.grid.shiftTiles('U', tgtCol)
-            this.downY = pointer.y
-            this.slideDir = "V"
-         } else if (dy >= 25) {
-            this.grid.shiftTiles('D', tgtCol)
-            this.downY = pointer.y
-            this.slideDir = "V"
+         let newRow = this.grid.getClickedRow(pointer.y)
+         let newCol = this.grid.getClickedCol(pointer.x)
+         if (newCol > this.currCol) {
+            this.grid.shiftTiles('R', newRow)
+            this.currCol = newCol
+            this.dragged = true
+         } else if (newCol < this.currCol) {
+            this.grid.shiftTiles('L', newRow)
+            this.currCol = newCol
+            this.dragged = true
+         } else if (newRow < this.currRow) {
+            this.grid.shiftTiles('U', newCol)
+            this.currRow = newRow
+            this.dragged = true
+         } else if (newRow > this.currRow) {
+            this.grid.shiftTiles('D', newCol)
+            this.currRow = newRow
+            this.dragged = true
          }
       }
    }
@@ -172,7 +172,7 @@ export default  class Latticewords extends Phaser.Scene {
       text.setFontSize(36)
       text.setOrigin(0.5)
 
-      var restart = this.add.text( 230, 220, "Play Again?", this.textCfg)
+      var restart = this.add.text( 230, 220, "Play Again", this.textCfg)
       restart.setFontSize(24)
       restart.setOrigin(0.5)
       restart.setInteractive()
