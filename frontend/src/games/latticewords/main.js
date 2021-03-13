@@ -18,6 +18,11 @@ export default  class Latticewords extends Phaser.Scene {
       this.load.image('grid', '/latticewords/images/grid.png')
    }
 
+   getTime() {
+      let d = new Date()
+      return d.getTime()
+   }
+
    create () {
       this.pool = new Pool()
       this.pool.refill()
@@ -27,6 +32,7 @@ export default  class Latticewords extends Phaser.Scene {
       this.downX = -1
       this.downY = -1
       this.slideDir = ""
+      this.clickCount = 0
 
       this.textCfg = {
          fontFamily: 'Arial',
@@ -85,7 +91,7 @@ export default  class Latticewords extends Phaser.Scene {
       this.input.on('pointerdown', pointer => {
          if (this.paused || this.gameOver ) return
          this.pointerDown = true
-         this.downX = pointer.x 
+         this.downX = pointer.x
          this.downY = pointer.y
          this.slideDir = ""
       })
@@ -96,7 +102,14 @@ export default  class Latticewords extends Phaser.Scene {
          this.downX = -1
          this.downY = -1
          if ( this.slideDir == "") {
-            this.grid.handlePointerUp(pointer.x, pointer.y)
+
+            this.clickCount++
+            if ( this.clickCount == 1) {
+               this.time.addEvent({ delay: 200, callback:  ()=> {
+                  this.grid.handlePointerUp(pointer.x, pointer.y, (this.clickCount>=2) )
+                  this.clickCount = 0
+               }})
+            }
          }
          this.slideDir = ""
       })
@@ -116,19 +129,19 @@ export default  class Latticewords extends Phaser.Scene {
          let dy = pointer.y - this.downY
          let tgtRow = this.grid.getClickedRow(pointer.y)
          let tgtCol = this.grid.getClickedCol(pointer.x)
-         if ( dx >= 25 ) {
-            this.grid.shiftTiles('R', tgtRow)   
+         if (dx >= 25) {
+            this.grid.shiftTiles('R', tgtRow)
             this.downX = pointer.x
             this.slideDir = "H"
-         } else if (dx <= -25 ) {
+         } else if (dx <= -25) {
             this.grid.shiftTiles('L', tgtRow)
             this.downX = pointer.x
             this.slideDir = "H"
-         } else if (dy <= -25 ) {
+         } else if (dy <= -25) {
             this.grid.shiftTiles('U', tgtCol)
             this.downY = pointer.y
             this.slideDir = "V"
-         } else if (dy >= 25 ) {
+         } else if (dy >= 25) {
             this.grid.shiftTiles('D', tgtCol)
             this.downY = pointer.y
             this.slideDir = "V"

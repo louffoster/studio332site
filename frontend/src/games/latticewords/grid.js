@@ -1,4 +1,4 @@
-const ANIMATE_SPEED = 250
+const ANIMATE_SPEED = 150
 const LETTER_COLOR = '#0e267f'
 const SELECT_COLOR = '#2f95ff'
 
@@ -276,7 +276,7 @@ export default class Grid  {
       return Math.floor(gridY / this.tileSize)
    }
 
-   handlePointerUp(screenX, screenY) {
+   handlePointerUp(screenX, screenY, isDoubleClick) {
       var gridX = screenX - 0
       var gridY = screenY - 40
       if ( gridX <=-10 || gridY <=-10 || gridX >= this.width-10 || gridY >= this.height-10) {
@@ -285,9 +285,7 @@ export default class Grid  {
 
       var col = Math.floor( gridX / this.tileSize)
       var row = Math.floor( gridY / this.tileSize)
-      // console.log("X: "+gridX+", Y: "+gridY+" : R="+row+" C="+col)
       var tile = this.grid[row][col]
-      // console.log(`r ${row} c ${col}: selected=${tile.selected}, lastR,C ${this.lastR},${this.lastC}`)
       if (tile.selected === true ) {
          // deselect selected tile
          tile = this.grid[row][col]
@@ -364,6 +362,16 @@ export default class Grid  {
             }
          }  
       } else {
+         if ( isDoubleClick === false) {
+            tile.selected = true
+            tile.letter.setFill(SELECT_COLOR)
+            this.lastC = col
+            this.lastR = row
+            this.lastTileMark.setVisible(true)
+            this.lastTileMark.x = this.tileSize * col + 10
+            this.lastTileMark.y = this.tileSize * row + 50
+            return
+         }
          if (row == this.lastR) {
             // auto select everythign between the last selected tile
             let c0 = Math.min(col, this.lastC)
@@ -394,19 +402,37 @@ export default class Grid  {
    }
 
    shiftTiles(dir, activeRowCol) {
+      let clear = false
       switch (dir) {
          case "R":
             this.shiftRight(activeRowCol )
+            if (activeRowCol == this.lastR) {
+               clear = true
+            }
             break
          case "L":
             this.shiftLeft(activeRowCol)
+            if (activeRowCol == this.lastR) {
+               clear = true
+            }
             break
          case "U":
             this.shiftUp(activeRowCol)
+            if (activeRowCol == this.lastC) {
+               clear = true
+            }
             break
          case "D":
             this.shiftDown(activeRowCol)
+            if (activeRowCol == this.lastC) {
+               clear = true
+            }
             break
+      }
+      if (clear) {
+         this.lastC = -1
+         this.lastR = -1
+         this.lastTileMark.setVisible(false)
       }
    }
 
