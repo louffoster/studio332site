@@ -83,17 +83,17 @@ export default class Menu extends Phaser.Scene {
 
       let txt = [
          "+ Drag rows and columns to arrange letters into words",
-         "+ Words run left to right and top to bottom",
          "+ Tap to select a letter",
          "+ Last selected letter is marked with a dot",
-         "+ Double tap to select multiple letters", 
-         "+ Tap a selected word or letter to deselect it", 
+         "+ Double tap selects multiple letters connected to the dot",
+         "+ Form words from left to right and top to bottom",
          "+ One word per row or column",
+         "+ Tap a selected word or letter to deselect it", 
          "+ Tap 'Score Grid' to score all selected words",
          "+ Base score is determined by word length",
-         "+ Score is doubled for multiple words",
+         "+ Score is doubled for each word after the first",
       ]
-      var help = this.add.text(40, 210, txt, txtCfg)
+      var help = this.add.text(30, 210, txt, txtCfg)
       help.setFontSize(16)
       help.setOrigin(0,0)
 
