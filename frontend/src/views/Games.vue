@@ -5,7 +5,7 @@
       <p>
         Lately, Studio332 has been experimenting with browser-based games using
         <a href="https://phaser.io/" target="_blank">Phaser</a>. The first sample is a bit rough, 
-        but is up and working. Play it at the link below. More to some soon!
+        but is up and working. Play it at the link below. More to come soon!
       </p>
       <p>
         <b>LatticeWords</b>: Shift rows and columns of letters to form words. Make several at 

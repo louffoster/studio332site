@@ -18,11 +18,6 @@ export default  class Latticewords extends Phaser.Scene {
       this.load.image('grid', '/latticewords/images/grid.png')
    }
 
-   getTime() {
-      let d = new Date()
-      return d.getTime()
-   }
-
    create () {
       this.pool = new Pool()
       this.pool.refill()
@@ -41,10 +36,10 @@ export default  class Latticewords extends Phaser.Scene {
          strokeThickness: 6
       }
 
-      this.addScoreAndTimer()
-
       this.grid = new Grid(this, ROWS, COLS, TILE_SIZE, this.pool)
       this.grid.fill()
+
+      this.addScoreAndTimer()
 
       // dark blue box to block out the letters that slide out of grid
       var rect1 = new Phaser.Geom.Rectangle(0, 490, 460, 60)
@@ -119,10 +114,11 @@ export default  class Latticewords extends Phaser.Scene {
       if (this.gameOver == true || this.paused == true) return
 
       var pointer = this.input.activePointer
-      if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 510) {
+      if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 490) {
          this.pointerDown = false
          this.downX = -1
          this.downY = -1
+         return
       }
       if ( this.pointerDown) {
          let dx = pointer.x - this.downX
