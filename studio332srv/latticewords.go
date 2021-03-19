@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (svc *WordGameService) checkHandler(c *gin.Context) {
+func (svc *GameService) checkHandler(c *gin.Context) {
 	var postData checkWords
 	c.Bind(&postData)
 

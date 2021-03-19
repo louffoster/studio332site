@@ -4,19 +4,22 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+
+	dbx "github.com/go-ozzo/ozzo-dbx"
 )
+
+// GameService is a contet used for word games. It has a dictionary and word checker
+type GameService struct {
+	Words []string
+	DB    *dbx.DB
+}
 
 type checkWords struct {
 	Words string `json:"words" binding:"required"`
 }
 
-// WordGameService is a contet used for word games. It has a dictionary and word checker
-type WordGameService struct {
-	Words []string
-}
-
 // IsValidWord looks up a word in the dictionary and returns result
-func (svc *WordGameService) IsValidWord(value string) bool {
+func (svc *GameService) IsValidWord(value string) bool {
 	for _, v := range svc.Words {
 		if v == value {
 			return true
@@ -25,8 +28,8 @@ func (svc *WordGameService) IsValidWord(value string) bool {
 	return false
 }
 
-// InitWordGame sets up a service for word games by loading / parsing a dictionary
-func InitWordGame() (*WordGameService, error) {
+// initializeGameService sets up a service for word games by loading / parsing a dictionary
+func initializeGameService(db *dbx.DB) (*GameService, error) {
 	// Read the disctionary into an array for checking word valididty
 	dict, err := ioutil.ReadFile("data/words.txt")
 	if err != nil {
@@ -34,7 +37,7 @@ func InitWordGame() (*WordGameService, error) {
 		return nil, err
 	}
 
-	out := WordGameService{}
+	out := GameService{DB: db}
 	out.Words = strings.Split(string(dict), "\n")
 	log.Printf("Loaded %d word dictionary", len(out.Words))
 	return &out, nil

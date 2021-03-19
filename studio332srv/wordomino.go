@@ -45,7 +45,7 @@ func wordominoShapes(c *gin.Context) {
 	c.JSON(http.StatusOK, cf)
 }
 
-func (svc *WordGameService) wordominoCheck(c *gin.Context) {
+func (svc *GameService) wordominoCheck(c *gin.Context) {
 	var postData checkWords
 	c.Bind(&postData)
 
@@ -58,7 +58,7 @@ func (svc *WordGameService) wordominoCheck(c *gin.Context) {
 	}
 	resp.Success = true
 	for _, word := range strings.Split(postData.Words, ",") {
-		if svc.IsValidWord(word) == false {
+		if !svc.IsValidWord(word) {
 			resp.Success = false
 			log.Printf("%s is not a valid word", word)
 			resp.WordStatus = append(resp.WordStatus, false)
