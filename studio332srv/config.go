@@ -23,6 +23,7 @@ type serviceConfig struct {
 func loadConfig() *serviceConfig {
 	var cfg serviceConfig
 	defPortStr := os.Getenv("PORT")
+	herokuDBConnect := os.Getenv("DATABASE_URL")
 	defPort := 8085
 	if defPortStr != "" {
 		defPort, _ = strconv.Atoi(defPortStr)
@@ -41,20 +42,22 @@ func loadConfig() *serviceConfig {
 
 	flag.Parse()
 
-	if cfg.DB.Host == "" {
-		log.Fatal("DB host is required")
-	} else {
-		log.Printf("DB Host: %s:%d", cfg.DB.Host, cfg.DB.Port)
-	}
-	if cfg.DB.Name == "" {
-		log.Fatal("DB name is required")
-	} else {
-		log.Printf("DB name: %s", cfg.DB.Name)
-	}
-	if cfg.DB.User == "" {
-		log.Fatal("DB user is required")
-	} else {
-		log.Printf("DB user: %s", cfg.DB.User)
+	if herokuDBConnect == "" {
+		if cfg.DB.Host == "" {
+			log.Fatal("DB host is required")
+		} else {
+			log.Printf("DB Host: %s:%d", cfg.DB.Host, cfg.DB.Port)
+		}
+		if cfg.DB.Name == "" {
+			log.Fatal("DB name is required")
+		} else {
+			log.Printf("DB name: %s", cfg.DB.Name)
+		}
+		if cfg.DB.User == "" {
+			log.Fatal("DB user is required")
+		} else {
+			log.Printf("DB user: %s", cfg.DB.User)
+		}
 	}
 
 	return &cfg

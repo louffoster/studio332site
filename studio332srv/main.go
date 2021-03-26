@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
@@ -17,8 +18,11 @@ func main() {
 	cfg := loadConfig()
 
 	log.Printf("Connect to Postgres")
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=disable",
-		cfg.DB.User, cfg.DB.Pass, cfg.DB.Name, cfg.DB.Host, cfg.DB.Port)
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		connStr = fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=disable",
+			cfg.DB.User, cfg.DB.Pass, cfg.DB.Name, cfg.DB.Host, cfg.DB.Port)
+	}
 	db, err := dbx.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -36,6 +40,8 @@ func main() {
 	router := gin.Default()
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 	api := router.Group("/api")
+	api.GET("/games/:id/hiscore", svc.getGameHiScores)
+	api.POST("/games/:id/hiscore", svc.updateGameHiScores)
 	lw := api.Group("/latticewords")
 	{
 		lw.POST("/check", svc.checkHandler)

@@ -1,4 +1,4 @@
-const ANIMATE_SPEED = 200
+const ANIMATE_SPEED = 100
 const LETTER_COLOR = '#0e267f'
 const SELECT_COLOR = '#2f95ff'
 
