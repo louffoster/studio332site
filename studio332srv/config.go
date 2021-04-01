@@ -16,8 +16,9 @@ type dbConfig struct {
 }
 
 type serviceConfig struct {
-	Port int
-	DB   dbConfig
+	Port   int
+	DB     dbConfig
+	JWTKey string
 }
 
 func loadConfig() *serviceConfig {
@@ -39,6 +40,7 @@ func loadConfig() *serviceConfig {
 	flag.StringVar(&cfg.DB.Name, "dbname", os.Getenv("S332_DB_NAME"), "Database name")
 	flag.StringVar(&cfg.DB.User, "dbuser", os.Getenv("S332_DB_USER"), "Database user")
 	flag.StringVar(&cfg.DB.Pass, "dbpass", os.Getenv("S332_DB_PASS"), "Database password")
+	flag.StringVar(&cfg.JWTKey, "jwt", os.Getenv("S332_JWT_KEY"), "JWT signing key")
 
 	flag.Parse()
 
@@ -58,6 +60,9 @@ func loadConfig() *serviceConfig {
 		} else {
 			log.Printf("DB user: %s", cfg.DB.User)
 		}
+	}
+	if cfg.JWTKey == "" {
+		log.Fatal("JWT Signing key required")
 	}
 
 	return &cfg

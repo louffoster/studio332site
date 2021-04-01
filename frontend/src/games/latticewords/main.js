@@ -24,8 +24,8 @@ export default  class Latticewords extends Phaser.Scene {
       this.gameOver = false
       this.pointerDown = false
       this.paused = false
-      this.currRow = -1
-      this.currCol = -1
+      this.currY = -1
+      this.currX = -1
       this.dragged = false
       this.clickCount = 0
 
@@ -86,16 +86,16 @@ export default  class Latticewords extends Phaser.Scene {
       this.input.on('pointerdown', pointer => {
          if (this.paused || this.gameOver ) return
          this.pointerDown = true
-         this.currRow = this.grid.getClickedRow(pointer.y)
-         this.currCol = this.grid.getClickedCol(pointer.x)
+         this.currY = pointer.y
+         this.currX = pointer.x
          this.dragged = false
       })
 
       this.input.on('pointerup',  pointer => {
          if (this.paused || this.gameOver) return
          this.pointerDown = false
-         this.currRow = -1
-         this.currCol = -1
+         this.currY = -1
+         this.currX = -1
          if ( this.dragged == false) {
 
             this.clickCount++
@@ -116,30 +116,37 @@ export default  class Latticewords extends Phaser.Scene {
       var pointer = this.input.activePointer
       if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 490) {
          this.pointerDown = false
-         this.currRow = -1
-         this.currCol = -1
+         this.currY = -1
+         this.currX = -1
          this.dragged = false
          return
       }
 
       if ( this.pointerDown) {
-         let newRow = this.grid.getClickedRow(pointer.y)
-         let newCol = this.grid.getClickedCol(pointer.x)
-         if (newCol > this.currCol) {
-            this.grid.shiftTiles('R', newRow)
-            this.currCol = newCol
-            this.dragged = true
-         } else if (newCol < this.currCol) {
-            this.grid.shiftTiles('L', newRow)
-            this.currCol = newCol
-            this.dragged = true
-         } else if (newRow < this.currRow) {
-            this.grid.shiftTiles('U', newCol)
-            this.currRow = newRow
-            this.dragged = true
-         } else if (newRow > this.currRow) {
-            this.grid.shiftTiles('D', newCol)
-            this.currRow = newRow
+         let newY = pointer.y
+         let newX = pointer.x
+         let tgtRow = this.grid.getClickedRow(pointer.y)
+         let tgtCol = this.grid.getClickedCol(pointer.x)
+         let dx = newX - this.currX
+         let dy = newY - this.currY
+         let dragged = false
+         if (dx >= 35) {
+            this.grid.shiftTiles('R', tgtRow)
+            dragged = true
+         } else if (dx <= -35) {
+            this.grid.shiftTiles('L', tgtRow)
+            dragged = true
+         } else if (dy <= -35) {
+            this.grid.shiftTiles('U', tgtCol)
+            dragged = true
+         } else if (dy >= 35) {
+            this.grid.shiftTiles('D', tgtCol)
+            dragged = true
+         }
+
+         if ( dragged ) {
+            this.currX = newX
+            this.currY = newY
             this.dragged = true
          }
       }

@@ -29,10 +29,9 @@ func main() {
 	}
 	db.LogFunc = log.Printf
 
-	// game service content with DB and dictionary
-	svc, err := initializeGameService(db)
+	svc, err := initializeGameService(db, cfg.JWTKey)
 	if err != nil {
-		log.Fatalf("Unable to setup word game context: %s", err.Error())
+		log.Fatalf("Unable to setup game context: %s", err.Error())
 	}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -40,8 +39,10 @@ func main() {
 	router := gin.Default()
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 	api := router.Group("/api")
-	api.GET("/games/:id/hiscore", svc.getGameHiScores)
-	api.POST("/games/:id/hiscore", svc.updateGameHiScores)
+	api.GET("/games", svc.getGames)
+	api.GET("/games/:id/start", svc.gameMiddleware, svc.getGameStartAuthToken)
+	api.GET("/games/:id/hiscore", svc.gameMiddleware, svc.getGameHiScores)
+	api.POST("/games/:id/hiscore", svc.authMiddleware, svc.gameMiddleware, svc.updateGameHiScores)
 	lw := api.Group("/latticewords")
 	{
 		lw.POST("/check", svc.checkHandler)
