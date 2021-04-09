@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Vue from 'vue'
 import Vuex from 'vuex'
+import router from '../router'
 
 Vue.use(Vuex)
 
@@ -12,12 +13,21 @@ export default new Vuex.Store({
    },
 
    getters: {
-      gameID: state => gameURL => {
+      gameID: state => {
+         let gameURL = router.currentRoute.fullPath
          let g = state.games.find(g => g.url == gameURL)
          if (g ) {
             return g.id
          }
          return 0
+      },
+      highScores: state => {
+         let gameURL = router.currentRoute.fullPath
+         let g = state.games.find(g => g.url == gameURL)
+         if (g) {
+            return g.highScores
+         }
+         return []
       }
    }, 
 
@@ -52,25 +62,22 @@ export default new Vuex.Store({
             ctx.commit("setAuthToken", response.data)
             ctx.commit("setWorking", false)
          }).catch( () => {
-            //console.error("Unable to start game "+ err)
             ctx.commit("setWorking", false)
             // TODO Error handling
          })
       },
       async getGames(ctx) {
          ctx.commit("setWorking", true)
-         await axios.get("/api/games").then( response=> {
+         return axios.get("/api/games").then( response=> {
             ctx.commit("setGames", response.data)
             ctx.commit("setWorking", false)
          }).catch( () => {
-            // console.error("No games! "+ err)
             ctx.commit("setWorking", false)
          })
       },
-      getHighScores(ctx, gameID) {
-         if (ctx.state.games.length > 0) return
+      async getHighScores(ctx, gameID) {
          ctx.commit("setWorking", true)
-         axios.get(`/api/games/${gameID}/hiscore`).then(response => {
+         return axios.get(`/api/games/${gameID}/hiscore`).then(response => {
             ctx.commit("setGameHighScores", {id: gameID, scores: response.data})
             ctx.commit("setWorking", false)
          }).catch( () => {

@@ -1,6 +1,7 @@
 
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
 import Phaser from 'phaser'
+import HighScore from '../shared/hiscore'
 
 export default class Menu extends Phaser.Scene {
    constructor ()   {
@@ -54,14 +55,15 @@ export default class Menu extends Phaser.Scene {
          this.helpGroup.setVisible(true)
       })
 
-      var bestLabel = this.add.text( 230,400, "Best Score", btnCfg)
-      bestLabel.setOrigin(0.5)
-      var best = this.add.text( 230,440, "0", btnCfg)
-      best.setOrigin(0.5)
-      var bestScore = Cookies.get('bestScore')
-      if ( bestScore ) {
-         best.setText( bestScore)
-      }
+      this.hiScore = new HighScore(this, 0, 310)
+      // var bestLabel = this.add.text( 230,400, "Best Score", btnCfg)
+      // bestLabel.setOrigin(0.5)
+      // var best = this.add.text( 230,440, "0", btnCfg)
+      // best.setOrigin(0.5)
+      // var bestScore = Cookies.get('bestScore')
+      // if ( bestScore ) {
+      //    best.setText( bestScore)
+      // }
 
       this.createRulesMenu()
    }

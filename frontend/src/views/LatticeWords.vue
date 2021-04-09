@@ -21,28 +21,28 @@ export default {
    methods: {
       async initGame() {
          await this.$store.dispatch("getGames")
-         this.$store.dispatch("getHighScores", this.gameID(this.$route.fullPath))
+         await this.$store.dispatch("getHighScores", this.gameID)
+
+         var config = {
+            type: Phaser.AUTO,
+            scale: {
+               parent: "lwgame",
+               mode: Phaser.Scale.FIT,
+               width: 460,
+               height: 550,
+            },
+            backgroundColor: "3F51B5",
+            title: "LatticeWords",
+            scene: [Menu, Latticewords],
+         }
+         window.game = new Phaser.Game(config)
       }
    },
    mounted() {
-      var config = {
-         type: Phaser.AUTO,
-         scale: {
-            parent: "lwgame",
-            mode: Phaser.Scale.FIT,
-            width: 460,
-            height: 550,
-         },
-         backgroundColor: "3F51B5",
-         title: "LatticeWords",
-         scene: [Menu, Latticewords],
-      }
-
-      this.initGame()
-      window.game = new Phaser.Game(config)
+      this.initGame( )
    },
    destroyed() {
-      window.game.destroy(true);
+      window.game.destroy(true)
    },
 };
 </script>

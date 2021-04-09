@@ -130,16 +130,16 @@ export default  class Latticewords extends Phaser.Scene {
          let dx = newX - this.currX
          let dy = newY - this.currY
          let dragged = false
-         if (dx >= 35) {
+         if (dx >= 45) {
             this.grid.shiftTiles('R', tgtRow)
             dragged = true
-         } else if (dx <= -35) {
+         } else if (dx <= -45) {
             this.grid.shiftTiles('L', tgtRow)
             dragged = true
-         } else if (dy <= -35) {
+         } else if (dy <= -45) {
             this.grid.shiftTiles('U', tgtCol)
             dragged = true
-         } else if (dy >= 35) {
+         } else if (dy >= 45) {
             this.grid.shiftTiles('D', tgtCol)
             dragged = true
          }
