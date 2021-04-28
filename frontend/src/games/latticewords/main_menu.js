@@ -1,13 +1,15 @@
 
 // import Cookies from 'js-cookie'
 import Phaser from 'phaser'
-import HighScore from '../shared/hiscore'
+// import HighScore from '../shared/hiscore'
+import HighScoreEntry from '../shared/hiscore_entry'
 
 export default class Menu extends Phaser.Scene {
    constructor ()   {
       super({ key: 'menu' })
    }
    preload () {
+      this.load.image('del', '/latticewords/images/del.png')
    }
 
    create () {
@@ -55,15 +57,8 @@ export default class Menu extends Phaser.Scene {
          this.helpGroup.setVisible(true)
       })
 
-      this.hiScore = new HighScore(this, 0, 310)
-      // var bestLabel = this.add.text( 230,400, "Best Score", btnCfg)
-      // bestLabel.setOrigin(0.5)
-      // var best = this.add.text( 230,440, "0", btnCfg)
-      // best.setOrigin(0.5)
-      // var bestScore = Cookies.get('bestScore')
-      // if ( bestScore ) {
-      //    best.setText( bestScore)
-      // }
+      // this.hiScore = new HighScore(this, 0, 310)
+      new HighScoreEntry(this, 0, 270)
 
       this.createRulesMenu()
    }

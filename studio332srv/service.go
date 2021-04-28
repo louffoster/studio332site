@@ -96,6 +96,10 @@ func (svc *GameService) getGameHiScores(c *gin.Context) {
 		return
 	}
 
+	for len(hs) < 10 {
+		hs = append(hs, HighScore{Player: "---"})
+	}
+
 	c.JSON(http.StatusOK, hs)
 }
 
