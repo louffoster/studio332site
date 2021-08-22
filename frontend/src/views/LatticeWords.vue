@@ -5,10 +5,11 @@
 </template>
 
 <script>
-import Phaser from "phaser";
-import Menu from "@/games/latticewords/main_menu";
-import Latticewords from "@/games/latticewords/main";
-import { mapGetters } from "vuex";
+import Phaser from "phaser"
+import Menu from "@/games/latticewords/main_menu"
+import HighScoreEntry from "@/games/shared/hiscore_entry"
+import Latticewords from "@/games/latticewords/main"
+import { mapGetters } from "vuex"
 
 export default {
    name: "LatticeWords",
@@ -33,7 +34,7 @@ export default {
             },
             backgroundColor: "3F51B5",
             title: "LatticeWords",
-            scene: [Menu, Latticewords],
+            scene: [Menu, Latticewords, HighScoreEntry],
          }
          window.game = new Phaser.Game(config)
       }

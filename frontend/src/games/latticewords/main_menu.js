@@ -1,8 +1,7 @@
 
 // import Cookies from 'js-cookie'
 import Phaser from 'phaser'
-// import HighScore from '../shared/hiscore'
-import HighScoreEntry from '../shared/hiscore_entry'
+import HighScore from '../shared/hiscore'
 
 export default class Menu extends Phaser.Scene {
    constructor ()   {
@@ -57,8 +56,7 @@ export default class Menu extends Phaser.Scene {
          this.helpGroup.setVisible(true)
       })
 
-      // this.hiScore = new HighScore(this, 0, 310)
-      new HighScoreEntry(this, 0, 270)
+      this.hiScore = new HighScore(this, 0, 310)
 
       this.createRulesMenu()
    }

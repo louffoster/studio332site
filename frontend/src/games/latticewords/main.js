@@ -2,12 +2,13 @@
 const TILE_SIZE= 75
 const ROWS = 6
 const COLS = 6
-const START_TIME = 240
+const START_TIME = 60//240
 
 import Phaser from 'phaser'
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
 import Grid from './grid'
 import Pool from './pool'
+import store from '../../store'
 
 export default  class Latticewords extends Phaser.Scene {
    constructor ()   {
@@ -169,6 +170,7 @@ export default  class Latticewords extends Phaser.Scene {
       this.pauseBtn.setFrame(0)
       this.gameTimer.paused = false
       this.pauseBtn.setVisible(true)
+      store.commit("resetCurrentHighScore")
    }
 
    createGameOverMenu() {
@@ -189,18 +191,7 @@ export default  class Latticewords extends Phaser.Scene {
          }, 100)
       }, this)
 
-      this.bestLabel = this.add.text( 230, 350, "Best Score", this.textCfg)
-      this.bestLabel.setFontSize(22)
-      this.bestLabel.setOrigin(0.5)
-      this.bestScore = this.add.text( 230, 380, "0", this.textCfg)
-      this.bestScore.setFontSize(16)
-      this.bestScore.setOrigin(0.5)
-      var bestScore = Cookies.get('bestScore')
-      if ( bestScore ) {
-         this.bestScore.setText(bestScore)
-      }
-
-      this.gameOverGroup = this.add.container(0, 40, [bkg, text, restart, this.bestLabel, this.bestScore])
+      this.gameOverGroup = this.add.container(0, 40, [bkg, text, restart])
       this.gameOverGroup.setVisible(false)
    }
 
@@ -296,15 +287,8 @@ export default  class Latticewords extends Phaser.Scene {
          this.pauseBtn.setVisible(false)
          this.gameOverGroup.setVisible(true)
          this.grid.setVisible(false)
-         var bestScore = parseInt(Cookies.get('bestScore'),10)
-         if ( !bestScore ) bestScore = 0
-         if ( this.score > bestScore ) {
-            Cookies.set('bestScore', this.score)
-            this.bestScore.setText(this.score)
-            this.bestLabel.setText("New Best Score!")
-         } else {
-            this.bestLabel.setText("Best Score")
-         }
+
+         store.commit("addHighScore", this.score)
       }
    }
 

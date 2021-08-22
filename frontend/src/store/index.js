@@ -10,6 +10,8 @@ export default new Vuex.Store({
       authToken: "",
       games: [],
       working: false,
+      highScoreRank: -1,
+      highScore: 0
    },
 
    getters: {
@@ -32,6 +34,25 @@ export default new Vuex.Store({
    }, 
 
    mutations: {
+      addHighScore(state, score) {
+         state.highScoreRank = -1
+         state.highScore = 0
+         let gameURL = router.currentRoute.fullPath
+         let g = state.games.find(g => g.url == gameURL)
+         if (g) {
+            g.highScores.some( (hs,idx) => {
+               if (score > hs.score) {
+                  state.highScoreRank = idx
+                  state.highScore = score
+               }
+               return state.highScoreRank > -1
+            })
+         }
+      },
+      resetCurrentHighScore(state) {
+         state.highScoreRank = -1
+         state.highScore = 0
+      },
       setAuthToken(state, token ) {
          state.authToken = token
       },
