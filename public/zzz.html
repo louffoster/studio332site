@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+   <head>
+      <script src="https://pixijs.download/release/pixi.js"></script>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   </head>
+
+   <body>
+      <h1>Hello PixiJS</h1>
+
+      <script>
+         let app = new PIXI.Application({                
+            backgroundColor: 0x33333f,
+            resolution: window.devicePixelRatio || 1,
+            width: 640,
+            height: 480 
+         });
+         
+         document.body.appendChild(app.view);
+            graphics = new PIXI.Graphics()
+               graphics.lineStyle(2, 0x00bb00, 1)
+               graphics.drawCircle(320, 240, 40)
+               app.stage.addChild(graphics)
+         // style = new PIXI.TextStyle({
+         //       fill: "#0b0",
+         //       fontFamily: "\"Courier New\", Courier, monospace",
+         //       fontSize: 56,
+         //    });
+      </script>
+   </body>
+
+</html>
