@@ -5,6 +5,7 @@ import Games from '@/views/Games.vue'
 import LatticeWords from '@/views/LatticeWords.vue'
 import Wordomino from '@/views/Wordomino.vue'
 import Squares from '@/views/Squares.vue'
+import Virus from '@/views/Virus.vue'
 
 Vue.use(Router)
 
@@ -16,6 +17,11 @@ export default new Router({
       alias: '/home',
       name: 'home',
       component: Home
+    },
+    {
+      path: '/virus',
+      name: 'virus',
+      component: Virus
     },
     {
       path: '/games',

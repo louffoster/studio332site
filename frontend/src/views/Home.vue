@@ -5,6 +5,7 @@
          <p>
             Studio332 likes to make games for mobile and web, but mostly web.
          </p>
+         <p><router-link to="/virus">pixi test game</router-link>
          <p>Check out some old mobile game code here (and this site):</p>
          <ul>
             <li>
