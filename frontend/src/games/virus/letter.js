@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js"
 export default class Letter extends PIXI.Container{
    constructor( stage, letter, x, y ) {
       super()
-      console.log("Create letter "+letter)
+      // console.log("Create letter "+letter)
       stage.addChild( this )
 
       this.x = x 

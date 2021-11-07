@@ -13,8 +13,8 @@ export default class Game  {
 
       
       document.body.appendChild(this.pixiApp.view)
-      console.log("VW "+this.pixiApp.renderer.view.width)
-      console.log("R " + this.pixiApp.renderer.resolution)
+      // console.log("VW "+this.pixiApp.renderer.view.width)
+      // console.log("R " + this.pixiApp.renderer.resolution)
       this.pixiApp.stage.width = this.pixiApp.renderer.view.width / window.devicePixelRatio
 
 

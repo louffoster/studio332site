@@ -19,7 +19,7 @@ export default class HighScoreEntry extends Phaser.Scene {
       this.name = []
       this.nameIdx = 0
 
-      console.log(store)
+      // console.log(store)
 
       let txtCfg = {
          fontFamily: 'Courier',
@@ -44,8 +44,8 @@ export default class HighScoreEntry extends Phaser.Scene {
       let t = this.add.text(230, 40, "You got a new high score!", hdrCfg)
       t.setOrigin(0.5,0)
 
-      let msg = `# ${store.state.highScoreRank}: ${store.state.highScore}`
-      console.log(msg)
+      // let msg = `# ${store.state.highScoreRank}: ${store.state.highScore}`
+      // console.log(msg)
       let t2 = this.add.text(190, 110, "Rank", hdrCfg)
       t2.setFontSize(16)
       t2.setOrigin(0.5, 0)
