@@ -1,6 +1,7 @@
 <template>
    <div class="content">
       <h2>Virus</h2>
+      <div class="container"></div>
    </div>
 </template>
 
@@ -21,11 +22,12 @@ export default {
       // The application will create a renderer using WebGL, if possible,
 // with a fallback to a canvas render. It will also setup the ticker
 // and the root stage PIXI.Container
-const app = new PIXI.Application();
+const app = new PIXI.Application(600,800);
 
 // The application will create a canvas element for you that you
 // can then insert into the DOM
-document.body.appendChild(app.view);
+// document.body.appendChild(app.view);
+document.querySelector('.container').appendChild(app.view);
 
 // load the texture we need
 app.loader.add('bunny', 'test.png').load((_loader, resources) => {
@@ -59,6 +61,14 @@ app.loader.add('bunny', 'test.png').load((_loader, resources) => {
    height: 480px;
    margin: 0 auto;
    position:relative;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+}
+canvas {
+    height: 100%;
 }
 </style>
 
