@@ -7,68 +7,73 @@
 
 <script>
 // import Game from "@/games/virus/game";
-import * as PIXI from "pixi.js"
+import * as PIXI from "pixi.js";
 export default {
    name: "virus",
    components: {},
    data() {
-      return { 
+      return {
          game: null,
-      }
+         app: null,
+         container: null
+      };
+   },
+   methods: {
+      createScaledContainer(tgtWidth, tgtHeight) {
+         this.app.stage.removeChildren();
+
+         // This is the stage for the new scene
+         this.container = new PIXI.Container();
+         this.container.width = tgtWidth;
+         this.container.height = tgtHeight;
+         this.container.scale.x = this.app.screen.width / tgtWidth;
+         this.container.scale.y = this.app.screen.height / tgtHeight;
+         this.container.x = this.app.screen.width / 2 - this.app.screen.width / 2;
+         this.container.y = this.app.screen.height / 2 - this.app.screen.height / 2;
+         this.app.stage.addChild(this.container);
+      },
    },
    mounted() {
-      // this.game = new Game("virus")
-   
-      // The application will create a renderer using WebGL, if possible,
-// with a fallback to a canvas render. It will also setup the ticker
-// and the root stage PIXI.Container
-const app = new PIXI.Application(600,800);
+      this.$nextTick(() => {
+         // this.game = new Game("virus")
+         let tgtW = 640 
+         let tgtH = 480
+         let gameEle = document.getElementById("app")
+         PIXI.settings.RESOLUTION = window.devicePixelRatio || 1;
+         this.app = new PIXI.Application({
+            // resizeTo: window, // Auto fill the screen
+            autoDensity: true, // Handles high DPI screens
+            backgroundColor: 0xFFFFFF,
+             width: tgtW, height: tgtH,
+         });
 
-// The application will create a canvas element for you that you
-// can then insert into the DOM
-// document.body.appendChild(app.view);
-document.querySelector('.container').appendChild(app.view);
+         // The application will create a canvas element for you that you
+         // can then insert into the DOM
+        //  document.body.appendChild(this.app.view);
+         gameEle.appendChild(this.app.view)
+         this.createScaledContainer(tgtW, tgtH)
 
-// load the texture we need
-app.loader.add('bunny', 'test.png').load((_loader, resources) => {
-    // This creates a texture from a 'bunny.png' image
-    const bunny = new PIXI.Sprite(resources.bunny.texture);
-
-    // Setup the position of the bunny
-    bunny.x = app.renderer.width / 2;
-    bunny.y = app.renderer.height / 2;
-
-    // Rotate around the center
-    bunny.anchor.x = 0.5;
-    bunny.anchor.y = 0.5;
-
-    // Add the bunny to the scene we are building
-    app.stage.addChild(bunny);
-
-    // Listen for frame updates
-    app.ticker.add(() => {
-         // each frame we spin the bunny around a bit
-        bunny.rotation += 0.01;
-    });
-});
+         // load the texture we need
+         this.app.loader.add("bunny", "test.png").load((_loader, resources) => {
+            const bunny = new PIXI.Sprite(resources.bunny.texture);
+            bunny.x = 0;
+            bunny.y = 0;
+            this.container.addChild(bunny);
+         });
+      });
    },
-}
+};
 </script>
 
 <style scoped>
-#virus {
+/* #virus {
    width: 640px;
    height: 480px;
    margin: 0 auto;
-   position:relative;
-}
-.container {
-    display: flex;
-    justify-content: center;
-    height: 100%;
+   position: relative;
 }
 canvas {
-    height: 100%;
-}
+   height: 100%;
+} */
 </style>
 
