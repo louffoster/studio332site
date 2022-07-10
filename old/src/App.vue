@@ -1,12 +1,18 @@
-<script setup>
-import { RouterView } from 'vue-router'
-import Studio332Header from '@/components/Studio332Header.vue'
-</script>
-
 <template>
-   <Studio332Header />
-   <RouterView />
+   <div id="app">
+      <Studio332Header />
+      <router-view />
+   </div>
 </template>
+
+<script>
+import Studio332Header from "@/components/Studio332Header.vue";
+export default {
+   components: {
+      Studio332Header,
+   },
+};
+</script>
 
 <style>
 html,
@@ -18,7 +24,6 @@ body {
    overflow: hidden;
    background-color: white;
 }
-
 #app {
    padding: 0;
    margin: 0;

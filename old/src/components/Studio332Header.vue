@@ -1,20 +1,23 @@
 <template>
    <div class="header">
       <router-link :to="{ name: 'home'}">
-         <img class="s332" src="@/assets/s332logotype.png" />
+         <img class="s332" src="../assets/s332logotype.png" />
       </router-link>
-      <!-- <ul class="menu">
+      <ul class="menu">
          <router-link to="/home">
             <li>Home</li>
          </router-link>
          <router-link to="/games">
             <li>Games</li>
          </router-link>
-      </ul> -->
+      </ul>
    </div>
 </template>
 
-<script setup>
+<script>
+export default {
+   name: "Studio332Header",
+};
 </script>
 
 <style scoped>
