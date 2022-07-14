@@ -1,14 +1,12 @@
 
-// import Cookies from 'js-cookie'
+import Cookies from 'js-cookie'
 import Phaser from 'phaser'
-import HighScore from '../shared/hiscore'
 
 export default class Menu extends Phaser.Scene {
    constructor ()   {
       super({ key: 'menu' })
    }
    preload () {
-      this.load.image('del', '/latticewords/images/del.png')
    }
 
    create () {
@@ -31,7 +29,7 @@ export default class Menu extends Phaser.Scene {
          strokeThickness:4,
          inputEnabled: true
       }
-      
+
       var play = this.add.text( 230,220, "Play Now!", btnCfg)
       play.setOrigin(0.5)
       play.setFontSize(32)
@@ -56,7 +54,14 @@ export default class Menu extends Phaser.Scene {
          this.helpGroup.setVisible(true)
       })
 
-      this.hiScore = new HighScore(this, 0, 310)
+      var bestLabel = this.add.text( 230,400, "Best Score", btnCfg)
+      bestLabel.setOrigin(0.5)
+      var best = this.add.text( 230,440, "0", btnCfg)
+      best.setOrigin(0.5)
+      var bestScore = Cookies.get('bestScore')
+      if ( bestScore ) {
+         best.setText( bestScore)
+      }
 
       this.createRulesMenu()
    }
@@ -64,7 +69,7 @@ export default class Menu extends Phaser.Scene {
    createRulesMenu() {
       let bkg = this.add.rectangle(0, 140, 460, 550, 0x2F41A5)  //B not F5
       bkg.setOrigin(0, 0)
-      
+
       var txtCfg = {
          fontFamily: 'Arial',
          fontSize: '22px',
@@ -84,7 +89,7 @@ export default class Menu extends Phaser.Scene {
          "+ Double tap to select letters connected to the dot",
          "+ Form words from left to right and top to bottom",
          "+ Only one word per row or column is allowed",
-         "+ Tap a selected word or letter to deselect it", 
+         "+ Tap a selected word or letter to deselect it",
          "+ Tap 'Score Grid' to score all selected words",
          "+ Base score is determined by word length",
          "+ Score is doubled for each word after the first",

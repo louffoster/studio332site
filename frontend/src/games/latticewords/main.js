@@ -2,13 +2,12 @@
 const TILE_SIZE= 75
 const ROWS = 6
 const COLS = 6
-const START_TIME = 60//240
+const START_TIME = 240
 
 import Phaser from 'phaser'
-// import Cookies from 'js-cookie'
+import Cookies from 'js-cookie'
 import Grid from './grid'
 import Pool from './pool'
-import store from '../../store'
 
 export default  class Latticewords extends Phaser.Scene {
    constructor ()   {
@@ -25,8 +24,8 @@ export default  class Latticewords extends Phaser.Scene {
       this.gameOver = false
       this.pointerDown = false
       this.paused = false
-      this.currY = -1
-      this.currX = -1
+      this.currRow = -1
+      this.currCol = -1
       this.dragged = false
       this.clickCount = 0
 
@@ -87,16 +86,16 @@ export default  class Latticewords extends Phaser.Scene {
       this.input.on('pointerdown', pointer => {
          if (this.paused || this.gameOver ) return
          this.pointerDown = true
-         this.currY = pointer.y
-         this.currX = pointer.x
+         this.currRow = this.grid.getClickedRow(pointer.y)
+         this.currCol = this.grid.getClickedCol(pointer.x)
          this.dragged = false
       })
 
       this.input.on('pointerup',  pointer => {
          if (this.paused || this.gameOver) return
          this.pointerDown = false
-         this.currY = -1
-         this.currX = -1
+         this.currRow = -1
+         this.currCol = -1
          if ( this.dragged == false) {
 
             this.clickCount++
@@ -117,37 +116,30 @@ export default  class Latticewords extends Phaser.Scene {
       var pointer = this.input.activePointer
       if (pointer.x < 10 || pointer.x > 450 || pointer.y < 50 || pointer.y > 490) {
          this.pointerDown = false
-         this.currY = -1
-         this.currX = -1
+         this.currRow = -1
+         this.currCol = -1
          this.dragged = false
          return
       }
 
       if ( this.pointerDown) {
-         let newY = pointer.y
-         let newX = pointer.x
-         let tgtRow = this.grid.getClickedRow(pointer.y)
-         let tgtCol = this.grid.getClickedCol(pointer.x)
-         let dx = newX - this.currX
-         let dy = newY - this.currY
-         let dragged = false
-         if (dx >= 45) {
-            this.grid.shiftTiles('R', tgtRow)
-            dragged = true
-         } else if (dx <= -45) {
-            this.grid.shiftTiles('L', tgtRow)
-            dragged = true
-         } else if (dy <= -45) {
-            this.grid.shiftTiles('U', tgtCol)
-            dragged = true
-         } else if (dy >= 45) {
-            this.grid.shiftTiles('D', tgtCol)
-            dragged = true
-         }
-
-         if ( dragged ) {
-            this.currX = newX
-            this.currY = newY
+         let newRow = this.grid.getClickedRow(pointer.y)
+         let newCol = this.grid.getClickedCol(pointer.x)
+         if (newCol > this.currCol) {
+            this.grid.shiftTiles('R', newRow)
+            this.currCol = newCol
+            this.dragged = true
+         } else if (newCol < this.currCol) {
+            this.grid.shiftTiles('L', newRow)
+            this.currCol = newCol
+            this.dragged = true
+         } else if (newRow < this.currRow) {
+            this.grid.shiftTiles('U', newCol)
+            this.currRow = newRow
+            this.dragged = true
+         } else if (newRow > this.currRow) {
+            this.grid.shiftTiles('D', newCol)
+            this.currRow = newRow
             this.dragged = true
          }
       }
@@ -170,7 +162,6 @@ export default  class Latticewords extends Phaser.Scene {
       this.pauseBtn.setFrame(0)
       this.gameTimer.paused = false
       this.pauseBtn.setVisible(true)
-      store.commit("resetCurrentHighScore")
    }
 
    createGameOverMenu() {
@@ -191,14 +182,25 @@ export default  class Latticewords extends Phaser.Scene {
          }, 100)
       }, this)
 
-      this.gameOverGroup = this.add.container(0, 40, [bkg, text, restart])
+      this.bestLabel = this.add.text( 230, 350, "Best Score", this.textCfg)
+      this.bestLabel.setFontSize(22)
+      this.bestLabel.setOrigin(0.5)
+      this.bestScore = this.add.text( 230, 380, "0", this.textCfg)
+      this.bestScore.setFontSize(16)
+      this.bestScore.setOrigin(0.5)
+      var bestScore = Cookies.get('bestScore')
+      if ( bestScore ) {
+         this.bestScore.setText(bestScore)
+      }
+
+      this.gameOverGroup = this.add.container(0, 40, [bkg, text, restart, this.bestLabel, this.bestScore])
       this.gameOverGroup.setVisible(false)
    }
 
    createPauseMenu() {
       let bkg = this.add.rectangle(0, 40, 460, 550, 0x03F51B5)
       bkg.setOrigin(0,0)
-      
+
       var text = this.add.text( 230, 80, "Game Paused", this.textCfg)
       text.setFontSize(36)
       text.setOrigin(0.50)
@@ -287,8 +289,15 @@ export default  class Latticewords extends Phaser.Scene {
          this.pauseBtn.setVisible(false)
          this.gameOverGroup.setVisible(true)
          this.grid.setVisible(false)
-
-         store.commit("addHighScore", this.score)
+         var bestScore = parseInt(Cookies.get('bestScore'),10)
+         if ( !bestScore ) bestScore = 0
+         if ( this.score > bestScore ) {
+            Cookies.set('bestScore', this.score)
+            this.bestScore.setText(this.score)
+            this.bestLabel.setText("New Best Score!")
+         } else {
+            this.bestLabel.setText("Best Score")
+         }
       }
    }
 

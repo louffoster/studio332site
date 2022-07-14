@@ -9,11 +9,11 @@ clean:
 
 web:
 	echo 'building web front end'
-	cd ./frontend/; yarn install; yarn build
+	cd frontend && npm install && npm run build
 	mv ./frontend/dist ./public
 
 dep:
-	cd frontend && yarn upgrade 
+	cd frontend && npm upgrade
 	go get -u ./studio332srv/...
 	go mod tidy
 	go mod verify

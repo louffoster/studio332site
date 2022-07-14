@@ -29,7 +29,7 @@ function initGame() {
 onMounted(() => {
  initGame()
 })
-onMounted(() => {
+onUnmounted(() => {
    window.game.destroy(true)
 })
 </script>
