@@ -1,9 +1,0 @@
-migrate create -ext sql -dir migrations -seq create_table
-migrate -database ${S332DB_LOCAL} -path migrations up
-
-FOR HEROKU:
-* Go to https://dashboard.heroku.com/apps/studio332/settings
-* Reveal settings
-* Copy DATABASE_URL value
-* Set it in a local env variable, like export TMPDB='blah'
-* Use $TMPDB in command above
