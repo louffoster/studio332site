@@ -1,5 +1,5 @@
 
-import Cookies from 'js-cookie'
+import VueCookies from 'vue-cookies'
 import Phaser from 'phaser'
 
 export default class Menu extends Phaser.Scene {
@@ -58,7 +58,7 @@ export default class Menu extends Phaser.Scene {
       bestLabel.setOrigin(0.5)
       var best = this.add.text( 230,440, "0", btnCfg)
       best.setOrigin(0.5)
-      var bestScore = Cookies.get('bestScore')
+      var bestScore = VueCookies.get('bestScore')
       if ( bestScore ) {
          best.setText( bestScore)
       }

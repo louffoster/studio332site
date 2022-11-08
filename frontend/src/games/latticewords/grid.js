@@ -3,6 +3,8 @@ const LETTER_COLOR = '#0e267f'
 const SELECT_COLOR = '#2f95ff'
 
 import axios from 'axios'
+const API_SERVICE = import.meta.env.VITE_S332_SERVICE
+
 
 export default class Grid  {
    constructor(scene, rows, cols, tileSize, pool) {
@@ -144,7 +146,9 @@ export default class Grid  {
       }
 
       coords = [...new Set(coords)]
-      axios.post('/api/latticewords/check', {words: words.join(",")})
+      let url = `${API_SERVICE}/latticewords/score`
+      console.log("SERVICE: "+url)
+      axios.post(url, {words: words.join(",")})
       .then( (response) => {
          this.handleResults(response.data, coords, scoreHandler )
       })

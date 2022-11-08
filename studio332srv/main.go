@@ -3,13 +3,27 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
-	dbx "github.com/go-ozzo/ozzo-dbx"
 	_ "github.com/lib/pq"
 )
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func main() {
 	// Get config params. Heroku defines env PORT for each app. See
@@ -17,19 +31,7 @@ func main() {
 	// the port the dev front end expects to communicate with the back end on
 	cfg := loadConfig()
 
-	log.Printf("Connect to Postgres")
-	connStr := os.Getenv("DATABASE_URL")
-	if connStr == "" {
-		connStr = fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=disable",
-			cfg.DB.User, cfg.DB.Pass, cfg.DB.Name, cfg.DB.Host, cfg.DB.Port)
-	}
-	db, err := dbx.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	db.LogFunc = log.Printf
-
-	svc, err := initializeGameService(db, cfg.JWTKey)
+	svc, err := initializeGameService()
 	if err != nil {
 		log.Fatalf("Unable to setup game context: %s", err.Error())
 	}
@@ -37,20 +39,12 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
 	router := gin.Default()
+	router.Use(CORSMiddleware())
+
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
-	api := router.Group("/api")
-	api.GET("/games", svc.getGames)
-	api.GET("/games/:id/start", svc.gameMiddleware, svc.getGameStartAuthToken)
-	api.GET("/games/:id/hiscore", svc.gameMiddleware, svc.getGameHiScores)
-	api.POST("/games/:id/hiscore", svc.authMiddleware, svc.gameMiddleware, svc.updateGameHiScores)
-	lw := api.Group("/latticewords")
+	lw := router.Group("/latticewords")
 	{
-		lw.POST("/check", svc.checkHandler)
-	}
-	wd := api.Group("/wordomino")
-	{
-		wd.GET("/shapes", wordominoShapes)
-		wd.POST("/check", svc.wordominoCheck)
+		lw.POST("/score", svc.latticeWordsScoreCheck)
 	}
 
 	// add a catchall route that renders the index page.

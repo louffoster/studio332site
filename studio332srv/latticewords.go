@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (svc *GameService) checkHandler(c *gin.Context) {
+func (svc *GameService) latticeWordsScoreCheck(c *gin.Context) {
 	var postData checkWords
 	c.Bind(&postData)
 

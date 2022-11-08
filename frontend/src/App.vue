@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import Studio332Header from '@/components/Studio332Header.vue'
+
 </script>
 
 <template>

@@ -5,7 +5,7 @@ const COLS = 6
 const START_TIME = 240
 
 import Phaser from 'phaser'
-import Cookies from 'js-cookie'
+import VueCookies from 'vue-cookies'
 import Grid from './grid'
 import Pool from './pool'
 
@@ -188,7 +188,7 @@ export default  class Latticewords extends Phaser.Scene {
       this.bestScore = this.add.text( 230, 380, "0", this.textCfg)
       this.bestScore.setFontSize(16)
       this.bestScore.setOrigin(0.5)
-      var bestScore = Cookies.get('bestScore')
+      var bestScore = VueCookies.get('bestScore')
       if ( bestScore ) {
          this.bestScore.setText(bestScore)
       }
@@ -289,10 +289,10 @@ export default  class Latticewords extends Phaser.Scene {
          this.pauseBtn.setVisible(false)
          this.gameOverGroup.setVisible(true)
          this.grid.setVisible(false)
-         var bestScore = parseInt(Cookies.get('bestScore'),10)
+         var bestScore = parseInt(VueCookies.get('bestScore'),10)
          if ( !bestScore ) bestScore = 0
          if ( this.score > bestScore ) {
-            Cookies.set('bestScore', this.score)
+            VueCookies.set('bestScore', this.score)
             this.bestScore.setText(this.score)
             this.bestLabel.setText("New Best Score!")
          } else {
