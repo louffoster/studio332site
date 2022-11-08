@@ -1,7 +1,7 @@
 build: clean web backend
 
 backend:
-	GOOS=darwin GOARCH=amd64 go build -a -o srv studio332srv/*.go
+	go build -a -o studio332 studio332srv/*.go
 
 clean:
 	rm -f srv

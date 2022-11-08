@@ -2,8 +2,11 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GameService is a contet used for word games. It has a dictionary and word checker
@@ -37,4 +40,8 @@ func initializeGameService() (*GameService, error) {
 	out.Words = strings.Split(string(dict), "\n")
 	log.Printf("Loaded %d word dictionary", len(out.Words))
 	return &out, nil
+}
+
+func (svc *GameService) infoRequest(c *gin.Context) {
+	c.String(http.StatusOK, "studdio332 game services")
 }

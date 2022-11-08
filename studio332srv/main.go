@@ -42,6 +42,7 @@ func main() {
 	router.Use(CORSMiddleware())
 
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
+	router.GET("/info", svc.infoRequest)
 	lw := router.Group("/latticewords")
 	{
 		lw.POST("/score", svc.latticeWordsScoreCheck)
@@ -58,3 +59,5 @@ func main() {
 	log.Printf("Starting Studio332 site server on port %s", portStr)
 	log.Fatal(router.Run(portStr))
 }
+
+//go build -tags netgo -ldflags '-s -w' -o app
