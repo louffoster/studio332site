@@ -1,7 +1,6 @@
 <template>
    <div class="content">
       <h2>Virus</h2>
-      <div class="stage"></div>
    </div>
 </template>
 
@@ -14,74 +13,63 @@ const game = ref(null)
 const app = ref(null)
 const scene = ref(null)
 
-function createScaledContainer(tgtWidth, tgtHeight) {
-   app.value.stage.removeChildren()
+function resizeHandler( logicalWidth, logicalHeight) {
+  const scaleFactor = Math.min(
+    window.innerWidth / logicalWidth,
+    window.innerHeight / logicalHeight
+  );
+  const newWidth = Math.ceil(logicalWidth * scaleFactor);
+  const newHeight = Math.ceil(logicalHeight * scaleFactor);
+  
+  app.value.renderer.view.style.width = `${newWidth}px`;
+  app.value.renderer.view.style.height = `${newHeight}px`;
 
-   // This is the stage for the new scene
-   scene.value = new PIXI.Container()
-   scene.value.width = tgtWidth
-   scene.value.height = tgtHeight
-   scene.value.scale.x = app.value.screen.width / tgtWidth
-   scene.value.scale.y = app.value.screen.height / tgtHeight
-   scene.value.x = app.value.screen.width / 2 - app.value.screen.width / 2
-   scene.value.y = app.value.screen.height / 2 - app.value.screen.height / 2
-   app.value.stage.addChild(scene.value)
+  app.value.renderer.resize(newWidth, newHeight);
+  scene.value.scale.set(scaleFactor); 
 }
 
-// function setup() {
-//    testSprite.value = new PIXI.Sprite(
-//     PIXI.Loader.shared.resources["test.png"].texture 
-//     console.log("LOADED")
-//   )
-// }
-
 onBeforeUnmount(() => {
-   console.log("DESTROY!!")
    scene.value.destroy({
       children: true,
       texture: true,
       baseTexture: true}
    )
+   app.value.stage.removeChildren()
    let gameEle = document.getElementById("app")
    gameEle.removeChild(app.value.view)
 })
 
 onMounted(() => {
-   // nextTick(() => {
       // game = new Game("virus")
-      let tgtW = 640
-      let tgtH = 480
-      
-      PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
-      app.value = new PIXI.Application({
-         autoDensity: true, // Handles high DPI screens
-         backgroundColor: 0x00FFFF,
-         width: tgtW, height: tgtH,
-      })
+   let tgtW = 480
+   let tgtH = 480
+   
+   PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
+   app.value = new PIXI.Application({
+      autoDensity: true, // Handles high DPI screens
+      backgroundColor: 0x00FFFF,
+      width: tgtW, 
+      height: tgtH,
+   })
 
-      // The application will create a canvas element for you that you
-      // can then insert into the DOM
-      let gameEle = document.getElementById("app")
-      gameEle.appendChild(app.value.view)
-      createScaledContainer(tgtW, tgtH)
+   // The application will create a canvas element for you that you
+   // can then insert into the DOM
+   let gameEle = document.getElementById("app")
+   gameEle.appendChild(app.value.view)
+   scene.value = new PIXI.Container()
+   app.value.stage.addChild(scene.value)
+   resizeHandler(tgtW, tgtH)
 
-      let zzz = PIXI.Sprite.from('test.png')
-      scene.value.addChild(zzz)
-      // PIXI.Loader.shared
-      //    .add("test.png")
-      //    .load(setup)
+   let zzz = PIXI.Sprite.from('test.png')
+   scene.value.addChild(zzz)
+
+   const graphics = new PIXI.Graphics()
+   graphics.lineStyle(2, 0xFF0000, 1)
+   graphics.drawRect(1, 1, 479, 479)
+   scene.value.addChild(graphics)
 })
 </script>
 
 <style scoped>
-/* #virus {
-   width: 640px
-   height: 480px
-   margin: 0 auto
-   position: relative
-}
-canvas {
-   height: 100%
-} */
 </style>
 
