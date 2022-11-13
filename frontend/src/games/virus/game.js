@@ -7,8 +7,11 @@ export default class Game  {
       this.pixiApp = new PIXI.Application({
          backgroundColor: 0x33334f,
          width: 640, height: 480,
-         // resolution: window.devicePixelRatio || 1
+         antialias: true,
+         resolution: 1,
       })
+      this.pixiApp.autoDensity = true
+      this.pixiApp.renderer.backgroundColor = 0x061639;
 
 
       
