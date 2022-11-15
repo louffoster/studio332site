@@ -10,7 +10,7 @@ export default class Game  {
          antialias: true,
          resolution: 1,
       })
-      this.pixiApp.autoDensity = true
+      this.pixiApp.renderer.autoDensity = true
       this.pixiApp.renderer.backgroundColor = 0x061639;
 
 

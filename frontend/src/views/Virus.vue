@@ -1,6 +1,5 @@
 <template>
-   <div class="content">
-      <h2>Virus</h2>
+   <div id="game">
    </div>
 </template>
 
@@ -35,41 +34,59 @@ onBeforeUnmount(() => {
       baseTexture: true}
    )
    app.value.stage.removeChildren()
-   let gameEle = document.getElementById("app")
+   let gameEle = document.getElementById("game")
    gameEle.removeChild(app.value.view)
 })
 
 onMounted(() => {
       // game = new Game("virus")
-   let tgtW = 480
-   let tgtH = 480
+   let tgtW = 300
+   let tgtH = 600
    
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app.value = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
-      backgroundColor: 0x00FFFF,
+      backgroundColor: 0x44444a,
       width: tgtW, 
       height: tgtH,
    })
 
    // The application will create a canvas element for you that you
    // can then insert into the DOM
-   let gameEle = document.getElementById("app")
+   let gameEle = document.getElementById("game")
    gameEle.appendChild(app.value.view)
    scene.value = new PIXI.Container()
    app.value.stage.addChild(scene.value)
-   resizeHandler(tgtW, tgtH)
+   // resizeHandler(tgtW, tgtH)
 
-   let zzz = PIXI.Sprite.from('test.png')
-   scene.value.addChild(zzz)
+   // let zzz = PIXI.Sprite.from('test.png')
+   // scene.value.addChild(zzz)
 
    const graphics = new PIXI.Graphics()
-   graphics.lineStyle(2, 0xFF0000, 1)
-   graphics.drawRect(1, 1, 479, 479)
+   // graphics.lineStyle(1, 0xFF0000, 1)
+   // graphics.drawRect(1, 1, 479, 499)
+
+   
+   let y=40
+   let x=40
+   for (let r=0; r<8; r++) {
+      for (let c=0; c<5; c++) {
+         graphics.lineStyle(1, 0xcccccc, 1)
+         graphics.drawCircle(x,y,25) 
+         console.log("CIRCLE "+x+","+y)
+         x+= 55     
+      }
+      y+= 55
+      x=40
+   }
+
    scene.value.addChild(graphics)
 })
 </script>
 
 <style scoped>
+#game {
+   margin-top: 15px;
+}
 </style>
 
