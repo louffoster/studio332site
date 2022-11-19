@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -41,19 +39,11 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 	router.GET("/info", svc.infoRequest)
 	lw := router.Group("/latticewords")
 	{
 		lw.POST("/score", svc.latticeWordsScoreCheck)
 	}
-
-	// add a catchall route that renders the index page.
-	// based on no-history config setup info here:
-	//    https://router.vuejs.org/guide/essentials/history-mode.html#example-server-configurations
-	router.NoRoute(func(c *gin.Context) {
-		c.File("./public/index.html")
-	})
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)
