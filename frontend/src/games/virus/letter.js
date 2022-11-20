@@ -4,8 +4,13 @@ export default class Letter extends PIXI.Container {
    constructor( stage, letter, x, y, r,c ) {
       super()
       stage.addChild( this )
+      this.interactive = true
+      this.cursor = 'pointer'
+      this.on('pointerdown', this.clickHandler)
 
+      this.selected = false
       this.infected = false
+      this.redraw = false
       this.virusGfx = new PIXI.Graphics() 
       this.virusPercent = 0.0 
       this.addChild(this.virusGfx)
@@ -36,11 +41,33 @@ export default class Letter extends PIXI.Container {
       this.addChild(this.letter)
    }
 
+   setClickCallback( callback ) {
+      this.clickCallback = callback
+   }
+
+   clickHandler() {
+      this.selected = !this.selected
+      this.redraw = true
+      this.clickCallback(this.selected, this.letter.text)
+   }
+
    destroy() {
       this.removeChildren()
    }
 
    update(delta, infectedCallback) {
+      if (this.redraw) {
+         this.graphics.clear()
+         if (this.selected) {
+            this.graphics.lineStyle(2, 0xaaddff, 1)
+            this.letter.style.fill = 0xaaddff
+         } else {
+            this.graphics.lineStyle(1, 0xcccccc, 1)
+            this.letter.style.fill = 0xcccccc
+         }
+         this.graphics.drawCircle(0,0, 25)
+         this.redraw = false
+      }
       if (this.infected  && this.virusPercent < 100.0) {
          this.virusGfx.clear()
          this.virusPercent += 0.25*delta
@@ -50,6 +77,8 @@ export default class Letter extends PIXI.Container {
             this.graphics.clear()
             this.graphics.lineStyle(1, 0x33cc33, 1)
             this.graphics.drawCircle(0,0, 25)
+            this.cursor = 'default'
+            this.interactive = false
             infectedCallback(this.row, this.col)
          }
          let radius = 25.0 * (this.virusPercent/100.0)

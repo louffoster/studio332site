@@ -15,6 +15,7 @@ var scene = null
 var grid = null
 var pool = new Pool()
 
+
 onBeforeUnmount(() => {
    app.ticker.stop()
    scene.destroy({
@@ -54,6 +55,7 @@ onMounted(() => {
    for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 5; c++) {
          let l = new Letter(scene, pool.pop(), x,y, r,c)
+         l.setClickCallback(letterClicked)
          grid[r][c] = l
          x += 55
          if (r == 0 && c > 0 && c < 4) {
@@ -74,6 +76,9 @@ onMounted(() => {
    })
 })
 
+function letterClicked( selected, letter) {
+   console.log("LETTER "+letter+" SELECTED "+selected)
+}
 function letterLost( row, col ) {
    console.log(`letter at ${row}, ${col} has been removed`)
    if ( row > 0) {
