@@ -5,13 +5,15 @@
 
 <script setup>
 import Letter from "@/games/virus/letter"
+import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
 
 
 var app = null
 var scene = null
-var letters = []
+var grid = null
+var pool = new Pool()
 
 onBeforeUnmount(() => {
    app.ticker.stop()
@@ -28,6 +30,7 @@ onBeforeUnmount(() => {
 onMounted(() => {
    let tgtW = 300
    let tgtH = 600
+   pool.refill()
 
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
@@ -47,12 +50,13 @@ onMounted(() => {
 
    let y = 40
    let x = 40   
+   grid = Array(8).fill().map(() => Array(5))
    for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 5; c++) {
-         let l = new Letter(scene, "A", x,y)
-         letters.push(l)
+         let l = new Letter(scene, pool.pop(), x,y)
+         grid[r][c] = l
          x += 55
-         if (c == 3 && r == 5) {
+         if (r == 0 && c > 0 && c < 4) {
             l.infected = true
          }
       }
@@ -62,9 +66,17 @@ onMounted(() => {
 
    app.start()
    app.ticker.add((delta) => {
-      letters.forEach( l=> l.update(delta))
+      for (let r = 0; r < 8; r++) {
+         for (let c = 0; c < 5; c++) {
+            grid[r][c].update(delta, letterLost)
+         }
+      }
    })
 })
+
+function letterLost( letter ) {
+   console.log(letter)
+}
 </script>
 
 <style scoped>

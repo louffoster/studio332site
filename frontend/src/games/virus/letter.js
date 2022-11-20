@@ -10,6 +10,8 @@ export default class Letter extends PIXI.Container {
       this.virusPercent = 0.0 
       this.addChild(this.virusGfx)
 
+      // set the container position. all other drawing is in reference 
+      // of the container, so x and y for drawing and letters is based in 0,0
       this.x = x 
       this.y = y
 
@@ -36,7 +38,7 @@ export default class Letter extends PIXI.Container {
       this.removeChildren()
    }
 
-   update(delta) {
+   update(delta, callback) {
       if (this.infected  && this.virusPercent < 100.0) {
          this.virusGfx.clear()
          this.virusPercent += 0.25*delta
@@ -46,6 +48,7 @@ export default class Letter extends PIXI.Container {
             this.graphics.clear()
             this.graphics.lineStyle(1, 0x33cc33, 1)
             this.graphics.drawCircle(0,0, 25)
+            callback(this)
          }
          let radius = 25.0 * (this.virusPercent/100.0)
       
