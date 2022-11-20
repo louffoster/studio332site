@@ -14,6 +14,8 @@ var app = null
 var scene = null
 var grid = null
 var pool = new Pool()
+var word = []
+var gfx = null
 
 
 onBeforeUnmount(() => {
@@ -48,6 +50,8 @@ onMounted(() => {
    gameEle.appendChild(app.view)
    scene = new PIXI.Container()
    app.stage.addChild(scene)
+   gfx = new PIXI.Graphics() 
+   scene.addChild(gfx)
 
    let y = 40
    let x = 40   
@@ -65,6 +69,32 @@ onMounted(() => {
       y += 55
       x = 40
    } 
+
+   let style = new PIXI.TextStyle({
+      fill: "#cccccc",
+      fontFamily: "\"Courier New\", Courier, monospace",
+      fontSize: 32,
+   })
+
+   gfx.lineStyle(1, 0xcccccc, 1)
+   gfx.moveTo(0, 465)
+   gfx.lineTo(300, 465)
+   gfx.moveTo(0, 520)
+   gfx.lineTo(300, 520)
+   x = 15
+   let test = ["L","I","Z","A","R","D"]
+   for ( let i=0; i<6; i++) {
+      gfx.moveTo(x, 510)
+      gfx.lineTo(x+25, 510)  
+
+      let wordLetter = new PIXI.Text(test[i], style)
+      wordLetter.x = x+2
+      wordLetter.y = 475
+      scene.addChild(wordLetter)
+      word.push(wordLetter)
+
+      x+=30
+   }
 
    app.start()
    app.ticker.add((delta) => {
