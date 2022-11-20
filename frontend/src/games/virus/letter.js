@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
-   constructor( stage, letter, x, y ) {
+   constructor( stage, letter, x, y, r,c ) {
       super()
       stage.addChild( this )
 
@@ -14,6 +14,8 @@ export default class Letter extends PIXI.Container {
       // of the container, so x and y for drawing and letters is based in 0,0
       this.x = x 
       this.y = y
+      this.row = r 
+      this.col = c
 
       this.style = new PIXI.TextStyle({
          fill: "#cccccc",
@@ -38,7 +40,7 @@ export default class Letter extends PIXI.Container {
       this.removeChildren()
    }
 
-   update(delta, callback) {
+   update(delta, infectedCallback) {
       if (this.infected  && this.virusPercent < 100.0) {
          this.virusGfx.clear()
          this.virusPercent += 0.25*delta
@@ -48,7 +50,7 @@ export default class Letter extends PIXI.Container {
             this.graphics.clear()
             this.graphics.lineStyle(1, 0x33cc33, 1)
             this.graphics.drawCircle(0,0, 25)
-            callback(this)
+            infectedCallback(this.row, this.col)
          }
          let radius = 25.0 * (this.virusPercent/100.0)
       

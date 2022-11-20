@@ -53,7 +53,7 @@ onMounted(() => {
    grid = Array(8).fill().map(() => Array(5))
    for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 5; c++) {
-         let l = new Letter(scene, pool.pop(), x,y)
+         let l = new Letter(scene, pool.pop(), x,y, r,c)
          grid[r][c] = l
          x += 55
          if (r == 0 && c > 0 && c < 4) {
@@ -74,8 +74,20 @@ onMounted(() => {
    })
 })
 
-function letterLost( letter ) {
-   console.log(letter)
+function letterLost( row, col ) {
+   console.log(`letter at ${row}, ${col} has been removed`)
+   if ( row > 0) {
+      grid[row-1][col].infected = true
+   }
+   if ( row < 7) {
+      grid[row+1][col].infected = true
+   }
+   if ( col > 0) {
+      grid[row][col-1].infected = true
+   }
+   if ( col < 4) {
+      grid[row][col+1].infected = true
+   }
 }
 </script>
 
