@@ -7,7 +7,6 @@ export default class Letter extends PIXI.Container {
       super()
       stage.addChild( this )
       this.interactive = true
-      this.cursor = 'pointer'
       this.on('pointerdown', this.clickHandler)
 
       this.selected = false
@@ -27,10 +26,13 @@ export default class Letter extends PIXI.Container {
       this.style = new PIXI.TextStyle({
          fill: "#cccccc",
          fontFamily: "\"Courier New\", Courier, monospace",
-         fontSize: 32,
+         fontSize: 38,
       })
 
       this.graphics = new PIXI.Graphics()
+      this.graphics.interactive = true 
+      this.graphics.hitArea = new PIXI.Circle(0,0,25)
+      this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0xcccccc, 1)
       this.graphics.drawCircle(0,0, 25)
       this.addChild(this.graphics)
@@ -52,6 +54,9 @@ export default class Letter extends PIXI.Container {
    }
 
    clickHandler() {
+      if ( this.infected && this.virusPercent == 100.0) {
+         return
+      }
       if ( Letter.wordFull && this.selected == false ) { 
          return
       }
@@ -86,7 +91,7 @@ export default class Letter extends PIXI.Container {
             this.graphics.clear()
             this.graphics.lineStyle(1, 0x33cc33, 1)
             this.graphics.drawCircle(0,0, 25)
-            this.cursor = 'default'
+            this.graphics.cursor = 'default'
             this.interactive = false
             infectedCallback(this.row, this.col)
          }
