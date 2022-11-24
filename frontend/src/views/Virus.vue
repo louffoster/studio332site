@@ -5,6 +5,7 @@
 
 <script setup>
 import Letter from "@/games/virus/letter"
+import EnterKey from "@/games/virus/enterkey"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
@@ -59,8 +60,9 @@ onMounted(() => {
    grid = Array(8).fill().map(() => Array(5))
    for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 5; c++) {
-         let l = new Letter(scene, pool.pop(), x,y, r,c)
+         let l = new Letter(pool.pop(), x,y, r,c)
          l.setClickCallback(letterClicked)
+         scene.addChild(l)
          grid[r][c] = l
          x += 55
          if (r == 0 && c > 0 && c < 4) {
@@ -96,6 +98,9 @@ onMounted(() => {
       x+=30
    }
 
+   let enterKey = new EnterKey(215,475, enterWord)
+   scene.addChild(enterKey)
+
    app.start()
    app.ticker.add((delta) => {
       for (let r = 0; r < 8; r++) {
@@ -105,6 +110,10 @@ onMounted(() => {
       }
    })
 })
+
+function enterWord() {
+   console.log("ENTER CLICLED")
+}
 
 function letterClicked( selected, letter) {
    Letter.wordFull = false

@@ -3,9 +3,8 @@ import * as PIXI from "pixi.js"
 export default class Letter extends PIXI.Container {
    static wordFull = false 
 
-   constructor( stage, letter, x, y, r,c ) {
+   constructor(letter, x, y, r,c ) {
       super()
-      stage.addChild( this )
       this.interactive = true
       this.on('pointerdown', this.clickHandler)
 
