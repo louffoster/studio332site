@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
+   static wordFull = false 
+
    constructor( stage, letter, x, y, r,c ) {
       super()
       stage.addChild( this )
@@ -45,7 +47,14 @@ export default class Letter extends PIXI.Container {
       this.clickCallback = callback
    }
 
+   text() {
+      return this.letter.text
+   }
+
    clickHandler() {
+      if ( Letter.wordFull && this.selected == false ) { 
+         return
+      }
       this.selected = !this.selected
       this.redraw = true
       this.clickCallback(this.selected, this.letter.text)

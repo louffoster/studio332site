@@ -14,6 +14,7 @@ var app = null
 var scene = null
 var grid = null
 var pool = new Pool()
+var letterIndex = 0
 var word = []
 var gfx = null
 
@@ -82,12 +83,11 @@ onMounted(() => {
    gfx.moveTo(0, 520)
    gfx.lineTo(300, 520)
    x = 15
-   let test = ["L","I","Z","A","R","D"]
    for ( let i=0; i<6; i++) {
       gfx.moveTo(x, 510)
       gfx.lineTo(x+25, 510)  
 
-      let wordLetter = new PIXI.Text(test[i], style)
+      let wordLetter = new PIXI.Text("", style)
       wordLetter.x = x+2
       wordLetter.y = 475
       scene.addChild(wordLetter)
@@ -107,10 +107,38 @@ onMounted(() => {
 })
 
 function letterClicked( selected, letter) {
-   console.log("LETTER "+letter+" SELECTED "+selected)
+   Letter.wordFull = false
+   if (selected) {
+      word[letterIndex].text = letter
+      letterIndex++ 
+      if (letterIndex == 6) {
+         Letter.wordFull = true
+      }
+   } else {
+      let delIdx = -1 
+      word.forEach( (wl,idx) => {
+         if (wl.text == letter) {
+            delIdx = idx
+         }
+      })
+      if (delIdx > -1) {
+         if (delIdx == 5) {
+            word[delIdx].text = ""
+         } else {
+            for (let idx = delIdx; idx <= 4; idx++) {
+               word[idx].text = word[idx+1].text
+            }
+            word[5].text = ""
+         }
+         letterIndex--
+      }
+   }
 }
+
 function letterLost( row, col ) {
-   console.log(`letter at ${row}, ${col} has been removed`)
+   if ( grid[row][col].selected) {
+      letterClicked(false, grid[row][col].text())
+   }
    if ( row > 0) {
       grid[row-1][col].infected = true
    }
