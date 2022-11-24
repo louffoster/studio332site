@@ -40,6 +40,7 @@ func main() {
 	router.Use(CORSMiddleware())
 
 	router.GET("/info", svc.infoRequest)
+	router.POST("/start", svc.startGameRequest)
 	lw := router.Group("/latticewords")
 	{
 		lw.POST("/score", svc.latticeWordsScoreCheck)

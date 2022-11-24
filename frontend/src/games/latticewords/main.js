@@ -8,6 +8,8 @@ import Phaser from 'phaser'
 import VueCookies from 'vue-cookies'
 import Grid from './grid'
 import Pool from './pool'
+import axios from 'axios'
+const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 export default  class Latticewords extends Phaser.Scene {
    constructor ()   {
@@ -19,6 +21,12 @@ export default  class Latticewords extends Phaser.Scene {
    }
 
    create () {
+      let url = `${API_SERVICE}/start?game=latticewords`
+      axios.post(url).then( () => {
+         console.log("GAME STARTED")    
+      })
+
+
       this.pool = new Pool()
       this.pool.refill()
       this.gameOver = false

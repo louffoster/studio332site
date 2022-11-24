@@ -9,6 +9,8 @@ import EnterKey from "@/games/virus/enterkey"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
+import axios from 'axios'
+const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 
 var app = null
@@ -32,7 +34,7 @@ onBeforeUnmount(() => {
    gameEle.removeChild(app.view)
 })
 
-onMounted(() => {
+onMounted(async () => {
    let tgtW = 300
    let tgtH = 600
    pool.refill()
@@ -44,6 +46,9 @@ onMounted(() => {
       width: tgtW,
       height: tgtH,
    })
+
+   let url = `${API_SERVICE}/start?game=virus`
+   await axios.post(url)
 
    // The application will create a canvas element for you that you
    // can then insert into the DOM, then add the base scene container 

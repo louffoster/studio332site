@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -44,4 +45,10 @@ func initializeGameService() (*GameService, error) {
 
 func (svc *GameService) infoRequest(c *gin.Context) {
 	c.String(http.StatusOK, "studdio332 game services")
+}
+
+func (svc *GameService) startGameRequest(c *gin.Context) {
+	game := c.Query("game")
+	log.Printf("INFO: start game %s", game)
+	c.String(http.StatusOK, fmt.Sprintf("started %s", game))
 }
