@@ -45,6 +45,10 @@ func main() {
 	{
 		lw.POST("/score", svc.latticeWordsScoreCheck)
 	}
+	virus := router.Group("/virus")
+	{
+		virus.POST("/check", svc.virusWordCheck)
+	}
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)

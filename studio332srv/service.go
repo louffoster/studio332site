@@ -21,8 +21,10 @@ type checkWords struct {
 
 // IsValidWord looks up a word in the dictionary and returns result
 func (svc *GameService) IsValidWord(value string) bool {
+	dcWord := strings.ToLower(value)
+	log.Printf("INFO: check [%s] against %d words in dictionary", dcWord, len(svc.Words))
 	for _, v := range svc.Words {
-		if v == value {
+		if v == dcWord {
 			return true
 		}
 	}

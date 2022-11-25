@@ -4,8 +4,8 @@ export default class Pool {
       this.pool = []
    }
 
-   tilesLeft() {
-      return this.pool.length
+   hasTilesLeft() {
+      return this.pool.length > 0
    }
 
    pop() {

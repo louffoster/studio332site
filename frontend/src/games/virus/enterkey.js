@@ -35,6 +35,8 @@ export default class EnterKey extends PIXI.Container {
       this.graphics.lineTo(25,14)
       this.graphics.moveTo(15,20)
       this.graphics.lineTo(25,26)  
+      this.graphics.interactive = true 
+      this.graphics.hitArea = new PIXI.Rectangle(0,0,75,35)
    }
 
    handlePointerDown() {

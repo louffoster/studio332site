@@ -18,6 +18,7 @@ var scene = null
 var grid = null
 var pool = new Pool()
 var letterIndex = 0
+var checkCountdown = 1000
 var word = []
 var gfx = null
 
@@ -71,7 +72,7 @@ onMounted(async () => {
          grid[r][c] = l
          x += 55
          if (r == 0 && c > 0 && c < 4) {
-            l.infected = true
+            l.infect()
          }
       }
       y += 55
@@ -108,6 +109,10 @@ onMounted(async () => {
 
    app.start()
    app.ticker.add((delta) => {
+      checkCountdown -= app.ticker.deltaMS 
+      if (checkCountdown <= 0 ) {
+         checkInfectedCount()
+      }
       for (let r = 0; r < 8; r++) {
          for (let c = 0; c < 5; c++) {
             grid[r][c].update(delta, letterLost)
@@ -116,8 +121,77 @@ onMounted(async () => {
    })
 })
 
-function enterWord() {
-   console.log("ENTER CLICLED")
+function checkInfectedCount() {
+   checkCountdown = 1000.0
+   let cnt = 0
+   for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 5; c++) {
+         if (grid[r][c].infected && grid[r][c].virusPercent < 100) {
+            cnt++
+         }
+      }
+   }
+   if ( cnt < 3) {
+      for (let r = 0; r < 8; r++) {
+         for (let c = 0; c < 5; c++) {
+            if (grid[r][c].infected == false) {
+               cnt++
+               grid[r][c].infect()
+            }
+            if (cnt >= 3) break
+         }
+         if (cnt >= 3) break
+      }
+   }
+}
+
+async function enterWord() {
+   if ( letterIndex < 3) return
+   let testWord = ""
+   word.forEach( l => testWord += l.text)
+   let url = `${API_SERVICE}/virus/check?w=${testWord}`
+   await axios.post(url).then( () => {
+      replaceAll( )
+   }).catch( e => {
+      deselectAll()
+   })
+}
+
+function replaceAll() {
+   let newLetters = drawNewLetters(letterIndex)
+   console.log("success. new letters: "+newLetters)
+   for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 5; c++) {
+         if (grid[r][c].selected) {
+            let replacement = newLetters.pop()
+            console.log("replace "+r+","+c+" with "+replacement)
+            grid[r][c].replace( replacement )   
+         }
+      }
+   }
+   word.forEach( wl  => wl.text = "")
+   letterIndex = 0
+}
+
+function drawNewLetters( cnt ) {
+   let out = [] 
+   for (let i=0; i<cnt; i++ ) {
+      if ( pool.hasTilesLeft() == false) {
+         pool.refill()
+      }
+      out.push( pool.pop() )
+   }
+   return out
+}
+
+function deselectAll() {
+   for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 5; c++) {
+         grid[r][c].deselect()
+      }
+   }
+   word.forEach( wl  => wl.text = "")
+   letterIndex = 0
 }
 
 function letterClicked( selected, letter) {
@@ -129,41 +203,43 @@ function letterClicked( selected, letter) {
          Letter.wordFull = true
       }
    } else {
-      let delIdx = -1 
-      word.forEach( (wl,idx) => {
-         if (wl.text == letter) {
-            delIdx = idx
-         }
-      })
-      if (delIdx > -1) {
-         if (delIdx == 5) {
-            word[delIdx].text = ""
-         } else {
-            for (let idx = delIdx; idx <= 4; idx++) {
-               word[idx].text = word[idx+1].text
-            }
-            word[5].text = ""
-         }
-         letterIndex--
-      }
+      deselectLetter( letter )
    }
 }
 
-function letterLost( row, col ) {
-   if ( grid[row][col].selected) {
-      letterClicked(false, grid[row][col].text())
+function deselectLetter( letter ) {
+   let delIdx = -1 
+   word.forEach( (wl,idx) => {
+      if (wl.text == letter) {
+         delIdx = idx
+      }
+   })
+   if (delIdx > -1) {
+      if (delIdx == 5) {
+         word[delIdx].text = ""
+      } else {
+         for (let idx = delIdx; idx <= 4; idx++) {
+            word[idx].text = word[idx+1].text
+         }
+         word[5].text = ""
+      }
+      letterIndex--
    }
+}
+
+function letterLost( letter, row, col ) {
+   deselectLetter( letter )
    if ( row > 0) {
-      grid[row-1][col].infected = true
+      grid[row-1][col].infect()
    }
    if ( row < 7) {
-      grid[row+1][col].infected = true
+      grid[row+1][col].infect()
    }
    if ( col > 0) {
-      grid[row][col-1].infected = true
+      grid[row][col-1].infect()
    }
    if ( col < 4) {
-      grid[row][col+1].infected = true
+      grid[row][col+1].infect()
    }
 }
 </script>
