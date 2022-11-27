@@ -89,6 +89,15 @@ export default class Letter extends PIXI.Container {
       }
    }
 
+   disinfect() {
+      if ( this.infected && this,this.virusPercent < 100) {
+         this.infected = false
+         this.letter.style.fill = 0xcccccc
+         this.virusPercent = 0
+         this.virusGfx.clear()
+      }
+   }
+
    destroy() {
       this.removeChildren()
    }

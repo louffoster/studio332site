@@ -22,7 +22,6 @@ var checkCountdown = 1000
 var word = []
 var gfx = null
 
-
 onBeforeUnmount(() => {
    app.ticker.stop()
    scene.destroy({
@@ -159,13 +158,27 @@ async function enterWord() {
 
 function replaceAll() {
    let newLetters = drawNewLetters(letterIndex)
-   console.log("success. new letters: "+newLetters)
    for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 5; c++) {
          if (grid[r][c].selected) {
             let replacement = newLetters.pop()
-            console.log("replace "+r+","+c+" with "+replacement)
             grid[r][c].replace( replacement )   
+
+            // stop infection on any adjecent tiles
+            if (newLetters.len > 3) {
+               if ( r > 0) {
+                  grid[r-1][c].disinfect()
+               }
+               if ( r < 7) {
+                  grid[r+1][c].disinfect()
+               }
+               if ( c > 0) {
+                  grid[r][c-1].disinfect()
+               }
+               if ( c < 4) {
+                  grid[r][c+1].disinfect()
+               }
+            }
          }
       }
    }
