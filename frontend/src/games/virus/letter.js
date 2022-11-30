@@ -48,10 +48,6 @@ export default class Letter extends PIXI.Container {
       this.clickCallback = callback
    }
 
-   text() {
-      return this.letter.text
-   }
-
    clickHandler() {
       if ( this.infected && this.virusPercent == 100.0) {
          return
@@ -61,11 +57,11 @@ export default class Letter extends PIXI.Container {
       }
       this.selected = !this.selected
       this.redraw = true
-      this.clickCallback(this.selected, this.letter.text)
+      this.clickCallback(this.selected, this.row, this.col, this.letter.text)
    }
 
    deselect() {
-      if ( this.seleccted) {
+      if ( this.selected) {
          this.selected = false
          this.redraw = true   
       }
@@ -117,7 +113,7 @@ export default class Letter extends PIXI.Container {
       }
       if (this.infected  && this.virusPercent < 100.0) {
          this.virusGfx.clear()
-         this.virusPercent += 0.15*delta
+         this.virusPercent += 0.1*delta
          if (this.virusPercent >= 100.0) {
             this.virusPercent = 100.0
             this.selected = false
@@ -132,7 +128,7 @@ export default class Letter extends PIXI.Container {
          }
          let radius = 25.0 * (this.virusPercent/100.0)
       
-         this.virusGfx.lineStyle(1, 0x33cc33, 1)
+         this.virusGfx.lineStyle(1, 0x660055, 1)
          this.virusGfx.beginFill(0x660055)
          this.virusGfx.drawCircle(0, 0, radius)
          this.virusGfx.endFill()

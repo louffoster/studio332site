@@ -89,8 +89,11 @@ onMounted(async () => {
    gfx.lineTo(300, 465)
    gfx.moveTo(0, 520)
    gfx.lineTo(300, 520)
+
+   // setup blank word... to be filled with clicked letters from grid
    x = 15
    for ( let i=0; i<6; i++) {
+      // draw the underline for the letter
       gfx.moveTo(x, 510)
       gfx.lineTo(x+25, 510)  
 
@@ -98,7 +101,7 @@ onMounted(async () => {
       wordLetter.x = x+2
       wordLetter.y = 475
       scene.addChild(wordLetter)
-      word.push(wordLetter)
+      word.push( {letter: wordLetter, fromRow: -1, fromCol: -1})
 
       x+=30
    }
@@ -145,19 +148,22 @@ function checkInfectedCount() {
 }
 
 async function enterWord() {
+   // 3 letters or more required!
    if ( letterIndex < 3) return
+
    let testWord = ""
-   word.forEach( l => testWord += l.text)
+   word.forEach( l => testWord += l.letter.text)
    let url = `${API_SERVICE}/virus/check?w=${testWord}`
    await axios.post(url).then( () => {
       replaceAll( )
    }).catch( e => {
-      deselectAll()
+      clearWord()
    })
 }
 
 function replaceAll() {
    let newLetters = drawNewLetters(letterIndex)
+   let clearAdjacent = newLetters.length > 3
    for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 5; c++) {
          if (grid[r][c].selected) {
@@ -165,7 +171,7 @@ function replaceAll() {
             grid[r][c].replace( replacement )   
 
             // stop infection on any adjecent tiles
-            if (newLetters.len > 3) {
+           if (clearAdjacent) {
                if ( r > 0) {
                   grid[r-1][c].disinfect()
                }
@@ -178,11 +184,22 @@ function replaceAll() {
                if ( c < 4) {
                   grid[r][c+1].disinfect()
                }
-            }
+           }
          }
       }
    }
-   word.forEach( wl  => wl.text = "")
+   clearWord()
+}
+
+function clearWord() {
+   word.forEach( wl  => {
+      if (wl.letter.text != "") {
+         grid[wl.fromRow][wl.fromCol].deselect()
+         wl.letter.text = ""
+         wl.fromCol = -1
+         wl.fromRow = -1   
+      }
+   })
    letterIndex = 0
 }
 
@@ -197,51 +214,34 @@ function drawNewLetters( cnt ) {
    return out
 }
 
-function deselectAll() {
-   for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 5; c++) {
-         grid[r][c].deselect()
-      }
-   }
-   word.forEach( wl  => wl.text = "")
-   letterIndex = 0
-}
-
-function letterClicked( selected, letter) {
+function letterClicked( selected, row, col, letter) {
+   console.log(letter+" "+row+","+col)
    Letter.wordFull = false
    if (selected) {
-      word[letterIndex].text = letter
+      word[letterIndex].letter.text = letter
+      word[letterIndex].fromCol = col
+      word[letterIndex].fromRow = row 
       letterIndex++ 
       if (letterIndex == 6) {
          Letter.wordFull = true
       }
    } else {
-      deselectLetter( letter )
-   }
-}
-
-function deselectLetter( letter ) {
-   let delIdx = -1 
-   word.forEach( (wl,idx) => {
-      if (wl.text == letter) {
-         delIdx = idx
-      }
-   })
-   if (delIdx > -1) {
-      if (delIdx == 5) {
-         word[delIdx].text = ""
-      } else {
-         for (let idx = delIdx; idx <= 4; idx++) {
-            word[idx].text = word[idx+1].text
-         }
-         word[5].text = ""
-      }
-      letterIndex--
+      clearWord()
    }
 }
 
 function letterLost( letter, row, col ) {
-   deselectLetter( letter )
+   console.log("lost "+letter+" at "+row+","+col)
+   let isInWord = false 
+   word.forEach( wl => {
+      if (wl.fromRow == row && wl.fromCol == col) {
+         isInWord = true
+      }
+   })
+   if ( isInWord ) {
+      clearWord()
+   }
+
    if ( row > 0) {
       grid[row-1][col].infect()
    }
