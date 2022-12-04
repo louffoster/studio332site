@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 
-export default class EnterKey extends PIXI.Container {
+export default class ShuttleKey extends PIXI.Container {
    constructor( x,y, listener) {
       super()
       this.interactive = true
@@ -24,19 +24,27 @@ export default class EnterKey extends PIXI.Container {
       if ( this.pointerDown) {
          this.graphics.beginFill(0x00cccc)
       }
-      this.graphics.drawRoundedRect(0,0, 60,35,5)
+      this.graphics.drawRoundedRect(0,0, 50,35,5)
       if ( this.pointerDown) {
          this.graphics.lineStyle(1, 0x333333, 1)
       }
-      this.graphics.moveTo(10,20)
-      this.graphics.lineTo(50,20)
-      this.graphics.lineTo(50,10)
-      this.graphics.moveTo(10,20)
-      this.graphics.lineTo(25,14)
-      this.graphics.moveTo(10,20)
-      this.graphics.lineTo(25,26)  
+      this.graphics.moveTo(10,10)
+      this.graphics.lineTo(20,10)
+      this.graphics.lineTo(40,25)
+      this.graphics.lineTo(35,25)
+      this.graphics.moveTo(40,25)
+      this.graphics.lineTo(40,20)
+
+      this.graphics.moveTo(10,25)
+      this.graphics.lineTo(20,25)
+      this.graphics.lineTo(40,10)
+
+      this.graphics.lineTo(35,10)
+      this.graphics.moveTo(40,10)
+      this.graphics.lineTo(40,15)
+ 
       this.graphics.interactive = true 
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,60,35)
+      this.graphics.hitArea = new PIXI.Rectangle(0,0,50,35)
    }
 
    handlePointerDown() {

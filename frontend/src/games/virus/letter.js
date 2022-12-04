@@ -49,7 +49,9 @@ export default class Letter extends PIXI.Container {
    }
 
    clickHandler() {
-      if ( this.infected && this.virusPercent == 100.0) {
+      console.log("LETTER CLICKED "+this.letter.text+": "+this.row+","+this.col)
+      console.log("FULL: "+Letter.wordFull+" SEL "+this.selected+" INFECTED "+this.infected)
+      if ( this.isLost() ) {
          return
       }
       if ( Letter.wordFull && this.selected == false ) { 
@@ -60,6 +62,13 @@ export default class Letter extends PIXI.Container {
       this.clickCallback(this.selected, this.row, this.col, this.letter.text)
    }
 
+   isInfected() {
+      return this.infected && this.virusPercent < 100
+   }
+   isLost() {
+      return this.infected && this.virusPercent == 100
+   }
+
    deselect() {
       if ( this.selected) {
          this.selected = false
@@ -68,6 +77,12 @@ export default class Letter extends PIXI.Container {
    }
 
    replace( newLetter ) {
+      if ( this.isLost() == false ) {
+         this.letter.text = newLetter    
+      }
+   }
+
+   reset( newLetter ) {
       this.selected = false
       if ( this.infected ) {
          this.infected = false 
@@ -86,7 +101,7 @@ export default class Letter extends PIXI.Container {
    }
 
    disinfect() {
-      if ( this.infected && this,this.virusPercent < 100) {
+      if ( this.infected == true ) {
          this.infected = false
          this.letter.style.fill = 0xcccccc
          this.virusPercent = 0
@@ -111,25 +126,24 @@ export default class Letter extends PIXI.Container {
          this.graphics.drawCircle(0,0, 25)
          this.redraw = false
       }
-      if (this.infected  && this.virusPercent < 100.0) {
+      if ( this.isInfected() ) {
          this.virusGfx.clear()
          this.virusPercent += 0.1*delta
          if (this.virusPercent >= 100.0) {
             this.virusPercent = 100.0
             this.selected = false
-            let deadLetter = this.letter.text
-            this.letter.destroy()
+            this.letter.text = ""
             this.graphics.clear()
             this.graphics.lineStyle(1, 0x33cc33, 1)
             this.graphics.drawCircle(0,0, 25)
             this.graphics.cursor = 'default'
             this.interactive = false
-            infectedCallback(deadLetter, this.row, this.col)
+            infectedCallback(this.row, this.col)
          }
          let radius = 25.0 * (this.virusPercent/100.0)
       
          this.virusGfx.lineStyle(1, 0x660055, 1)
-         this.virusGfx.beginFill(0x660055)
+         this.virusGfx.beginFill(0x770066)
          this.virusGfx.drawCircle(0, 0, radius)
          this.virusGfx.endFill()
       }

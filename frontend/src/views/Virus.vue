@@ -6,6 +6,7 @@
 <script setup>
 import Letter from "@/games/virus/letter"
 import EnterKey from "@/games/virus/enterkey"
+import ShuffleKey from "@/games/virus/shufflekey"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
@@ -21,6 +22,8 @@ var letterIndex = 0
 var checkCountdown = 1000
 var word = []
 var gfx = null
+const ROWS = 6
+const COLS = 5
 
 onBeforeUnmount(() => {
    app.ticker.stop()
@@ -62,9 +65,9 @@ onMounted(async () => {
 
    let y = 40
    let x = 40   
-   grid = Array(8).fill().map(() => Array(5))
-   for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 5; c++) {
+   grid = Array(ROWS).fill().map(() => Array(COLS))
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
          let l = new Letter(pool.pop(), x,y, r,c)
          l.setClickCallback(letterClicked)
          scene.addChild(l)
@@ -81,33 +84,35 @@ onMounted(async () => {
    let style = new PIXI.TextStyle({
       fill: "#cccccc",
       fontFamily: "\"Courier New\", Courier, monospace",
-      fontSize: 32,
+      fontSize: 24,
    })
 
    gfx.lineStyle(1, 0xcccccc, 1)
-   gfx.moveTo(0, 465)
-   gfx.lineTo(300, 465)
-   gfx.moveTo(0, 520)
-   gfx.lineTo(300, 520)
+   gfx.moveTo(0, 355)
+   gfx.lineTo(300, 355)
+   gfx.moveTo(0, 410)
+   gfx.lineTo(300, 410)
 
    // setup blank word... to be filled with clicked letters from grid
-   x = 15
+   x = 10
    for ( let i=0; i<6; i++) {
       // draw the underline for the letter
-      gfx.moveTo(x, 510)
-      gfx.lineTo(x+25, 510)  
+      gfx.moveTo(x, 395)
+      gfx.lineTo(x+20, 395)  
 
       let wordLetter = new PIXI.Text("", style)
       wordLetter.x = x+2
-      wordLetter.y = 475
+      wordLetter.y = 365
       scene.addChild(wordLetter)
       word.push( {letter: wordLetter, fromRow: -1, fromCol: -1})
 
-      x+=30
+      x+=25
    }
 
-   let enterKey = new EnterKey(215,475, enterWord)
+   let enterKey = new EnterKey(170,365, enterWord)
    scene.addChild(enterKey)
+   let shuffleKey = new ShuffleKey(170+70 ,365, shuffleGrid)
+   scene.addChild(shuffleKey)
 
    app.start()
    app.ticker.add((delta) => {
@@ -115,8 +120,8 @@ onMounted(async () => {
       if (checkCountdown <= 0 ) {
          checkInfectedCount()
       }
-      for (let r = 0; r < 8; r++) {
-         for (let c = 0; c < 5; c++) {
+      for (let r = 0; r < ROWS; r++) {
+         for (let c = 0; c < COLS; c++) {
             grid[r][c].update(delta, letterLost)
          }
       }
@@ -126,16 +131,16 @@ onMounted(async () => {
 function checkInfectedCount() {
    checkCountdown = 1000.0
    let cnt = 0
-   for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 5; c++) {
-         if (grid[r][c].infected && grid[r][c].virusPercent < 100) {
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if ( grid[r][c].isInfected() ) {
             cnt++
          }
       }
    }
    if ( cnt < 3) {
-      for (let r = 0; r < 8; r++) {
-         for (let c = 0; c < 5; c++) {
+      for (let r = 0; r < ROWS; r++) {
+         for (let c = 0; c < COLS; c++) {
             if (grid[r][c].infected == false) {
                cnt++
                grid[r][c].infect()
@@ -143,6 +148,15 @@ function checkInfectedCount() {
             if (cnt >= 3) break
          }
          if (cnt >= 3) break
+      }
+   }
+}
+
+function shuffleGrid() {
+   let newLetters = drawNewLetters(ROWS*COLS) 
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].replace( newLetters.pop() )  
       }
    }
 }
@@ -162,29 +176,28 @@ async function enterWord() {
 }
 
 function replaceAll() {
-   let newLetters = drawNewLetters(letterIndex)
-   let clearAdjacent = newLetters.length > 3
-   for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 5; c++) {
-         if (grid[r][c].selected) {
-            let replacement = newLetters.pop()
-            grid[r][c].replace( replacement )   
+   let newLetters = drawNewLetters(letterIndex) 
+   let clearCnt = newLetters.length-2
 
-            // stop infection on any adjecent tiles
-           if (clearAdjacent) {
-               if ( r > 0) {
-                  grid[r-1][c].disinfect()
-               }
-               if ( r < 7) {
-                  grid[r+1][c].disinfect()
-               }
-               if ( c > 0) {
-                  grid[r][c-1].disinfect()
-               }
-               if ( c < 4) {
-                  grid[r][c+1].disinfect()
-               }
-           }
+   // go from bottom to top and clear infected tiles 
+   // based on the length of the correct word
+   for (let r = (ROWS-1); r >= 0; r--) {
+      for (let c = 0; c < COLS; c++) {
+         if (grid[r][c].selected) {
+            if (grid[r][c].infected && clearCnt > 0) {
+               clearCnt--
+            }
+            let replacement = newLetters.pop()
+            grid[r][c].reset( replacement )  
+         }
+         if ( grid[r][c].isLost() && clearCnt > 0 ) {
+            let letters = drawNewLetters(1)
+            grid[r][c].reset(letters[0])
+            clearCnt--
+         }
+         if ( grid[r][c].infected && clearCnt > 0 ) {
+            grid[r][c].disinfect()   
+            clearCnt--
          }
       }
    }
@@ -201,6 +214,7 @@ function clearWord() {
       }
    })
    letterIndex = 0
+   Letter.wordFull = false
 }
 
 function drawNewLetters( cnt ) {
@@ -230,8 +244,7 @@ function letterClicked( selected, row, col, letter) {
    }
 }
 
-function letterLost( letter, row, col ) {
-   console.log("lost "+letter+" at "+row+","+col)
+function letterLost( row, col ) {
    let isInWord = false 
    word.forEach( wl => {
       if (wl.fromRow == row && wl.fromCol == col) {
@@ -245,13 +258,13 @@ function letterLost( letter, row, col ) {
    if ( row > 0) {
       grid[row-1][col].infect()
    }
-   if ( row < 7) {
+   if ( row < (ROWS-1) ) {
       grid[row+1][col].infect()
    }
    if ( col > 0) {
       grid[row][col-1].infect()
    }
-   if ( col < 4) {
+   if ( col < (COLS-1)) {
       grid[row][col+1].infect()
    }
 }
