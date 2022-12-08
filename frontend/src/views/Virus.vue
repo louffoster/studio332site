@@ -19,7 +19,14 @@ var scene = null
 var grid = null
 var pool = new Pool()
 var letterIndex = 0
-var checkCountdown = 1000
+var checkCountdown = 500
+var growInfection = false 
+var addCountdown = 1000
+var maxInfections = 3
+var lastIncreasedTimeSec = 0
+var gameTime = 0.0
+var timerDisplay = null
+var debugDisplay = null
 var word = []
 var gfx = null
 const ROWS = 6
@@ -114,22 +121,66 @@ onMounted(async () => {
    let shuffleKey = new ShuffleKey(170+70 ,365, shuffleGrid)
    scene.addChild(shuffleKey)
 
+   // timer and debug
+   timerDisplay = new PIXI.Text("00:00", style)
+   timerDisplay.x = 10
+   timerDisplay.y = 420
+   scene.addChild(timerDisplay)
+   debugDisplay = new PIXI.Text(`${maxInfections}`, style)
+   debugDisplay.x = 250
+   debugDisplay.y = 420
+   scene.addChild(debugDisplay)
+
    app.start()
-   app.ticker.add((delta) => {
-      checkCountdown -= app.ticker.deltaMS 
-      if (checkCountdown <= 0 ) {
-         checkInfectedCount()
-      }
-      for (let r = 0; r < ROWS; r++) {
-         for (let c = 0; c < COLS; c++) {
-            grid[r][c].update(delta, letterLost)
-         }
-      }
-   })
+   app.ticker.add( gameLoop )
 })
 
+function gameLoop(delta) {
+   let origTimeSec = Math.round(gameTime / 1000)
+   gameTime += app.ticker.deltaMS
+   let timeSec = Math.round(gameTime / 1000)
+
+   if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
+      maxInfections++
+      debugDisplay.text = `${maxInfections}`
+      lastIncreasedTimeSec = timeSec
+      addInfectedTile()
+   }
+
+   
+   if ( timeSec > origTimeSec) {
+      let secs = timeSec
+      let mins = Math.floor(timeSec / 60)
+      if ( mins > 0) {
+         secs = timeSec - mins*60
+      }
+      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+      timerDisplay.text = timeStr
+   }
+   
+   checkCountdown -= app.ticker.deltaMS 
+   if (checkCountdown <= 0 ) {
+      checkInfectedCount()
+   }
+
+   if ( growInfection ) {
+      addCountdown -= app.ticker.deltaMS 
+      if (addCountdown <=0)  {
+         addCountdown = 0 
+         growInfection = false
+         addInfectedTile()
+      }
+   }
+
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].update(delta, letterLost)
+      }
+   }
+}
+
 function checkInfectedCount() {
-   checkCountdown = 1000.0
+   checkCountdown = 500.0
    let cnt = 0
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -138,17 +189,22 @@ function checkInfectedCount() {
          }
       }
    }
-   if ( cnt < 3) {
-      for (let r = 0; r < ROWS; r++) {
-         for (let c = 0; c < COLS; c++) {
-            if (grid[r][c].infected == false) {
-               cnt++
-               grid[r][c].infect()
-            }
-            if (cnt >= 3) break
+   if ( cnt < maxInfections ) {
+      addInfectedTile()
+   }
+}
+
+function addInfectedTile() {
+   let added = false
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if (grid[r][c].infected == false) {
+            grid[r][c].infect()
+            added  = true
+            break 
          }
-         if (cnt >= 3) break
       }
+      if (added ) break
    }
 }
 
@@ -178,6 +234,7 @@ async function enterWord() {
 function replaceAll() {
    let newLetters = drawNewLetters(letterIndex) 
    let clearCnt = newLetters.length-2
+   console.log("GOOD WORD. DISINFECT "+clearCnt)
 
    // go from bottom to top and clear infected tiles 
    // based on the length of the correct word
@@ -229,7 +286,6 @@ function drawNewLetters( cnt ) {
 }
 
 function letterClicked( selected, row, col, letter) {
-   console.log(letter+" "+row+","+col)
    Letter.wordFull = false
    if (selected) {
       word[letterIndex].letter.text = letter

@@ -49,8 +49,6 @@ export default class Letter extends PIXI.Container {
    }
 
    clickHandler() {
-      console.log("LETTER CLICKED "+this.letter.text+": "+this.row+","+this.col)
-      console.log("FULL: "+Letter.wordFull+" SEL "+this.selected+" INFECTED "+this.infected)
       if ( this.isLost() ) {
          return
       }
