@@ -7,6 +7,7 @@
 import Letter from "@/games/virus/letter"
 import EnterKey from "@/games/virus/enterkey"
 import ShuffleKey from "@/games/virus/shufflekey"
+import StartOverlay from "@/games/virus/startoverlay"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
@@ -57,9 +58,6 @@ onMounted(async () => {
       height: tgtH,
    })
 
-   let url = `${API_SERVICE}/start?game=virus`
-   await axios.post(url)
-
    // The application will create a canvas element for you that you
    // can then insert into the DOM, then add the base scene container 
    // in this setup, all content added to the scene is auto scaled
@@ -70,6 +68,23 @@ onMounted(async () => {
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
 
+   let overlay = new StartOverlay() 
+   scene.addChild(overlay)
+
+   console.log("Start game request...")
+   let url = `${API_SERVICE}/start?game=virus`
+   await axios.post(url).then( response => {
+      console.log("Game started "+response.data)
+   })
+   console.log("AFTER START")
+
+   scene.removeChild(overlay)
+   overlay.destroy()
+
+   initGame()
+})
+
+function initGame() {
    let y = 40
    let x = 40   
    grid = Array(ROWS).fill().map(() => Array(COLS))
@@ -133,7 +148,7 @@ onMounted(async () => {
 
    app.start()
    app.ticker.add( gameLoop )
-})
+}
 
 function gameLoop(delta) {
    let origTimeSec = Math.round(gameTime / 1000)

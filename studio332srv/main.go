@@ -29,7 +29,7 @@ func main() {
 	// the port the dev front end expects to communicate with the back end on
 	cfg := loadConfig()
 
-	svc, err := initializeGameService()
+	svc, err := initializeGameService(cfg)
 	if err != nil {
 		log.Fatalf("Unable to setup game context: %s", err.Error())
 	}

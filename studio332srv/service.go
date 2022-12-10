@@ -6,13 +6,16 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 // GameService is a contet used for word games. It has a dictionary and word checker
 type GameService struct {
-	Words []string
+	Words  []string
+	JWTKey string
 }
 
 type checkWords struct {
@@ -31,7 +34,7 @@ func (svc *GameService) IsValidWord(value string) bool {
 	return false
 }
 
-func initializeGameService() (*GameService, error) {
+func initializeGameService(cfg *serviceConfig) (*GameService, error) {
 	// Read the disctionary into an array for checking word valididty
 	dict, err := os.ReadFile("data/words.txt")
 	if err != nil {
@@ -39,7 +42,7 @@ func initializeGameService() (*GameService, error) {
 		return nil, err
 	}
 
-	out := GameService{}
+	out := GameService{JWTKey: cfg.JWTKey}
 	out.Words = strings.Split(string(dict), "\n")
 	log.Printf("Loaded %d word dictionary", len(out.Words))
 	return &out, nil
@@ -52,5 +55,21 @@ func (svc *GameService) infoRequest(c *gin.Context) {
 func (svc *GameService) startGameRequest(c *gin.Context) {
 	game := c.Query("game")
 	log.Printf("INFO: start game %s", game)
-	c.String(http.StatusOK, fmt.Sprintf("started %s", game))
+	claims := jwt.StandardClaims{
+		Issuer:    "studio332",
+		IssuedAt:  time.Now().Unix(),
+		ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+		Subject:   fmt.Sprintf("%s:%d", game, time.Now().Unix()),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedStr, err := token.SignedString([]byte(svc.JWTKey))
+	if err != nil {
+		log.Printf("Unable to generate JWT: %s", err.Error())
+		c.String(http.StatusInternalServerError, "cannot start game")
+		return
+	}
+	log.Printf("SLEEP")
+	time.Sleep(time.Second * 10)
+	log.Printf("DONE")
+	c.String(http.StatusOK, signedStr)
 }
