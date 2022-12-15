@@ -19,6 +19,7 @@ var app = null
 var scene = null
 var grid = null
 var pool = new Pool()
+var initGameOverlay = null
 var letterIndex = 0
 var checkCountdown = 500
 var growInfection = false 
@@ -68,23 +69,16 @@ onMounted(async () => {
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
 
-   let overlay = new StartOverlay() 
-   scene.addChild(overlay)
-
-   console.log("Start game request...")
-   let url = `${API_SERVICE}/start?game=virus`
-   await axios.post(url).then( response => {
-      console.log("Game started "+response.data)
-   })
-   console.log("AFTER START")
-
-   scene.removeChild(overlay)
-   overlay.destroy()
-
-   initGame()
+   initGameOverlay = new StartOverlay(API_SERVICE) 
+   scene.addChild(initGameOverlay)
+   initGameOverlay.startGameInit( startGame )
 })
 
-function initGame() {
+function startGame( jwt ) {
+   console.log("START GAME "+jwt)
+   scene.removeChild(initGameOverlay)
+   initGameOverlay.destroy()
+
    let y = 40
    let x = 40   
    grid = Array(ROWS).fill().map(() => Array(COLS))

@@ -68,8 +68,5 @@ func (svc *GameService) startGameRequest(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "cannot start game")
 		return
 	}
-	log.Printf("SLEEP")
-	time.Sleep(time.Second * 10)
-	log.Printf("DONE")
 	c.String(http.StatusOK, signedStr)
 }
