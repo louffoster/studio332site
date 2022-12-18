@@ -20,6 +20,8 @@ var scene = null
 var grid = null
 var pool = new Pool()
 var initGameOverlay = null
+var gameOverOverlay = null
+var gameOver = false
 var letterIndex = 0
 var checkCountdown = 500
 var growInfection = false 
@@ -31,11 +33,20 @@ var timerDisplay = null
 var debugDisplay = null
 var word = []
 var gfx = null
+var wordCounts = []
 const ROWS = 6
 const COLS = 5
+const GAME_WIDTH = 300
+const GAME_HEIGHT = 600
 
 onBeforeUnmount(() => {
    app.ticker.stop()
+   if (initGameOverlay) {
+      initGameOverlay.destroy()
+   }
+   if (gameOverOverlay) {
+      initGameOverlay.destroy()
+   }
    scene.destroy({
       children: true,
       texture: true,
@@ -47,16 +58,14 @@ onBeforeUnmount(() => {
 })
 
 onMounted(async () => {
-   let tgtW = 300
-   let tgtH = 600
    pool.refill()
 
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
       backgroundColor: 0x44444a,
-      width: tgtW,
-      height: tgtH,
+      width: GAME_WIDTH,
+      height: GAME_HEIGHT,
    })
 
    // The application will create a canvas element for you that you
@@ -77,7 +86,12 @@ onMounted(async () => {
 function startGame( jwt ) {
    console.log("START GAME "+jwt)
    scene.removeChild(initGameOverlay)
-   initGameOverlay.destroy()
+
+   wordCounts = [0,0,0,0] // onve for each letter count; 3,4,5,6
+
+   gfx.lineStyle(3, 0xff6666, 1)
+   gfx.moveTo(0, 295)
+   gfx.lineTo(GAME_WIDTH, 295)
 
    let y = 40
    let x = 40   
@@ -94,6 +108,9 @@ function startGame( jwt ) {
          }
       }
       y += 55
+      if (r == ROWS-2) {
+         y+= 15
+      }
       x = 40
    } 
 
@@ -104,40 +121,40 @@ function startGame( jwt ) {
    })
 
    gfx.lineStyle(1, 0xcccccc, 1)
-   gfx.moveTo(0, 355)
-   gfx.lineTo(300, 355)
-   gfx.moveTo(0, 410)
-   gfx.lineTo(300, 410)
+   gfx.moveTo(0, 370)
+   gfx.lineTo(300, 370)
+   gfx.moveTo(0, 425)
+   gfx.lineTo(300, 425)
 
    // setup blank word... to be filled with clicked letters from grid
    x = 10
    for ( let i=0; i<6; i++) {
       // draw the underline for the letter
-      gfx.moveTo(x, 395)
-      gfx.lineTo(x+20, 395)  
+      gfx.moveTo(x, 410)
+      gfx.lineTo(x+20, 410)  
 
       let wordLetter = new PIXI.Text("", style)
       wordLetter.x = x+2
-      wordLetter.y = 365
+      wordLetter.y = 380
       scene.addChild(wordLetter)
       word.push( {letter: wordLetter, fromRow: -1, fromCol: -1})
 
       x+=25
    }
 
-   let enterKey = new EnterKey(170,365, enterWord)
+   let enterKey = new EnterKey(170,380, enterWord)
    scene.addChild(enterKey)
-   let shuffleKey = new ShuffleKey(170+70 ,365, shuffleGrid)
+   let shuffleKey = new ShuffleKey(170+70 ,380, shuffleGrid)
    scene.addChild(shuffleKey)
 
    // timer and debug
    timerDisplay = new PIXI.Text("00:00", style)
    timerDisplay.x = 10
-   timerDisplay.y = 420
+   timerDisplay.y = 435
    scene.addChild(timerDisplay)
    debugDisplay = new PIXI.Text(`${maxInfections}`, style)
    debugDisplay.x = 250
-   debugDisplay.y = 420
+   debugDisplay.y = 435
    scene.addChild(debugDisplay)
 
    app.start()
@@ -145,6 +162,10 @@ function startGame( jwt ) {
 }
 
 function gameLoop(delta) {
+   if (gameOver) {
+      return
+   }
+
    let origTimeSec = Math.round(gameTime / 1000)
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
@@ -156,7 +177,6 @@ function gameLoop(delta) {
       addInfectedTile()
    }
 
-   
    if ( timeSec > origTimeSec) {
       let secs = timeSec
       let mins = Math.floor(timeSec / 60)
@@ -218,6 +238,8 @@ function addInfectedTile() {
 }
 
 function shuffleGrid() {
+   if (gameOver) return 
+   
    let newLetters = drawNewLetters(ROWS*COLS) 
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -227,6 +249,8 @@ function shuffleGrid() {
 }
 
 async function enterWord() {
+   if (gameOver) return
+
    // 3 letters or more required!
    if ( letterIndex < 3) return
 
@@ -244,6 +268,10 @@ function replaceAll() {
    let newLetters = drawNewLetters(letterIndex) 
    let clearCnt = newLetters.length-2
    console.log("GOOD WORD. DISINFECT "+clearCnt)
+
+   let cntIdx = newLetters.length - 3 
+   wordCounts[cntIdx]++
+   console.log(wordCounts)
 
    // go from bottom to top and clear infected tiles 
    // based on the length of the correct word
@@ -295,6 +323,9 @@ function drawNewLetters( cnt ) {
 }
 
 function letterClicked( selected, row, col, letter) {
+   if (gameOver) {
+      return
+   }
    Letter.wordFull = false
    if (selected) {
       word[letterIndex].letter.text = letter
@@ -310,6 +341,12 @@ function letterClicked( selected, row, col, letter) {
 }
 
 function letterLost( row, col ) {
+   // if any in the last row are lost, game over
+   if (row == ROWS-1) {
+      gameOver = true
+      console.log("GAME OVER!")
+      return
+   }
    let isInWord = false 
    word.forEach( wl => {
       if (wl.fromRow == row && wl.fromCol == col) {
