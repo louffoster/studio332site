@@ -6,11 +6,12 @@ export default class StartOverlay extends PIXI.Container {
    constructor(apiURL) {
       super()
       this.x = 5 
-      this.y = 100
+      this.y = 150
       this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(1, 0x55dd55, 1)
+      this.graphics.beginFill(0x333333)
       this.graphics.drawRect(0,0, 290,150)
       this.addChild(this.graphics)
 
@@ -41,7 +42,8 @@ export default class StartOverlay extends PIXI.Container {
       this.graphics.hitArea = new PIXI.Rectangle(95,90, 100,35)
       this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0x55dd55, 1)
-      this.graphics.drawRoundedRect(95,90, 100,35,5)
+      this.graphics.beginFill(0x114a11)
+      this.graphics.drawRect(95,90, 100,35)
       let style = new PIXI.TextStyle({
          fill: "#55dd55",
          fontFamily: "\"Courier New\", Courier, monospace",

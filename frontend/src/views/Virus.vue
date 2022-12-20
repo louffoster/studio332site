@@ -8,6 +8,7 @@ import Letter from "@/games/virus/letter"
 import EnterKey from "@/games/virus/enterkey"
 import ShuffleKey from "@/games/virus/shufflekey"
 import StartOverlay from "@/games/virus/startoverlay"
+import EndOverlay from "@/games/virus/endoverlay"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
@@ -75,10 +76,9 @@ onMounted(async () => {
    gameEle.appendChild(app.view)
    scene = new PIXI.Container()
    app.stage.addChild(scene)
-   gfx = new PIXI.Graphics() 
-   scene.addChild(gfx)
 
    initGameOverlay = new StartOverlay(API_SERVICE) 
+   gameOverOverlay = new EndOverlay(restartHandler, gameTime, wordCounts) 
    scene.addChild(initGameOverlay)
    initGameOverlay.startGameInit( startGame )
 })
@@ -86,6 +86,9 @@ onMounted(async () => {
 function startGame( jwt ) {
    console.log("START GAME "+jwt)
    scene.removeChild(initGameOverlay)
+
+   gfx = new PIXI.Graphics() 
+   scene.addChild(gfx)
 
    wordCounts = [0,0,0,0] // onve for each letter count; 3,4,5,6
 
@@ -152,8 +155,8 @@ function startGame( jwt ) {
    timerDisplay.x = 10
    timerDisplay.y = 435
    scene.addChild(timerDisplay)
-   debugDisplay = new PIXI.Text(`${maxInfections}`, style)
-   debugDisplay.x = 250
+   debugDisplay = new PIXI.Text(`${maxInfections}, R ${Letter.infectRatePerSec}`, style)
+   debugDisplay.x = 120
    debugDisplay.y = 435
    scene.addChild(debugDisplay)
 
@@ -161,7 +164,7 @@ function startGame( jwt ) {
    app.ticker.add( gameLoop )
 }
 
-function gameLoop(delta) {
+function gameLoop() {
    if (gameOver) {
       return
    }
@@ -170,9 +173,17 @@ function gameLoop(delta) {
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
 
-   if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
+   // get harder every 20 seconds
+   if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 20 == 0) { 
       maxInfections++
-      debugDisplay.text = `${maxInfections}`
+      if (maxInfections > 10) {
+         maxInfections = 10
+      }
+      Letter.infectRatePerSec += Letter.infectRatePerSec * 0.15
+      if ( Letter.infectRatePerSec > 12.5) {
+         Letter.infectRatePerSec = 12.5
+      }
+      debugDisplay.text = `${maxInfections}, R ${Letter.infectRatePerSec}`
       lastIncreasedTimeSec = timeSec
       addInfectedTile()
    }
@@ -203,7 +214,7 @@ function gameLoop(delta) {
 
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         grid[r][c].update(delta, letterLost)
+         grid[r][c].update(app.ticker.deltaMS, letterLost)
       }
    }
 }
@@ -266,8 +277,10 @@ async function enterWord() {
 
 function replaceAll() {
    let newLetters = drawNewLetters(letterIndex) 
-   let clearCnt = newLetters.length-2
-   console.log("GOOD WORD. DISINFECT "+clearCnt)
+   //let clearCnt = newLetters.length-2
+   let clearCounts = [0,0,1,2,4,6]
+   let clearCnt = clearCounts[newLetters.length-1]
+   console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
 
    let cntIdx = newLetters.length - 3 
    wordCounts[cntIdx]++
@@ -344,7 +357,7 @@ function letterLost( row, col ) {
    // if any in the last row are lost, game over
    if (row == ROWS-1) {
       gameOver = true
-      console.log("GAME OVER!")
+      scene.addChild(gameOverOverlay)
       return
    }
    let isInWord = false 
@@ -369,6 +382,25 @@ function letterLost( row, col ) {
    if ( col < (COLS-1)) {
       grid[row][col+1].infect()
    }
+}
+
+function restartHandler() {
+   Letter.wordFull = false 
+   Letter.infectRatePerSec = 5.0
+   gameOver = false
+   letterIndex = 0
+   checkCountdown = 500
+   growInfection = false 
+   addCountdown = 1000
+   maxInfections = 3
+   lastIncreasedTimeSec = 0
+   gameTime = 0.0
+   word = []
+   wordCounts = []
+   pool.refill()
+   scene.removeChildren()
+
+   // TODO RESTART game wigout double creatiing stuff
 }
 </script>
 

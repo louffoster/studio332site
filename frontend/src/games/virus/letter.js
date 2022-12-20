@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
    static wordFull = false 
+   static infectRatePerSec = 5.0 // 20 sec to fill
 
    constructor(letter, x, y, r,c ) {
       super()
@@ -13,6 +14,7 @@ export default class Letter extends PIXI.Container {
       this.redraw = false
       this.virusGfx = new PIXI.Graphics() 
       this.virusPercent = 0.0 
+      this
       this.addChild(this.virusGfx)
 
       // set the container position. all other drawing is in reference 
@@ -25,7 +27,9 @@ export default class Letter extends PIXI.Container {
       this.style = new PIXI.TextStyle({
          fill: "#cccccc",
          fontFamily: "\"Courier New\", Courier, monospace",
-         fontSize: 38,
+         fontSize: 36,
+         stroke: '#111111',
+         strokeThickness: 4,
       })
 
       this.graphics = new PIXI.Graphics()
@@ -111,7 +115,7 @@ export default class Letter extends PIXI.Container {
       this.removeChildren()
    }
 
-   update(delta, infectedCallback) {
+   update(deltaMS, infectedCallback) {
       if (this.redraw) {
          this.graphics.clear()
          if (this.selected) {
@@ -126,13 +130,14 @@ export default class Letter extends PIXI.Container {
       }
       if ( this.isInfected() ) {
          this.virusGfx.clear()
-         this.virusPercent += 0.1*delta
+
+         this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
          if (this.virusPercent >= 100.0) {
             this.virusPercent = 100.0
             this.selected = false
             this.letter.text = ""
             this.graphics.clear()
-            this.graphics.lineStyle(1, 0x33cc33, 1)
+            this.graphics.lineStyle(3, 0x008800, 1)
             this.graphics.drawCircle(0,0, 25)
             this.graphics.cursor = 'default'
             this.interactive = false
@@ -141,7 +146,11 @@ export default class Letter extends PIXI.Container {
          let radius = 25.0 * (this.virusPercent/100.0)
       
          this.virusGfx.lineStyle(1, 0x660055, 1)
-         this.virusGfx.beginFill(0x770066)
+         let color = 0xaa0099
+         if ( this.virusPercent == 100) {
+            color = 0x660055
+         }
+         this.virusGfx.beginFill(color)
          this.virusGfx.drawCircle(0, 0, radius)
          this.virusGfx.endFill()
       }

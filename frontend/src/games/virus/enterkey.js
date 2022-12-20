@@ -21,10 +21,11 @@ export default class EnterKey extends PIXI.Container {
    drawButton() {
       this.graphics.clear()
       this.graphics.lineStyle(1, 0xcccccc, 1)
+      this.graphics.beginFill(0x445577)
       if ( this.pointerDown) {
-         this.graphics.beginFill(0x00cccc)
+         this.graphics.beginFill(0x77aaff)
       }
-      this.graphics.drawRoundedRect(0,0, 60,35,5)
+      this.graphics.drawRect(0,0, 60,35)
       if ( this.pointerDown) {
          this.graphics.lineStyle(1, 0x333333, 1)
       }
