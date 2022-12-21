@@ -98,7 +98,7 @@ export default class Letter extends PIXI.Container {
    infect() {
       if ( this.infected == false) {
          this.infected = true
-         this.letter.style.fill = 0x33aa33
+         this.redraw = true  
       }
    }
 
@@ -123,7 +123,11 @@ export default class Letter extends PIXI.Container {
             this.letter.style.fill = 0xaaddff
          } else {
             this.graphics.lineStyle(1, 0xcccccc, 1)
-            this.letter.style.fill = 0xcccccc
+            if ( this.isInfected() ) {
+               this.letter.style.fill = 0x33aa33
+            } else {
+               this.letter.style.fill = 0xcccccc
+            }
          }
          this.graphics.drawCircle(0,0, 25)
          this.redraw = false

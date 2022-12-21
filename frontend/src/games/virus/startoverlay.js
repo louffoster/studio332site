@@ -5,14 +5,14 @@ import axios from 'axios'
 export default class StartOverlay extends PIXI.Container {
    constructor(apiURL) {
       super()
-      this.x = 5 
-      this.y = 150
+      this.x = 10 
+      this.y = 100
       this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(1, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
-      this.graphics.drawRect(0,0, 290,150)
+      this.graphics.drawRect(0,0, 280,150)
       this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({

@@ -3,19 +3,19 @@ import * as PIXI from "pixi.js"
 export default class EndOverlay extends PIXI.Container {
    constructor( restartCallback, gameTime, stats ) {
       super()
-      this.x = 5 
+      this.x = 10
       this.y = 100
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(1, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
-      this.graphics.drawRect(0,0, 290,250)
+      this.graphics.drawRect(0,0, 280,250)
       this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({
          fill: "#55dd55",
          fontFamily: "\"Courier New\", Courier, monospace",
-         fontSize: 20,
+         fontSize: 18,
       })
       this.msg = new PIXI.Text("System Failure", style)
       this.msg.anchor.set(0.5)

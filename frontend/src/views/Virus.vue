@@ -22,7 +22,7 @@ var grid = null
 var pool = new Pool()
 var initGameOverlay = null
 var gameOverOverlay = null
-var gameOver = false
+var gameOver = true
 var letterIndex = 0
 var checkCountdown = 500
 var growInfection = false 
@@ -35,6 +35,7 @@ var debugDisplay = null
 var word = []
 var gfx = null
 var wordCounts = []
+var gameplayToken = ""
 const ROWS = 6
 const COLS = 5
 const GAME_WIDTH = 300
@@ -59,8 +60,6 @@ onBeforeUnmount(() => {
 })
 
 onMounted(async () => {
-   pool.refill()
-
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
@@ -77,20 +76,20 @@ onMounted(async () => {
    scene = new PIXI.Container()
    app.stage.addChild(scene)
 
+   layoutGameScreen()
+
    initGameOverlay = new StartOverlay(API_SERVICE) 
    gameOverOverlay = new EndOverlay(restartHandler, gameTime, wordCounts) 
    scene.addChild(initGameOverlay)
    initGameOverlay.startGameInit( startGame )
+
+   app.start()
+   app.ticker.add( gameLoop )
 })
 
-function startGame( jwt ) {
-   console.log("START GAME "+jwt)
-   scene.removeChild(initGameOverlay)
-
+function layoutGameScreen() {
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
-
-   wordCounts = [0,0,0,0] // onve for each letter count; 3,4,5,6
 
    gfx.lineStyle(3, 0xff6666, 1)
    gfx.moveTo(0, 295)
@@ -101,14 +100,11 @@ function startGame( jwt ) {
    grid = Array(ROWS).fill().map(() => Array(COLS))
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         let l = new Letter(pool.pop(), x,y, r,c)
+         let l = new Letter("", x,y, r,c)
          l.setClickCallback(letterClicked)
          scene.addChild(l)
          grid[r][c] = l
          x += 55
-         if (r == 0 && c > 0 && c < 4) {
-            l.infect()
-         }
       }
       y += 55
       if (r == ROWS-2) {
@@ -155,13 +151,27 @@ function startGame( jwt ) {
    timerDisplay.x = 10
    timerDisplay.y = 435
    scene.addChild(timerDisplay)
+
+   // debug stuff
    debugDisplay = new PIXI.Text(`${maxInfections}, R ${Letter.infectRatePerSec}`, style)
    debugDisplay.x = 120
    debugDisplay.y = 435
    scene.addChild(debugDisplay)
+}
 
-   app.start()
-   app.ticker.add( gameLoop )
+function startGame( jwt ) {
+   gameplayToken = jwt
+   scene.removeChild(initGameOverlay)
+
+   pool.refill()
+   wordCounts = [0,0,0,0] // one for each letter count; 3,4,5,6
+   gameOver = false
+
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].reset( pool.pop() )
+      }
+   } 
 }
 
 function gameLoop() {
@@ -180,9 +190,9 @@ function gameLoop() {
          maxInfections = 10
       }
       Letter.infectRatePerSec += Letter.infectRatePerSec * 0.15
-      if ( Letter.infectRatePerSec > 12.5) {
-         Letter.infectRatePerSec = 12.5
-      }
+      // if ( Letter.infectRatePerSec > 12.5) {
+      //    Letter.infectRatePerSec = 12.5
+      // }
       debugDisplay.text = `${maxInfections}, R ${Letter.infectRatePerSec}`
       lastIncreasedTimeSec = timeSec
       addInfectedTile()
@@ -228,6 +238,12 @@ function checkInfectedCount() {
             cnt++
          }
       }
+   }
+   if (cnt == 0) {
+      grid[0][0].infect()
+      grid[0][2].infect()
+      grid[0][4].infect()
+      cnt = 3
    }
    if ( cnt < maxInfections ) {
       addInfectedTile()
@@ -357,6 +373,11 @@ function letterLost( row, col ) {
    // if any in the last row are lost, game over
    if (row == ROWS-1) {
       gameOver = true
+      for (let r = 0; r < ROWS; r++) {
+         for (let c = 0; c < COLS; c++) {
+            grid[r][c].replace( "" )
+         }
+      } 
       scene.addChild(gameOverOverlay)
       return
    }
@@ -387,7 +408,6 @@ function letterLost( row, col ) {
 function restartHandler() {
    Letter.wordFull = false 
    Letter.infectRatePerSec = 5.0
-   gameOver = false
    letterIndex = 0
    checkCountdown = 500
    growInfection = false 
@@ -397,10 +417,16 @@ function restartHandler() {
    gameTime = 0.0
    word = []
    wordCounts = []
-   pool.refill()
-   scene.removeChildren()
-
-   // TODO RESTART game wigout double creatiing stuff
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].reset( "" )
+         grid[r][c].update(0, letterLost)
+      }
+   } 
+   
+   scene.removeChild(gameOverOverlay)
+   scene.addChild(initGameOverlay)
+   initGameOverlay.startGameInit( startGame )
 }
 </script>
 
