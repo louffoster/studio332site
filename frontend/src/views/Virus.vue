@@ -79,7 +79,7 @@ onMounted(async () => {
    layoutGameScreen()
 
    initGameOverlay = new StartOverlay(API_SERVICE) 
-   gameOverOverlay = new EndOverlay(restartHandler, gameTime, wordCounts) 
+   gameOverOverlay = new EndOverlay(restartHandler) 
    scene.addChild(initGameOverlay)
    initGameOverlay.startGameInit( startGame )
 
@@ -147,15 +147,20 @@ function layoutGameScreen() {
    scene.addChild(shuffleKey)
 
    // timer and debug
-   timerDisplay = new PIXI.Text("00:00", style)
-   timerDisplay.x = 10
+   timerDisplay = new PIXI.Text("Uptime: 00:00", {
+      fill: "#55dd55",
+      fontFamily: "\"Courier New\", Courier, monospace",
+      fontSize: 18,
+   })
+   timerDisplay.anchor.set(0.5,0)
+   timerDisplay.x = GAME_WIDTH/2
    timerDisplay.y = 435
    scene.addChild(timerDisplay)
 
    // debug stuff
    debugDisplay = new PIXI.Text(`${maxInfections}, R ${Letter.infectRatePerSec}`, style)
-   debugDisplay.x = 120
-   debugDisplay.y = 435
+   debugDisplay.x = 10
+   debugDisplay.y = 470
    scene.addChild(debugDisplay)
 }
 
@@ -183,16 +188,13 @@ function gameLoop() {
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
 
-   // get harder every 20 seconds
-   if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 20 == 0) { 
+   // get harder every 30 seconds
+   if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
       maxInfections++
       if (maxInfections > 10) {
          maxInfections = 10
       }
-      Letter.infectRatePerSec += Letter.infectRatePerSec * 0.15
-      // if ( Letter.infectRatePerSec > 12.5) {
-      //    Letter.infectRatePerSec = 12.5
-      // }
+      Letter.infectRatePerSec += Letter.infectRatePerSec * 0.1
       debugDisplay.text = `${maxInfections}, R ${Letter.infectRatePerSec}`
       lastIncreasedTimeSec = timeSec
       addInfectedTile()
@@ -204,7 +206,7 @@ function gameLoop() {
       if ( mins > 0) {
          secs = timeSec - mins*60
       }
-      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+      let timeStr = "Uptime: "+`${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       timerDisplay.text = timeStr
    }
    
@@ -293,7 +295,6 @@ async function enterWord() {
 
 function replaceAll() {
    let newLetters = drawNewLetters(letterIndex) 
-   //let clearCnt = newLetters.length-2
    let clearCounts = [0,0,1,2,4,6]
    let clearCnt = clearCounts[newLetters.length-1]
    console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
@@ -371,13 +372,14 @@ function letterClicked( selected, row, col, letter) {
 
 function letterLost( row, col ) {
    // if any in the last row are lost, game over
-   if (row == ROWS-1) {
+   if (row == ROWS-1 && gameOver == false) {
       gameOver = true
       for (let r = 0; r < ROWS; r++) {
          for (let c = 0; c < COLS; c++) {
             grid[r][c].replace( "" )
          }
       } 
+      gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
       scene.addChild(gameOverOverlay)
       return
    }

@@ -135,7 +135,12 @@ export default class Letter extends PIXI.Container {
       if ( this.isInfected() ) {
          this.virusGfx.clear()
 
-         this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
+         if ( this.selected ) {
+            // selecting a letter slows growth
+            this.virusPercent += (Letter.infectRatePerSec/2.0) * (deltaMS/1000.0)
+         } else {
+            this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
+         }
          if (this.virusPercent >= 100.0) {
             this.virusPercent = 100.0
             this.selected = false
