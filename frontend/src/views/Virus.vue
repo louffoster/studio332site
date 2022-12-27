@@ -27,7 +27,6 @@ var letterIndex = 0
 var checkCountdown = 500
 var growInfection = false 
 var addCountdown = 1000
-var maxInfections = 3
 var lastIncreasedTimeSec = 0
 var gameTime = 0.0
 var timerDisplay = null
@@ -36,10 +35,12 @@ var word = []
 var gfx = null
 var wordCounts = []
 var gameplayToken = ""
+
 const ROWS = 6
 const COLS = 5
 const GAME_WIDTH = 300
 const GAME_HEIGHT = 600
+const MIN_INFECTIONS = 3
 
 onBeforeUnmount(() => {
    app.ticker.stop()
@@ -158,7 +159,7 @@ function layoutGameScreen() {
    scene.addChild(timerDisplay)
 
    // debug stuff
-   debugDisplay = new PIXI.Text(`${maxInfections}, R ${Letter.infectRatePerSec}`, style)
+   debugDisplay = new PIXI.Text(`R ${Letter.infectRatePerSec}`, style)
    debugDisplay.x = 10
    debugDisplay.y = 470
    scene.addChild(debugDisplay)
@@ -188,17 +189,12 @@ function gameLoop() {
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
 
-   // get harder every 30 seconds
    if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
-      maxInfections++
-      if (maxInfections > 10) {
-         maxInfections = 10
-      }
-      Letter.infectRatePerSec += Letter.infectRatePerSec * 0.1
-      debugDisplay.text = `${maxInfections}, R ${Letter.infectRatePerSec}`
       lastIncreasedTimeSec = timeSec
       addInfectedTile()
+      Letter.infectRatePerSec += Letter.infectRatePerSec * 0.1
    }
+   debugDisplay.text = `R ${Letter.infectRatePerSec}`
 
    if ( timeSec > origTimeSec) {
       let secs = timeSec
@@ -247,7 +243,7 @@ function checkInfectedCount() {
       grid[0][4].infect()
       cnt = 3
    }
-   if ( cnt < maxInfections ) {
+   if ( cnt < MIN_INFECTIONS ) {
       addInfectedTile()
    }
 }
@@ -414,10 +410,13 @@ function restartHandler() {
    checkCountdown = 500
    growInfection = false 
    addCountdown = 1000
-   maxInfections = 3
    lastIncreasedTimeSec = 0
    gameTime = 0.0
-   word = []
+   for ( let i=0; i<6; i++) {
+     word[i].letter.text = ""
+     word[i].fromRow = -1
+     word[i].fromCol = -1
+   }
    wordCounts = []
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
