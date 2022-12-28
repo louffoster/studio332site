@@ -9,6 +9,7 @@ import EnterKey from "@/games/virus/enterkey"
 import ShuffleKey from "@/games/virus/shufflekey"
 import StartOverlay from "@/games/virus/startoverlay"
 import EndOverlay from "@/games/virus/endoverlay"
+import Gauge from "@/games/virus/gauge"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
@@ -30,10 +31,10 @@ var addCountdown = 1000
 var lastIncreasedTimeSec = 0
 var gameTime = 0.0
 var timerDisplay = null
-var debugDisplay = null
 var word = []
 var gfx = null
 var wordCounts = []
+var gauges = []
 var gameplayToken = ""
 
 const ROWS = 6
@@ -120,11 +121,11 @@ function layoutGameScreen() {
       fontSize: 24,
    })
 
-   gfx.lineStyle(1, 0xcccccc, 1)
+   gfx.lineStyle(1, 0x888899, 1)
    gfx.moveTo(0, 370)
-   gfx.lineTo(300, 370)
+   gfx.lineTo(GAME_WIDTH, 370)
    gfx.moveTo(0, 425)
-   gfx.lineTo(300, 425)
+   gfx.lineTo(GAME_WIDTH, 425)
 
    // setup blank word... to be filled with clicked letters from grid
    x = 10
@@ -147,22 +148,29 @@ function layoutGameScreen() {
    let shuffleKey = new ShuffleKey(170+70 ,380, shuffleGrid)
    scene.addChild(shuffleKey)
 
-   // timer and debug
+   // word count gauges
+   gauges = []
+   let maxValues = [8,6,5,4]
+   let gaugeY = 440
+   for (let i=0; i<4; i++) {
+      let g = new Gauge(10,gaugeY,`${i+3}`, maxValues[i])
+      gauges.push( g )
+      scene.addChild( g )
+      gaugeY+=28
+   }
+
+   // timer 
+   gfx.moveTo(0, 560)
+   gfx.lineTo(GAME_WIDTH, 560)
    timerDisplay = new PIXI.Text("Uptime: 00:00", {
-      fill: "#55dd55",
+      fill: "#44cc44",
       fontFamily: "\"Courier New\", Courier, monospace",
       fontSize: 18,
    })
    timerDisplay.anchor.set(0.5,0)
    timerDisplay.x = GAME_WIDTH/2
-   timerDisplay.y = 435
+   timerDisplay.y = 570
    scene.addChild(timerDisplay)
-
-   // debug stuff
-   debugDisplay = new PIXI.Text(`R ${Letter.infectRatePerSec}`, style)
-   debugDisplay.x = 10
-   debugDisplay.y = 470
-   scene.addChild(debugDisplay)
 }
 
 function startGame( jwt ) {
@@ -194,7 +202,6 @@ function gameLoop() {
       addInfectedTile()
       Letter.infectRatePerSec += Letter.infectRatePerSec * 0.1
    }
-   debugDisplay.text = `R ${Letter.infectRatePerSec}`
 
    if ( timeSec > origTimeSec) {
       let secs = timeSec
@@ -296,6 +303,7 @@ function replaceAll() {
    console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
 
    let cntIdx = newLetters.length - 3 
+   gauges[cntIdx].increaseValue()
    wordCounts[cntIdx]++
    console.log(wordCounts)
 

@@ -14,7 +14,6 @@ export default class Letter extends PIXI.Container {
       this.redraw = false
       this.virusGfx = new PIXI.Graphics() 
       this.virusPercent = 0.0 
-      this
       this.addChild(this.virusGfx)
 
       // set the container position. all other drawing is in reference 

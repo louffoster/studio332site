@@ -7,7 +7,7 @@ export default class EndOverlay extends PIXI.Container {
       this.y = 100
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(1, 0x55dd55, 1)
+      this.graphics.lineStyle(2, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
       this.graphics.drawRect(0,0, 280,250)
       this.addChild(this.graphics)

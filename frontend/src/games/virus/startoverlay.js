@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js"
 import axios from 'axios'
+import { PI_2 } from "pixi.js"
 
 
 export default class StartOverlay extends PIXI.Container {
@@ -10,7 +11,7 @@ export default class StartOverlay extends PIXI.Container {
       this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(1, 0x55dd55, 1)
+      this.graphics.lineStyle(2, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
       this.graphics.drawRect(0,0, 280,150)
       this.addChild(this.graphics)
