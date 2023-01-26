@@ -25,10 +25,11 @@ var initGameOverlay = null
 var gameOverOverlay = null
 var gameOver = true
 var letterIndex = 0
-var checkCountdown = 500
-var growInfection = false 
+var checkCountdown = 0
 var addCountdown = 1000
 var lastIncreasedTimeSec = 0
+var infectionLevel = 3     // minmum number of infected tiles
+var pendingInfections = 0  // numner of infections to add to bring up to current level
 var gameTime = 0.0
 var timerDisplay = null
 var word = []
@@ -41,7 +42,7 @@ const ROWS = 6
 const COLS = 5
 const GAME_WIDTH = 300
 const GAME_HEIGHT = 600
-const MIN_INFECTIONS = 3
+const MAX_INFECTIONS = 5
 
 onBeforeUnmount(() => {
    app.ticker.stop()
@@ -193,16 +194,42 @@ function gameLoop() {
       return
    }
 
+   // get prior time and new time. necessary to check if a new second has gone by
    let origTimeSec = Math.round(gameTime / 1000)
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
 
+   // Every 30 seconds, increase rate by 10%, and raise infection level
    if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
       lastIncreasedTimeSec = timeSec
-      addInfectedTile()
-      Letter.infectRatePerSec += Letter.infectRatePerSec * 0.1
+      Letter.increseInfectionRate()
+      if (infectionLevel < MAX_INFECTIONS) {
+         infectionLevel++
+      }
+      console.log("NEW RATE: "+Letter.infectRatePerSec+"  LEVEL "+infectionLevel)
    }
 
+   // is it time to check for infectedd tile counts (very second)?
+   checkCountdown -= app.ticker.deltaMS 
+   if (checkCountdown <= 0 ) {
+      checkInfectedCount()
+      if (pendingInfections > 0) {
+         console.log("Checked infections. NEW pending: "+pendingInfections)
+      }
+   }
+
+   // if more infections are pending add them once per second
+   if ( pendingInfections > 0 ) {
+      addCountdown -= app.ticker.deltaMS 
+      if (addCountdown <=0)  {
+         addCountdown = 1000
+         addInfectedTile()
+         pendingInfections--
+         console.log("ADDED pending infection. Pending: "+pendingInfections)
+      }
+   }
+
+   // Update the timer and display it
    if ( timeSec > origTimeSec) {
       let secs = timeSec
       let mins = Math.floor(timeSec / 60)
@@ -212,21 +239,8 @@ function gameLoop() {
       let timeStr = "Uptime: "+`${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       timerDisplay.text = timeStr
    }
-   
-   checkCountdown -= app.ticker.deltaMS 
-   if (checkCountdown <= 0 ) {
-      checkInfectedCount()
-   }
 
-   if ( growInfection ) {
-      addCountdown -= app.ticker.deltaMS 
-      if (addCountdown <=0)  {
-         addCountdown = 0 
-         growInfection = false
-         addInfectedTile()
-      }
-   }
-
+   // Tick all letters to gro infection. Pass along a callback for lost letter
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
          grid[r][c].update(app.ticker.deltaMS, letterLost)
@@ -235,7 +249,7 @@ function gameLoop() {
 }
 
 function checkInfectedCount() {
-   checkCountdown = 500.0
+   checkCountdown = 1000.0
    let cnt = 0
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -244,14 +258,23 @@ function checkInfectedCount() {
          }
       }
    }
+
+   // If there is nothing, always start with 3 in alternating columns in first row
    if (cnt == 0) {
+      console.log("NO infections, add 3 starters immediately")
       grid[0][0].infect()
       grid[0][2].infect()
       grid[0][4].infect()
       cnt = 3
    }
-   if ( cnt < MIN_INFECTIONS ) {
-      addInfectedTile()
+
+   // keep the number of infected tiles at a minum of the current level
+   if ( cnt < infectionLevel) {
+      pendingInfections = infectionLevel - cnt
+      addCountdown = 1000
+   } else {
+      pendingInfections = 0
+      addCountdown = 0
    }
 }
 
@@ -290,39 +313,52 @@ async function enterWord() {
    word.forEach( l => testWord += l.letter.text)
    let url = `${API_SERVICE}/virus/check?w=${testWord}`
    await axios.post(url).then( () => {
-      replaceAll( )
+      wordAccepted( )
    }).catch( e => {
+      // FAILED WORD TODO
       clearWord()
    })
 }
 
-function replaceAll() {
+function wordAccepted() {
    let newLetters = drawNewLetters(letterIndex) 
-   let clearCounts = [0,0,1,2,4,6]
+   let clearCounts = [0,0,2,3,4,5]
    let clearCnt = clearCounts[newLetters.length-1]
    console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
 
+   // Increase the letter count gauges
    let cntIdx = newLetters.length - 3 
    gauges[cntIdx].increaseValue()
    wordCounts[cntIdx]++
-   console.log(wordCounts)
+   if ( areGaugesFull()) {
+      console.log("WIN")
+      // TODO
+   }
 
    // go from bottom to top and clear infected tiles 
    // based on the length of the correct word
    for (let r = (ROWS-1); r >= 0; r--) {
       for (let c = 0; c < COLS; c++) {
-         if (grid[r][c].selected) {
-            if (grid[r][c].infected && clearCnt > 0) {
-               clearCnt--
-            }
-            let replacement = newLetters.pop()
-            grid[r][c].reset( replacement )  
-         }
+
+         // restore lost letters first
          if ( grid[r][c].isLost() && clearCnt > 0 ) {
             let letters = drawNewLetters(1)
             grid[r][c].reset(letters[0])
             clearCnt--
          }
+
+         // the selected letter is infected. clear it and deduct from clear counts
+         // TODO maybe don't count this as a clear?
+         if (grid[r][c].selected) {
+            if (grid[r][c].infected && clearCnt > 0) {
+               clearCnt--
+            }
+            // alwys reset seleccted infected tiles regardless of counts
+            let replacement = newLetters.pop()
+            grid[r][c].reset( replacement )  
+         }
+
+         // disinfect infected tiles
          if ( grid[r][c].infected && clearCnt > 0 ) {
             grid[r][c].disinfect()   
             clearCnt--
@@ -330,6 +366,11 @@ function replaceAll() {
       }
    }
    clearWord()
+}
+
+function areGaugesFull() {
+   // TODO
+   return false
 }
 
 function clearWord() {
@@ -415,8 +456,7 @@ function restartHandler() {
    Letter.wordFull = false 
    Letter.infectRatePerSec = 5.0
    letterIndex = 0
-   checkCountdown = 500
-   growInfection = false 
+   checkCountdown = 1000
    addCountdown = 1000
    lastIncreasedTimeSec = 0
    gameTime = 0.0

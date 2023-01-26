@@ -2,6 +2,8 @@ import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
    static wordFull = false 
+
+   // 100% is full so take 100 / rate to get time for total infection
    static infectRatePerSec = 5.0 // 20 sec to fill
 
    constructor(letter, x, y, r,c ) {
@@ -45,6 +47,11 @@ export default class Letter extends PIXI.Container {
       this.letter.y = 0
       this.letter.resolution = window.devicePixelRatio
       this.addChild(this.letter)
+   }
+
+   static increseInfectionRate() {
+      Letter.infectRatePerSec +=  0.75
+      Letter.infectRatePerSec = Math.min(10.0, Letter.infectRatePerSec)
    }
 
    setClickCallback( callback ) {
