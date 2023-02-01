@@ -9,6 +9,7 @@ import EnterKey from "@/games/virus/enterkey"
 import ShuffleKey from "@/games/virus/shufflekey"
 import StartOverlay from "@/games/virus/startoverlay"
 import EndOverlay from "@/games/virus/endoverlay"
+import WinOverlay from "@/games/virus/winoverlay"
 import Gauge from "@/games/virus/gauge"
 import Pool from "@/games/virus/pool"
 import * as PIXI from "pixi.js"
@@ -16,6 +17,11 @@ import { onMounted, onBeforeUnmount } from "vue"
 import axios from 'axios'
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
+const ROWS = 6
+const COLS = 5
+const GAME_WIDTH = 300
+const GAME_HEIGHT = 600
+const MAX_INFECTIONS = 5
 
 var app = null
 var scene = null
@@ -23,6 +29,7 @@ var grid = null
 var pool = new Pool()
 var initGameOverlay = null
 var gameOverOverlay = null
+var winOverlay = null
 var gameOver = true
 var letterIndex = 0
 var checkCountdown = 0
@@ -38,12 +45,6 @@ var wordCounts = []
 var gauges = []
 var gameplayToken = ""
 
-const ROWS = 6
-const COLS = 5
-const GAME_WIDTH = 300
-const GAME_HEIGHT = 600
-const MAX_INFECTIONS = 5
-
 onBeforeUnmount(() => {
    app.ticker.stop()
    if (initGameOverlay) {
@@ -51,6 +52,9 @@ onBeforeUnmount(() => {
    }
    if (gameOverOverlay) {
       initGameOverlay.destroy()
+   }
+   if (winOverlay) {
+      winOverlay.destroy()
    }
    scene.destroy({
       children: true,
@@ -83,6 +87,7 @@ onMounted(async () => {
 
    initGameOverlay = new StartOverlay(API_SERVICE) 
    gameOverOverlay = new EndOverlay(restartHandler) 
+   winOverlay = new WinOverlay(restartHandler) 
    scene.addChild(initGameOverlay)
    initGameOverlay.startGameInit( startGame )
 
@@ -151,7 +156,7 @@ function layoutGameScreen() {
 
    // word count gauges
    gauges = []
-   let maxValues = [8,6,5,4]
+   let maxValues = [8,6,5,4] 
    let gaugeY = 440
    for (let i=0; i<4; i++) {
       let g = new Gauge(10,gaugeY,`${i+3}`, maxValues[i])
@@ -307,7 +312,11 @@ async function enterWord() {
    if (gameOver) return
 
    // 3 letters or more required!
-   if ( letterIndex < 3) return
+   // TODO flash error
+   if ( letterIndex < 3) {
+      addInfectedTile()
+      return
+   }
 
    let testWord = ""
    word.forEach( l => testWord += l.letter.text)
@@ -317,6 +326,7 @@ async function enterWord() {
    }).catch( e => {
       // FAILED WORD TODO
       clearWord()
+      addInfectedTile()
    })
 }
 
@@ -331,8 +341,10 @@ function wordAccepted() {
    gauges[cntIdx].increaseValue()
    wordCounts[cntIdx]++
    if ( areGaugesFull()) {
-      console.log("WIN")
-      // TODO
+      gameOver = true
+      winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
+      scene.addChild(winOverlay)
+      return
    }
 
    // go from bottom to top and clear infected tiles 
@@ -369,8 +381,13 @@ function wordAccepted() {
 }
 
 function areGaugesFull() {
-   // TODO
-   return false
+   let allFull = true
+   gauges.forEach( g =>{
+      if (g.isFull() == false) {
+         allFull = false
+      }
+   })
+   return allFull
 }
 
 function clearWord() {
@@ -418,12 +435,12 @@ function letterClicked( selected, row, col, letter) {
 function letterLost( row, col ) {
    // if any in the last row are lost, game over
    if (row == ROWS-1 && gameOver == false) {
-      gameOver = true
       for (let r = 0; r < ROWS; r++) {
          for (let c = 0; c < COLS; c++) {
             grid[r][c].replace( "" )
          }
       } 
+      gameOver = true
       gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
       scene.addChild(gameOverOverlay)
       return
@@ -473,6 +490,7 @@ function restartHandler() {
       }
    } 
    
+   scene.removeChild(winOverlay)
    scene.removeChild(gameOverOverlay)
    scene.addChild(initGameOverlay)
    initGameOverlay.startGameInit( startGame )

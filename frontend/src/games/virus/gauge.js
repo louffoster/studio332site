@@ -25,6 +25,10 @@ export default class Gauge extends PIXI.Container {
       this.drawGauge()
    }
 
+   isFull() {
+      return (this.value == this.maxValue)
+   }
+
    increaseValue() {
       this.value++
       this.value = Math.min(this.value, this.maxValue)
