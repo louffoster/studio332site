@@ -99,9 +99,9 @@ function layoutGameScreen() {
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
 
-   gfx.lineStyle(3, 0xff6666, 1)
-   gfx.moveTo(0, 295)
-   gfx.lineTo(GAME_WIDTH, 295)
+   gfx.beginFill(0x664444)
+   gfx.drawRect(0, 287, GAME_WIDTH, 68)
+   gfx.endFill()
 
    let y = 40
    let x = 40   
@@ -115,9 +115,6 @@ function layoutGameScreen() {
          x += 55
       }
       y += 55
-      if (r == ROWS-2) {
-         y+= 15
-      }
       x = 40
    } 
 
@@ -128,35 +125,35 @@ function layoutGameScreen() {
    })
 
    gfx.lineStyle(1, 0x888899, 1)
-   gfx.moveTo(0, 370)
-   gfx.lineTo(GAME_WIDTH, 370)
+   gfx.moveTo(0, 353)
+   gfx.lineTo(GAME_WIDTH, 353)
    gfx.moveTo(0, 425)
    gfx.lineTo(GAME_WIDTH, 425)
 
    // setup blank word... to be filled with clicked letters from grid
    x = 10
    for ( let i=0; i<6; i++) {
-      // draw the underline for the letter
-      gfx.moveTo(x, 410)
-      gfx.lineTo(x+20, 410)  
+      // draw the underline for the lettercl
+      gfx.moveTo(x, 405)
+      gfx.lineTo(x+20, 405)  
 
       let wordLetter = new PIXI.Text("", style)
       wordLetter.x = x+2
-      wordLetter.y = 380
+      wordLetter.y = 375
       scene.addChild(wordLetter)
       word.push( {letter: wordLetter, fromRow: -1, fromCol: -1})
 
       x+=25
    }
 
-   let enterKey = new EnterKey(170,380, enterWord)
+   let enterKey = new EnterKey(170,375, enterWord)
    scene.addChild(enterKey)
-   let shuffleKey = new ShuffleKey(170+70 ,380, shuffleGrid)
+   let shuffleKey = new ShuffleKey(170+70 ,375, shuffleGrid)
    scene.addChild(shuffleKey)
 
    // word count gauges
    gauges = []
-   let maxValues = [8,6,5,4] 
+   let maxValues = [10,6,4,3] 
    let gaugeY = 440
    for (let i=0; i<4; i++) {
       let g = new Gauge(10,gaugeY,`${i+3}`, maxValues[i])
@@ -300,6 +297,7 @@ function addInfectedTile() {
 function shuffleGrid() {
    if (gameOver) return 
    
+   clearWord()
    let newLetters = drawNewLetters(ROWS*COLS) 
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -489,6 +487,8 @@ function restartHandler() {
          grid[r][c].update(0, letterLost)
       }
    } 
+
+   gauges.forEach( g => g.reset() )
    
    scene.removeChild(winOverlay)
    scene.removeChild(gameOverOverlay)
