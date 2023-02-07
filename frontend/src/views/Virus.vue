@@ -21,7 +21,7 @@ const ROWS = 6
 const COLS = 5
 const GAME_WIDTH = 300
 const GAME_HEIGHT = 600
-const MAX_INFECTIONS = 5
+const MAX_INFECTIONS = 8
 
 var app = null
 var scene = null
@@ -100,8 +100,11 @@ function layoutGameScreen() {
    scene.addChild(gfx)
 
    gfx.beginFill(0x664444)
-   gfx.drawRect(0, 287, GAME_WIDTH, 68)
+   gfx.drawRect(0, 289, GAME_WIDTH, 64)
    gfx.endFill()
+   gfx.lineStyle(1, 0xcc0000, 1)
+   gfx.moveTo(0, 289)
+   gfx.lineTo(GAME_WIDTH, 289)
 
    let y = 40
    let x = 40   
@@ -125,36 +128,36 @@ function layoutGameScreen() {
    })
 
    gfx.lineStyle(1, 0x888899, 1)
-   gfx.moveTo(0, 353)
-   gfx.lineTo(GAME_WIDTH, 353)
-   gfx.moveTo(0, 425)
-   gfx.lineTo(GAME_WIDTH, 425)
+   gfx.moveTo(0, 352)
+   gfx.lineTo(GAME_WIDTH, 352)
+   gfx.moveTo(0, 413)
+   gfx.lineTo(GAME_WIDTH, 413)
 
    // setup blank word... to be filled with clicked letters from grid
    x = 10
    for ( let i=0; i<6; i++) {
       // draw the underline for the lettercl
-      gfx.moveTo(x, 405)
-      gfx.lineTo(x+20, 405)  
+      gfx.moveTo(x, 395)
+      gfx.lineTo(x+20, 395)  
 
       let wordLetter = new PIXI.Text("", style)
       wordLetter.x = x+2
-      wordLetter.y = 375
+      wordLetter.y = 365
       scene.addChild(wordLetter)
       word.push( {letter: wordLetter, fromRow: -1, fromCol: -1})
 
       x+=25
    }
 
-   let enterKey = new EnterKey(170,375, enterWord)
+   let enterKey = new EnterKey(170,365, enterWord)
    scene.addChild(enterKey)
-   let shuffleKey = new ShuffleKey(170+70 ,375, shuffleGrid)
+   let shuffleKey = new ShuffleKey(170+70 ,365, shuffleGrid)
    scene.addChild(shuffleKey)
 
    // word count gauges
    gauges = []
    let maxValues = [10,6,4,3] 
-   let gaugeY = 440
+   let gaugeY = 430
    for (let i=0; i<4; i++) {
       let g = new Gauge(10,gaugeY,`${i+3}`, maxValues[i])
       gauges.push( g )
@@ -163,16 +166,16 @@ function layoutGameScreen() {
    }
 
    // timer 
-   gfx.moveTo(0, 560)
-   gfx.lineTo(GAME_WIDTH, 560)
-   timerDisplay = new PIXI.Text("Uptime: 00:00", {
+   gfx.moveTo(0, 550)
+   gfx.lineTo(GAME_WIDTH, 550)
+   timerDisplay = new PIXI.Text("System Time: 00:00", {
       fill: "#44cc44",
       fontFamily: "\"Courier New\", Courier, monospace",
       fontSize: 18,
    })
    timerDisplay.anchor.set(0.5,0)
    timerDisplay.x = GAME_WIDTH/2
-   timerDisplay.y = 570
+   timerDisplay.y = 565
    scene.addChild(timerDisplay)
 }
 
@@ -330,7 +333,7 @@ async function enterWord() {
 
 function wordAccepted() {
    let newLetters = drawNewLetters(letterIndex) 
-   let clearCounts = [0,0,2,3,4,5]
+   let clearCounts = [0,0,1,2,4,5]
    let clearCnt = clearCounts[newLetters.length-1]
    console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
 
