@@ -333,13 +333,18 @@ async function enterWord() {
 
 function wordAccepted() {
    let newLetters = drawNewLetters(letterIndex) 
-   let clearCounts = [0,0,1,2,4,5]
+   let clearCounts = [0,0,2,3,4,5]
    let clearCnt = clearCounts[newLetters.length-1]
    console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
 
    // Increase the letter count gauges
    let cntIdx = newLetters.length - 3 
-   gauges[cntIdx].increaseValue()
+   if ( gauges[cntIdx].isFull() ) {
+      console.log("gauge "+gaugeIdx+" is full. subrtact 1 from clear")
+      clearCnt--
+   } else {
+      gauges[cntIdx].increaseValue()
+   }
    wordCounts[cntIdx]++
    if ( areGaugesFull()) {
       gameOver = true
