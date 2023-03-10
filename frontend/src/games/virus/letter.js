@@ -1,11 +1,6 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
-   static wordFull = false 
-
-   // 100% is full so take 100 / rate to get time for total infection
-   static infectRatePerSec = 5.0 // 20 sec to fill
-
    constructor(letter, x, y, r,c ) {
       super()
       this.interactive = true
@@ -171,3 +166,9 @@ export default class Letter extends PIXI.Container {
       }
    }
 }
+
+// Static data -------
+Letter.wordFull = false 
+
+// 100% is full so take 100 / rate to get time for total infection
+Letter.infectRatePerSec = 5.0 // 20 sec to fill

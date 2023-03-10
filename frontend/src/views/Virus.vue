@@ -4,6 +4,7 @@
 </template>
 
 <script setup>
+import GameState from "@/games/virus/gamestate"
 import Letter from "@/games/virus/letter"
 import EnterKey from "@/games/virus/enterkey"
 import ShuffleKey from "@/games/virus/shufflekey"
@@ -30,7 +31,7 @@ var pool = new Pool()
 var initGameOverlay = null
 var gameOverOverlay = null
 var winOverlay = null
-var gameOver = true
+var state = new GameState()
 var letterIndex = 0
 var checkCountdown = 0
 var addCountdown = 1000
@@ -181,21 +182,22 @@ function layoutGameScreen() {
 
 function startGame( jwt ) {
    gameplayToken = jwt
+   console.log("TOKEN: " + gameplayToken)
    scene.removeChild(initGameOverlay)
 
    pool.refill()
    wordCounts = [0,0,0,0] // one for each letter count; 3,4,5,6
-   gameOver = false
 
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
          grid[r][c].reset( pool.pop() )
       }
    } 
+   state.initialized()
 }
 
 function gameLoop() {
-   if (gameOver) {
+   if (state.isGameOver()) {
       return
    }
 
@@ -203,6 +205,12 @@ function gameLoop() {
    let origTimeSec = Math.round(gameTime / 1000)
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
+
+   state.update( app.ticker.deltaMS, gameStateChanged)
+
+   if ( state.isSubmitRequested() ) {
+      setWordColor(0xaaddff)  
+   }
 
    // Every 30 seconds, increase rate by 10%, and raise infection level
    if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
@@ -253,6 +261,13 @@ function gameLoop() {
    }
 }
 
+function gameStateChanged( newState ) {
+   console.log("NEW STATE "+newState)
+   if (newState == GameState.SUBMIT) {
+      doSubmission()
+   }
+}
+
 function checkInfectedCount() {
    checkCountdown = 1000.0
    let cnt = 0
@@ -298,7 +313,7 @@ function addInfectedTile() {
 }
 
 function shuffleGrid() {
-   if (gameOver) return 
+   if (state.isGameOver()) return 
    
    clearWord()
    let newLetters = drawNewLetters(ROWS*COLS) 
@@ -309,9 +324,12 @@ function shuffleGrid() {
    }
 }
 
-async function enterWord() {
-   if (gameOver) return
+function enterWord() {
+   if (state.isGameOver()) return
+   state.requestSubmit()
+}
 
+async function doSubmission() {
    // 3 letters or more required!
    // TODO flash error
    if ( letterIndex < 3) {
@@ -324,11 +342,19 @@ async function enterWord() {
    let url = `${API_SERVICE}/virus/check?w=${testWord}`
    await axios.post(url).then( () => {
       wordAccepted( )
-   }).catch( e => {
+   }).catch( _e => {
       // FAILED WORD TODO
       clearWord()
       addInfectedTile()
    })
+
+   setWordColor(0xcccccc)
+}
+
+function setWordColor( c ) {
+   word.forEach( wl => {
+      wl.letter.style.fill = c
+   }) 
 }
 
 function wordAccepted() {
@@ -340,14 +366,14 @@ function wordAccepted() {
    // Increase the letter count gauges
    let cntIdx = newLetters.length - 3 
    if ( gauges[cntIdx].isFull() ) {
-      console.log("gauge "+gaugeIdx+" is full. subrtact 1 from clear")
+      console.log("gauge "+cntIdx+" is full. subrtact 1 from clear")
       clearCnt--
    } else {
       gauges[cntIdx].increaseValue()
    }
    wordCounts[cntIdx]++
    if ( areGaugesFull()) {
-      gameOver = true
+      state.gameOver()
       winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
       scene.addChild(winOverlay)
       return
@@ -421,9 +447,8 @@ function drawNewLetters( cnt ) {
 }
 
 function letterClicked( selected, row, col, letter) {
-   if (gameOver) {
-      return
-   }
+   if (state.isGameOver()) return 
+
    Letter.wordFull = false
    if (selected) {
       word[letterIndex].letter.text = letter
@@ -439,14 +464,16 @@ function letterClicked( selected, row, col, letter) {
 }
 
 function letterLost( row, col ) {
+   if ( state.isGameOver()) return
+
    // if any in the last row are lost, game over
-   if (row == ROWS-1 && gameOver == false) {
+   if (row == ROWS-1) {
       for (let r = 0; r < ROWS; r++) {
          for (let c = 0; c < COLS; c++) {
             grid[r][c].replace( "" )
          }
       } 
-      gameOver = true
+      state.gameOver()
       gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
       scene.addChild(gameOverOverlay)
       return

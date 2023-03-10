@@ -4,5 +4,10 @@ module.exports = {
   "extends": [
     "plugin:vue/vue3-essential",
     "eslint:recommended"
-  ]
+  ],
+  "rules": {
+    'no-unused-vars': [2, {"args": "all", "argsIgnorePattern": "^_.*"}],
+    'vue/multi-word-component-names': 'off',
+    "vue/no-v-for-template-key-on-child": 2,
+  }
 }
