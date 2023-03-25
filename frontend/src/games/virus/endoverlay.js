@@ -61,7 +61,6 @@ export default class EndOverlay extends PIXI.Container {
       })
 
       this.wordStats = []
-      let btnY = 130
       let xPos = [10,150,10,150]
       let yPos = [130,130,152,152]
       for ( let i=0; i<4; i++) { 

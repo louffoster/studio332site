@@ -96,7 +96,7 @@ onMounted(async () => {
    app.ticker.add( gameLoop )
 })
 
-function layoutGameScreen() {
+const layoutGameScreen =(() => {
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
 
@@ -178,9 +178,9 @@ function layoutGameScreen() {
    timerDisplay.x = GAME_WIDTH/2
    timerDisplay.y = 565
    scene.addChild(timerDisplay)
-}
+})
 
-function startGame( jwt ) {
+const startGame = (( jwt ) => {
    gameplayToken = jwt
    console.log("TOKEN: " + gameplayToken)
    scene.removeChild(initGameOverlay)
@@ -194,9 +194,277 @@ function startGame( jwt ) {
       }
    } 
    state.initialized()
-}
+})
 
-function gameLoop() {
+const checkInfectedCount = (() => {
+   checkCountdown = 1000.0
+   let cnt = 0
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if ( grid[r][c].isInfected() ) {
+            cnt++
+         }
+      }
+   }
+
+   // If there is nothing, always start with 3 in alternating columns in first row
+   if (cnt == 0) {
+      console.log("NO infections, add 3 starters immediately")
+      grid[0][0].infect()
+      grid[0][2].infect()
+      grid[0][4].infect()
+      cnt = 3
+   }
+
+   // keep the number of infected tiles at a minum of the current level
+   if ( cnt < infectionLevel) {
+      pendingInfections = infectionLevel - cnt
+      addCountdown = 1000
+   } else {
+      pendingInfections = 0
+      addCountdown = 0
+   }
+})
+
+const addInfectedTile = (() => {
+   let added = false
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if (grid[r][c].infected == false) {
+            grid[r][c].infect()
+            added  = true
+            break 
+         }
+      }
+      if (added ) break
+   }
+})
+
+const shuffleGrid =(() => {
+   if (state.isGameOver()) return 
+   
+   clearWord()
+   let newLetters = pickNewLetters(ROWS*COLS) 
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].replace( newLetters.pop() )  
+      }
+   }
+})
+
+const enterWord = (() => {
+   if (state.isGameOver()) return
+   state.requestSubmit()
+   setWordColor(0xaaddff)  
+})
+
+const doSubmission = ( async () => {
+   // 3 letters or more required!
+   // TODO flash error
+   if ( letterIndex < 3) {
+      addInfectedTile()
+      failedWord()
+      return
+   }
+
+   let testWord = ""
+   word.forEach( l => testWord += l.letter.text)
+   let url = `${API_SERVICE}/virus/check?w=${testWord}`
+   await axios.post(url).then( () => {
+      wordAccepted( )
+   }).catch( _e => {
+      failedWord()
+      addInfectedTile()
+   })
+})
+
+const failedWord = (() => {
+   setWordColor(0xff5555)
+   state.submitFailed()
+})
+
+const setWordColor = (( c ) => {
+   word.forEach( wl => {
+      wl.letter.style.fill = c
+   }) 
+})
+
+const wordAccepted = (() => {
+   let newLetters = pickNewLetters(letterIndex) 
+   let clearCounts = [0,0,2,3,4,5]
+   let clearCnt = clearCounts[newLetters.length-1]
+   console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
+
+   // Increase the letter count gauges
+   let cntIdx = newLetters.length - 3 
+   if ( gauges[cntIdx].isFull() ) {
+      console.log("gauge "+cntIdx+" is full. subrtact 1 from clear")
+      clearCnt--
+   } else {
+      gauges[cntIdx].increaseValue()
+   }
+   wordCounts[cntIdx]++
+   if ( areGaugesFull()) {
+      state.gameOver()
+      winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
+      scene.addChild(winOverlay)
+      return
+   }
+
+   // go from bottom to top and clear infected tiles 
+   // based on the length of the correct word
+   for (let r = (ROWS-1); r >= 0; r--) {
+      for (let c = 0; c < COLS; c++) {
+
+         // restore lost letters first
+         if ( grid[r][c].isLost() && clearCnt > 0 ) {
+            let letters = pickNewLetters(1)
+            grid[r][c].reset(letters[0])
+            clearCnt--
+         }
+
+         // the selected letter is infected. clear it and deduct from clear counts
+         // TODO maybe don't count this as a clear?
+         if (grid[r][c].selected) {
+            if (grid[r][c].infected && clearCnt > 0) {
+               clearCnt--
+            }
+            // alwys reset seleccted infected tiles regardless of counts
+            let replacement = newLetters.pop()
+            grid[r][c].reset( replacement )  
+         }
+
+         // disinfect infected tiles
+         if ( grid[r][c].infected && clearCnt > 0 ) {
+            grid[r][c].disinfect()   
+            clearCnt--
+         }
+      }
+   }
+   clearWord()
+})
+
+const areGaugesFull =(() => {
+   let allFull = true
+   gauges.forEach( g =>{
+      if (g.isFull() == false) {
+         allFull = false
+      }
+   })
+   return allFull
+})
+
+const clearWord = (() => {
+   word.forEach( wl  => {
+      if (wl.letter.text != "") {
+         grid[wl.fromRow][wl.fromCol].deselect()
+         wl.letter.text = ""
+         wl.fromCol = -1
+         wl.fromRow = -1   
+      }
+   })
+   letterIndex = 0
+   Letter.wordFull = false
+})
+
+const pickNewLetters = (( cnt ) => {
+   let out = [] 
+   for (let i=0; i<cnt; i++ ) {
+      if ( pool.hasTilesLeft() == false) {
+         pool.refill()
+      }
+      out.push( pool.pop() )
+   }
+   return out
+})
+
+const letterClicked = (( selected, row, col, letter) => {
+   if (state.isGameOver()) return 
+
+   Letter.wordFull = false
+   if (selected) {
+      word[letterIndex].letter.text = letter
+      word[letterIndex].fromCol = col
+      word[letterIndex].fromRow = row 
+      letterIndex++ 
+      if (letterIndex == 6) {
+         Letter.wordFull = true
+      }
+   } else {
+      clearWord()
+   }
+})
+
+const letterLost = (( row, col ) => {
+   if ( state.isGameOver()) return
+
+   // if any in the last row are lost, game over
+   if (row == ROWS-1) {
+      for (let r = 0; r < ROWS; r++) {
+         for (let c = 0; c < COLS; c++) {
+            grid[r][c].replace( "" )
+         }
+      } 
+      state.gameOver()
+      gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
+      scene.addChild(gameOverOverlay)
+      return
+   }
+   let isInWord = false 
+   word.forEach( wl => {
+      if (wl.fromRow == row && wl.fromCol == col) {
+         isInWord = true
+      }
+   })
+   if ( isInWord ) {
+      clearWord()
+   }
+
+   if ( row > 0) {
+      grid[row-1][col].infect()
+   }
+   if ( row < (ROWS-1) ) {
+      grid[row+1][col].infect()
+   }
+   if ( col > 0) {
+      grid[row][col-1].infect()
+   }
+   if ( col < (COLS-1)) {
+      grid[row][col+1].infect()
+   }
+})
+
+const restartHandler = (() => {
+   Letter.wordFull = false 
+   Letter.infectRatePerSec = 5.0
+   letterIndex = 0
+   checkCountdown = 1000
+   addCountdown = 1000
+   lastIncreasedTimeSec = 0
+   gameTime = 0.0
+   for ( let i=0; i<6; i++) {
+     word[i].letter.text = ""
+     word[i].fromRow = -1
+     word[i].fromCol = -1
+   }
+   wordCounts = []
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].reset( "" )
+         grid[r][c].update(0, letterLost)
+      }
+   } 
+
+   gauges.forEach( g => g.reset() )
+   
+   scene.removeChild(winOverlay)
+   scene.removeChild(gameOverOverlay)
+   scene.addChild(initGameOverlay)
+   initGameOverlay.startGameInit( startGame )
+})
+
+// MAIN GAME LOOP =========================================================
+const gameLoop = (() => {
    if (state.isGameOver()) {
       return
    }
@@ -207,10 +475,6 @@ function gameLoop() {
    let timeSec = Math.round(gameTime / 1000)
 
    state.update( app.ticker.deltaMS, gameStateChanged)
-
-   if ( state.isSubmitRequested() ) {
-      setWordColor(0xaaddff)  
-   }
 
    // Every 30 seconds, increase rate by 10%, and raise infection level
    if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
@@ -259,277 +523,19 @@ function gameLoop() {
          grid[r][c].update(app.ticker.deltaMS, letterLost)
       }
    }
-}
+})
 
-function gameStateChanged( newState ) {
-   console.log("NEW STATE "+newState)
+const gameStateChanged = (( oldState, newState ) => {
+   console.log("NEW STATE FROM "+oldState+" TO "+newState)
    if (newState == GameState.SUBMIT) {
       doSubmission()
-   }
-}
-
-function checkInfectedCount() {
-   checkCountdown = 1000.0
-   let cnt = 0
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         if ( grid[r][c].isInfected() ) {
-            cnt++
-         }
+   } else if (newState == GameState.PLAY) {
+      setWordColor(0xcccccc)
+      if ( oldState == GameState.FAIL) {
+         clearWord()
       }
    }
-
-   // If there is nothing, always start with 3 in alternating columns in first row
-   if (cnt == 0) {
-      console.log("NO infections, add 3 starters immediately")
-      grid[0][0].infect()
-      grid[0][2].infect()
-      grid[0][4].infect()
-      cnt = 3
-   }
-
-   // keep the number of infected tiles at a minum of the current level
-   if ( cnt < infectionLevel) {
-      pendingInfections = infectionLevel - cnt
-      addCountdown = 1000
-   } else {
-      pendingInfections = 0
-      addCountdown = 0
-   }
-}
-
-function addInfectedTile() {
-   let added = false
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         if (grid[r][c].infected == false) {
-            grid[r][c].infect()
-            added  = true
-            break 
-         }
-      }
-      if (added ) break
-   }
-}
-
-function shuffleGrid() {
-   if (state.isGameOver()) return 
-   
-   clearWord()
-   let newLetters = drawNewLetters(ROWS*COLS) 
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         grid[r][c].replace( newLetters.pop() )  
-      }
-   }
-}
-
-function enterWord() {
-   if (state.isGameOver()) return
-   state.requestSubmit()
-}
-
-async function doSubmission() {
-   // 3 letters or more required!
-   // TODO flash error
-   if ( letterIndex < 3) {
-      addInfectedTile()
-      return
-   }
-
-   let testWord = ""
-   word.forEach( l => testWord += l.letter.text)
-   let url = `${API_SERVICE}/virus/check?w=${testWord}`
-   await axios.post(url).then( () => {
-      wordAccepted( )
-   }).catch( _e => {
-      // FAILED WORD TODO
-      clearWord()
-      addInfectedTile()
-   })
-
-   setWordColor(0xcccccc)
-}
-
-function setWordColor( c ) {
-   word.forEach( wl => {
-      wl.letter.style.fill = c
-   }) 
-}
-
-function wordAccepted() {
-   let newLetters = drawNewLetters(letterIndex) 
-   let clearCounts = [0,0,2,3,4,5]
-   let clearCnt = clearCounts[newLetters.length-1]
-   console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
-
-   // Increase the letter count gauges
-   let cntIdx = newLetters.length - 3 
-   if ( gauges[cntIdx].isFull() ) {
-      console.log("gauge "+cntIdx+" is full. subrtact 1 from clear")
-      clearCnt--
-   } else {
-      gauges[cntIdx].increaseValue()
-   }
-   wordCounts[cntIdx]++
-   if ( areGaugesFull()) {
-      state.gameOver()
-      winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
-      scene.addChild(winOverlay)
-      return
-   }
-
-   // go from bottom to top and clear infected tiles 
-   // based on the length of the correct word
-   for (let r = (ROWS-1); r >= 0; r--) {
-      for (let c = 0; c < COLS; c++) {
-
-         // restore lost letters first
-         if ( grid[r][c].isLost() && clearCnt > 0 ) {
-            let letters = drawNewLetters(1)
-            grid[r][c].reset(letters[0])
-            clearCnt--
-         }
-
-         // the selected letter is infected. clear it and deduct from clear counts
-         // TODO maybe don't count this as a clear?
-         if (grid[r][c].selected) {
-            if (grid[r][c].infected && clearCnt > 0) {
-               clearCnt--
-            }
-            // alwys reset seleccted infected tiles regardless of counts
-            let replacement = newLetters.pop()
-            grid[r][c].reset( replacement )  
-         }
-
-         // disinfect infected tiles
-         if ( grid[r][c].infected && clearCnt > 0 ) {
-            grid[r][c].disinfect()   
-            clearCnt--
-         }
-      }
-   }
-   clearWord()
-}
-
-function areGaugesFull() {
-   let allFull = true
-   gauges.forEach( g =>{
-      if (g.isFull() == false) {
-         allFull = false
-      }
-   })
-   return allFull
-}
-
-function clearWord() {
-   word.forEach( wl  => {
-      if (wl.letter.text != "") {
-         grid[wl.fromRow][wl.fromCol].deselect()
-         wl.letter.text = ""
-         wl.fromCol = -1
-         wl.fromRow = -1   
-      }
-   })
-   letterIndex = 0
-   Letter.wordFull = false
-}
-
-function drawNewLetters( cnt ) {
-   let out = [] 
-   for (let i=0; i<cnt; i++ ) {
-      if ( pool.hasTilesLeft() == false) {
-         pool.refill()
-      }
-      out.push( pool.pop() )
-   }
-   return out
-}
-
-function letterClicked( selected, row, col, letter) {
-   if (state.isGameOver()) return 
-
-   Letter.wordFull = false
-   if (selected) {
-      word[letterIndex].letter.text = letter
-      word[letterIndex].fromCol = col
-      word[letterIndex].fromRow = row 
-      letterIndex++ 
-      if (letterIndex == 6) {
-         Letter.wordFull = true
-      }
-   } else {
-      clearWord()
-   }
-}
-
-function letterLost( row, col ) {
-   if ( state.isGameOver()) return
-
-   // if any in the last row are lost, game over
-   if (row == ROWS-1) {
-      for (let r = 0; r < ROWS; r++) {
-         for (let c = 0; c < COLS; c++) {
-            grid[r][c].replace( "" )
-         }
-      } 
-      state.gameOver()
-      gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
-      scene.addChild(gameOverOverlay)
-      return
-   }
-   let isInWord = false 
-   word.forEach( wl => {
-      if (wl.fromRow == row && wl.fromCol == col) {
-         isInWord = true
-      }
-   })
-   if ( isInWord ) {
-      clearWord()
-   }
-
-   if ( row > 0) {
-      grid[row-1][col].infect()
-   }
-   if ( row < (ROWS-1) ) {
-      grid[row+1][col].infect()
-   }
-   if ( col > 0) {
-      grid[row][col-1].infect()
-   }
-   if ( col < (COLS-1)) {
-      grid[row][col+1].infect()
-   }
-}
-
-function restartHandler() {
-   Letter.wordFull = false 
-   Letter.infectRatePerSec = 5.0
-   letterIndex = 0
-   checkCountdown = 1000
-   addCountdown = 1000
-   lastIncreasedTimeSec = 0
-   gameTime = 0.0
-   for ( let i=0; i<6; i++) {
-     word[i].letter.text = ""
-     word[i].fromRow = -1
-     word[i].fromCol = -1
-   }
-   wordCounts = []
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         grid[r][c].reset( "" )
-         grid[r][c].update(0, letterLost)
-      }
-   } 
-
-   gauges.forEach( g => g.reset() )
-   
-   scene.removeChild(winOverlay)
-   scene.removeChild(gameOverOverlay)
-   scene.addChild(initGameOverlay)
-   initGameOverlay.startGameInit( startGame )
-}
+})
 </script>
 
 <style scoped>
