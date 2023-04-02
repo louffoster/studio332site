@@ -3,12 +3,11 @@ import * as PIXI from "pixi.js"
 export default class Letter extends PIXI.Container {
    constructor(letter, x, y, r,c ) {
       super()
-      this.interactive = true
+      this.eventMode = 'static'
       this.on('pointerdown', this.clickHandler)
 
       this.selected = false
       this.infected = false
-      this.redraw = false
       this.virusGfx = new PIXI.Graphics() 
       this.virusPercent = 0.0 
       this.addChild(this.virusGfx)
@@ -29,7 +28,7 @@ export default class Letter extends PIXI.Container {
       })
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.interactive = true 
+      this.graphics.eventMode = 'static'
       this.graphics.hitArea = new PIXI.Circle(0,0,25)
       this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0xcccccc, 1)
@@ -61,7 +60,7 @@ export default class Letter extends PIXI.Container {
          return
       }
       this.selected = !this.selected
-      this.redraw = true
+      this.draw()
       this.clickCallback(this.selected, this.row, this.col, this.letter.text)
    }
 
@@ -75,7 +74,7 @@ export default class Letter extends PIXI.Container {
    deselect() {
       if ( this.selected) {
          this.selected = false
-         this.redraw = true   
+         this.draw()
       }
    }
 
@@ -93,22 +92,12 @@ export default class Letter extends PIXI.Container {
          this.virusGfx.clear()
       }
       this.letter.text = newLetter 
-      this.redraw = true    
+      this.draw()  
    }
 
    infect() {
       if ( this.infected == false) {
          this.infected = true
-         this.redraw = true  
-      }
-   }
-
-   disinfect() {
-      if ( this.infected == true ) {
-         this.infected = false
-         this.letter.style.fill = 0xcccccc
-         this.virusPercent = 0
-         this.virusGfx.clear()
       }
    }
 
@@ -116,23 +105,24 @@ export default class Letter extends PIXI.Container {
       this.removeChildren()
    }
 
-   update(deltaMS, infectedCallback) {
-      if (this.redraw) {
-         this.graphics.clear()
-         if (this.selected) {
-            this.graphics.lineStyle(2, 0xaaddff, 1)
-            this.letter.style.fill = 0xaaddff
+   draw() {
+      this.graphics.clear()
+      if (this.selected) {
+         this.graphics.lineStyle(2, 0xaaddff, 1)
+         this.letter.style.fill = 0xaaddff
+      } else {
+         this.graphics.lineStyle(1, 0xcccccc, 1)
+         if ( this.isInfected() ) {
+            this.letter.style.fill = 0x33aa33
          } else {
-            this.graphics.lineStyle(1, 0xcccccc, 1)
-            if ( this.isInfected() ) {
-               this.letter.style.fill = 0x33aa33
-            } else {
-               this.letter.style.fill = 0xcccccc
-            }
+            this.letter.style.fill = 0xcccccc
          }
-         this.graphics.drawCircle(0,0, 25)
-         this.redraw = false
       }
+      this.graphics.drawCircle(0,0, 25)
+   }
+
+   update(deltaMS, infectedCallback) {
+      this.draw()
       if ( this.isInfected() ) {
          this.virusGfx.clear()
 
@@ -150,7 +140,7 @@ export default class Letter extends PIXI.Container {
             this.graphics.lineStyle(3, 0x008800, 1)
             this.graphics.drawCircle(0,0, 25)
             this.graphics.cursor = 'default'
-            this.interactive = false
+            this.eventMode = 'none'
             infectedCallback(this.row, this.col)
          }
          let radius = 25.0 * (this.virusPercent/100.0)

@@ -32,7 +32,7 @@ export default class EndOverlay extends PIXI.Container {
       this.graphics.moveTo(10,75)
       this.graphics.lineTo(270, 75)
 
-      this.graphics.interactive = true 
+      this.graphics.eventMode = 'static'
       this.graphics.hitArea = new PIXI.Rectangle(95,195, 100,35)
       this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0x55dd55, 1)
@@ -42,7 +42,7 @@ export default class EndOverlay extends PIXI.Container {
       btnTxt.anchor.set(0.5)
       btnTxt.x = 145
       btnTxt.y = 212
-      btnTxt.interactive = true 
+      btnTxt.eventMode = 'static'
       btnTxt.cursor ="pointer"
       this.addChild(btnTxt)
       this.graphics.on('pointerup', restartCallback) 

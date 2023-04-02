@@ -7,7 +7,6 @@ export default class Gauge extends PIXI.Container {
       this.y = y
       this.value = 0
       this.maxValue = maxValue
-      console.log("GAUGE MAX "+this.maxValue)
 
       let style = new PIXI.TextStyle({
          fill: "#cccccc",
@@ -48,7 +47,6 @@ export default class Gauge extends PIXI.Container {
       let sectionW = this.gaugeWidth / this.maxValue
       let sectionX = 20+sectionW
       for (let i=1; i< this.maxValue; i++) {
-         console.log("MAX "+this.maxValue+" section W "+sectionW+" section X"+sectionX)
          this.gfx.lineStyle(1, 0x777777, 1)
          this.gfx.moveTo(sectionX, 0)
          this.gfx.lineTo(sectionX, 20)

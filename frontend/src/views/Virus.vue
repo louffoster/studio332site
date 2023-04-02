@@ -26,13 +26,14 @@ const MAX_INFECTIONS = 8
 
 var app = null
 var scene = null
+var gfx = null
+
 var grid = null
 var pool = new Pool()
 var initGameOverlay = null
 var gameOverOverlay = null
 var winOverlay = null
 var state = new GameState()
-var letterIndex = 0
 var checkCountdown = 0
 var addCountdown = 1000
 var lastIncreasedTimeSec = 0
@@ -40,9 +41,13 @@ var infectionLevel = 3     // minmum number of infected tiles
 var pendingInfections = 0  // numner of infections to add to bring up to current level
 var gameTime = 0.0
 var timerDisplay = null
+
+
+var letterIndex = 0
 var word = []
-var gfx = null
+var lastWordSize = 0
 var wordCounts = []
+
 var gauges = []
 var gameplayToken = ""
 
@@ -290,68 +295,54 @@ const setWordColor = (( c ) => {
 })
 
 const wordAccepted = (() => {
-   let newLetters = pickNewLetters(letterIndex) 
-   let clearCounts = [0,0,2,3,4,5]
-   let clearCnt = clearCounts[newLetters.length-1]
-   console.log(`GOOD ${newLetters.length} WORD. DISINFECT ${clearCnt}`)
-
-   // Increase the letter count gauges
-   let cntIdx = newLetters.length - 3 
-   if ( gauges[cntIdx].isFull() ) {
-      console.log("gauge "+cntIdx+" is full. subrtact 1 from clear")
-      clearCnt--
-   } else {
-      gauges[cntIdx].increaseValue()
-   }
-   wordCounts[cntIdx]++
-   if ( areGaugesFull()) {
-      state.gameOver()
-      winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
-      scene.addChild(winOverlay)
-      return
-   }
-
-   // go from bottom to top and clear infected tiles 
-   // based on the length of the correct word
-   for (let r = (ROWS-1); r >= 0; r--) {
-      for (let c = 0; c < COLS; c++) {
-
-         // restore lost letters first
-         if ( grid[r][c].isLost() && clearCnt > 0 ) {
-            let letters = pickNewLetters(1)
-            grid[r][c].reset(letters[0])
-            clearCnt--
-         }
-
-         // the selected letter is infected. clear it and deduct from clear counts
-         // TODO maybe don't count this as a clear?
-         if (grid[r][c].selected) {
-            if (grid[r][c].infected && clearCnt > 0) {
-               clearCnt--
-            }
-            // alwys reset seleccted infected tiles regardless of counts
-            let replacement = newLetters.pop()
-            grid[r][c].reset( replacement )  
-         }
-
-         // disinfect infected tiles
-         if ( grid[r][c].infected && clearCnt > 0 ) {
-            grid[r][c].disinfect()   
-            clearCnt--
-         }
-      }
-   }
-   clearWord()
+   // letter index is the index of the next letter to add, so it is the word length
+   lastWordSize = letterIndex 
+   state.submitSuccess( lastWordSize )
 })
 
-const areGaugesFull =(() => {
-   let allFull = true
-   gauges.forEach( g =>{
-      if (g.isFull() == false) {
-         allFull = false
+const disinfectLetter = (() =>{
+   // clear the letter from the word and deselect it from the grid
+   let selR = word[letterIndex].fromRow
+   let selC = word[letterIndex].fromCol 
+   let isSelectedInfected = grid[selR][selC].infected
+   console.log("disinfect "+selR+","+selC+": infected "+isSelectedInfected)
+
+   // reset grid letter and clear word letter
+   grid[selR][selC].reset( pickNewLetter() )   
+   word[letterIndex].letter.text = ""
+   word[letterIndex].fromCol = -1
+   word[letterIndex].fromRow = -1  
+
+   // If this letter was infected, nothing left to do
+   if ( isSelectedInfected ) {
+      // TODO animate
+      console.log("SELECTED LETTER WAS INFECTED, DONE")
+      return
+   } 
+
+   // // no infected tiles cleared for first and second letter
+   // if (letterIndex <= 1) {
+   //    console.log("SELECTED WAS FIST OR SECOND LETTER. NOTHING TO DO")
+   //    return
+   // }
+
+   // go from bottom right to top left and clear one infected or lost tile
+   console.log("selection was not infected. look for tile...")
+   let done = false
+   for (let r = (ROWS-1); r >= 0; r--) {
+      for (let c = (COLS-1); c  >= 0; c--) {
+         // restore infected or lost letter from the grid
+         if ( grid[r][c].isLost()  || grid[r][c].infected ) {
+            console.log(`clear infected tile at ${r}, ${c}`)
+            grid[r][c].reset( pickNewLetter() )
+            done = true
+            break
+         }
       }
-   })
-   return allFull
+      if (done) {
+         break
+      }
+   }
 })
 
 const clearWord = (() => {
@@ -364,9 +355,14 @@ const clearWord = (() => {
       }
    })
    letterIndex = 0
+   lastWordSize = 0
    Letter.wordFull = false
 })
 
+const pickNewLetter = (() => {
+   let l = pickNewLetters(1)
+   return l[0]
+})
 const pickNewLetters = (( cnt ) => {
    let out = [] 
    for (let i=0; i<cnt; i++ ) {
@@ -434,10 +430,21 @@ const letterLost = (( row, col ) => {
    }
 })
 
+const areGaugesFull =(() => {
+   let allFull = true
+   gauges.forEach( g =>{
+      if (g.isFull() == false) {
+         allFull = false
+      }
+   })
+   return allFull
+})
+
 const restartHandler = (() => {
    Letter.wordFull = false 
    Letter.infectRatePerSec = 5.0
    letterIndex = 0
+   lastWordSize = 0
    checkCountdown = 1000
    addCountdown = 1000
    lastIncreasedTimeSec = 0
@@ -463,6 +470,28 @@ const restartHandler = (() => {
    initGameOverlay.startGameInit( startGame )
 })
 
+const wordDisinfectFinished = ( () => {
+   //  Increase the letter count gauges and word scoreboard
+   let cntIdx = lastWordSize - 3 
+   if ( gauges[cntIdx].isFull() == false ) {
+      gauges[cntIdx].increaseValue()
+   }
+   wordCounts[cntIdx]++
+
+   // reset grid and word trackers
+   pickNewLetters( lastWordSize )
+   letterIndex = 0
+   lastWordSize = 0
+   Letter.wordFull = false
+
+   // is the game over?
+   if ( areGaugesFull()) {
+      state.gameOver()
+      winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
+      scene.addChild(winOverlay)
+   }
+})
+
 // MAIN GAME LOOP =========================================================
 const gameLoop = (() => {
    if (state.isGameOver()) {
@@ -474,7 +503,22 @@ const gameLoop = (() => {
    gameTime += app.ticker.deltaMS
    let timeSec = Math.round(gameTime / 1000)
 
+   // Update the timer and display it
+   if ( timeSec > origTimeSec) {
+      let secs = timeSec
+      let mins = Math.floor(timeSec / 60)
+      if ( mins > 0) {
+         secs = timeSec - mins*60
+      }
+      let timeStr = "Uptime: "+`${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+      timerDisplay.text = timeStr
+   }
+
    state.update( app.ticker.deltaMS, gameStateChanged)
+   if ( state.isSubmitting() ) {
+      // dont advance infections while a word is being submitted
+      return
+   }
 
    // Every 30 seconds, increase rate by 10%, and raise infection level
    if ( timeSec>0 && timeSec != lastIncreasedTimeSec && timeSec % 30 == 0) { 
@@ -506,17 +550,6 @@ const gameLoop = (() => {
       }
    }
 
-   // Update the timer and display it
-   if ( timeSec > origTimeSec) {
-      let secs = timeSec
-      let mins = Math.floor(timeSec / 60)
-      if ( mins > 0) {
-         secs = timeSec - mins*60
-      }
-      let timeStr = "Uptime: "+`${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
-      timerDisplay.text = timeStr
-   }
-
    // Tick all letters to gro infection. Pass along a callback for lost letter
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -525,7 +558,7 @@ const gameLoop = (() => {
    }
 })
 
-const gameStateChanged = (( oldState, newState ) => {
+const gameStateChanged = (( oldState, newState, ) => {
    console.log("NEW STATE FROM "+oldState+" TO "+newState)
    if (newState == GameState.SUBMIT) {
       doSubmission()
@@ -533,7 +566,14 @@ const gameStateChanged = (( oldState, newState ) => {
       setWordColor(0xcccccc)
       if ( oldState == GameState.FAIL) {
          clearWord()
+      } if ( oldState == GameState.SUCCESS) {
+         console.log("DONE CLEARING SUCCESSFUL WORD")
+         wordDisinfectFinished()
       }
+   } else if ( newState == GameState.SUCCESS) {
+      console.log("SUCCESS NOTY FOR LETTER")
+      letterIndex--
+      disinfectLetter( )
    }
 })
 </script>

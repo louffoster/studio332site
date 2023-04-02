@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js"
 export default class ShuttleKey extends PIXI.Container {
    constructor( x,y, listener) {
       super()
-      this.interactive = true
+      this.eventMode = 'static'
       this.pointerDown = false
       this.on('pointerdown', this.handlePointerDown)
       this.on('pointerup', this.clickHandler)
@@ -11,7 +11,7 @@ export default class ShuttleKey extends PIXI.Container {
       this.x = x
       this.y = y
       this.graphics = new PIXI.Graphics()
-      this.graphics.interactive = true 
+      this.graphics.eventMode = 'static' 
       this.graphics.hitArea = new PIXI.Rectangle(0,0,75,25)
       this.graphics.cursor ="pointer"
       this.drawButton()
@@ -44,7 +44,7 @@ export default class ShuttleKey extends PIXI.Container {
       this.graphics.moveTo(40,10)
       this.graphics.lineTo(40,15)
  
-      this.graphics.interactive = true 
+      this.graphics.eventMode = 'static' 
       this.graphics.hitArea = new PIXI.Rectangle(0,0,50,35)
    }
 
