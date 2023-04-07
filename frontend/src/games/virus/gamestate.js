@@ -11,7 +11,7 @@ export default class GameState {
 
    requestSubmit() {
       this.state = GameState.SUBMIT_REQUESTED
-      this.stateDuration = 0.5
+      this.stateDuration = 0.25
       this.stateRepeatCount = 1
    }
    submitFailed() {

@@ -86,11 +86,9 @@ export default class Letter extends PIXI.Container {
 
    reset( newLetter ) {
       this.selected = false
-      if ( this.infected ) {
-         this.infected = false 
-         this.virusPercent = 0
-         this.virusGfx.clear()
-      }
+      this.infected = false 
+      this.virusPercent = 0
+      this.virusGfx.clear()
       this.letter.text = newLetter 
       this.draw()  
    }
