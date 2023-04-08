@@ -85,7 +85,6 @@ onMounted(async () => {
    initGameOverlay.startGameInit( startGame )
 
    app.start()
-   app.ticker.add( gameLoop )
 })
 
 const layoutGameScreen =(() => {
@@ -186,6 +185,7 @@ const startGame = (( jwt ) => {
       }
    } 
    state.initialized()
+   app.ticker.add( gameLoop )
 })
 
 const checkInfectedCount = (() => {
@@ -379,6 +379,7 @@ const letterClicked = (( selected, row, col, letter) => {
 
 const startExplode = ((row, col) => {
    var emitter = new particles.Emitter(scene, boom2 )
+   console.log(boom2)
 
    // start of grid is 40,40 each letter is 55x55
    let x = 40 + (col*55)
