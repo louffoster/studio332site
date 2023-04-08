@@ -4,7 +4,7 @@ backend:
 	go build -a -o studio332 studio332srv/*.go
 
 clean:
-	rm -f srv
+	rm -f studio332
 	rm -rf ./public/
 
 web:
