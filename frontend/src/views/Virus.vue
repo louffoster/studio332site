@@ -304,10 +304,10 @@ const disinfectLetter = (() =>{
       return
    } 
 
-   // no infected tiles cleared for first letter
-   if (letterIndex == 0) {
-      return
-   }
+   // // no infected tiles cleared for first letter
+   // if (letterIndex == 0) {
+   //    return
+   // }
 
    // go from bottom right to top left and clear one infected or lost tile
    let done = false
