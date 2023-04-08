@@ -38,8 +38,6 @@ export default class StartOverlay extends PIXI.Container {
 
    addStartButton() {
       this.graphics.eventMode = 'static' 
-      this.graphics.interactive = true 
-      this.graphics.interactiveChildren = true
       this.graphics.hitArea = new PIXI.Rectangle(95,90, 100,35)
       this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0x55dd55, 1)
@@ -55,7 +53,6 @@ export default class StartOverlay extends PIXI.Container {
       btnTxt.x = 145
       btnTxt.y = 108
       btnTxt.eventMode = 'static' 
-      btnTxt.interactive = true
       btnTxt.cursor ="pointer"
       this.addChild(btnTxt)
 

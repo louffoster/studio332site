@@ -72,10 +72,8 @@ export default class Letter extends PIXI.Container {
    }
 
    deselect() {
-      if ( this.selected) {
-         this.selected = false
-         this.draw()
-      }
+      this.selected = false
+      this.draw()
    }
 
    replace( newLetter ) {
@@ -125,8 +123,8 @@ export default class Letter extends PIXI.Container {
          this.virusGfx.clear()
 
          if ( this.selected ) {
-            // selecting a letter slows growth
-            this.virusPercent += (Letter.infectRatePerSec/2.0) * (deltaMS/1000.0)
+            // selecting a letter STOPS growth
+            // this.virusPercent += (Letter.infectRatePerSec/2.0) * (deltaMS/1000.0)
          } else {
             this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
          }

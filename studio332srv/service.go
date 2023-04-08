@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // GameService is a contet used for word games. It has a dictionary and word checker
@@ -55,11 +55,11 @@ func (svc *GameService) infoRequest(c *gin.Context) {
 func (svc *GameService) startGameRequest(c *gin.Context) {
 	game := c.Query("game")
 	log.Printf("INFO: start game %s", game)
-	claims := jwt.StandardClaims{
-		Issuer:    "studio332",
-		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
-		Subject:   fmt.Sprintf("%s:%d", game, time.Now().Unix()),
+	claims := jwt.MapClaims{
+		"Issuer":    "studio332",
+		"IssuedAt":  time.Now().Unix(),
+		"ExpiresAt": time.Now().Add(5 * time.Minute).Unix(),
+		"Subject":   fmt.Sprintf("%s:%d", game, time.Now().Unix()),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedStr, err := token.SignedString([]byte(svc.JWTKey))

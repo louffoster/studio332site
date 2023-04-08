@@ -3,8 +3,8 @@ module github.com/louffoster/studio332site
 go 1.19
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.0
+	github.com/golang-jwt/jwt/v5 v5.0.0-rc.2
 )
 
 require (
