@@ -89,12 +89,12 @@ const layoutGameScreen =(() => {
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
 
-   gfx.beginFill(0x664444)
-   gfx.drawRect(0, 289, GAME_WIDTH, 64)
-   gfx.endFill()
-   gfx.lineStyle(1, 0xcc0000, 1)
-   gfx.moveTo(0, 289)
-   gfx.lineTo(GAME_WIDTH, 289)
+   // gfx.beginFill(0x664444)
+   // gfx.drawRect(0, 289, GAME_WIDTH, 64)
+   // gfx.endFill()
+   // gfx.lineStyle(1, 0xcc0000, 1)
+   // gfx.moveTo(0, 289)
+   // gfx.lineTo(GAME_WIDTH, 289)
 
    let y = 40
    let x = 40   
@@ -392,18 +392,41 @@ const startExplode = ((row, col) => {
 const letterLost = (( row, col ) => {
    if ( state.isGameOver()) return
 
-   // if any in the last row are lost, game over
-   if (row == ROWS-1) {
-      for (let r = 0; r < ROWS; r++) {
-         for (let c = 0; c < COLS; c++) {
-            grid[r][c].replace( "" )
+   let biggestWordLeft = 0 
+   gauges.forEach( g =>{
+      if (g.isFull() == false) {
+         biggestWordLeft = Math.max(g.maxValue)   
+      }
+   })
+
+   let remainingLetters = 0
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if ( grid[r][c].isLost() == false) {
+            remainingLetters++
          }
-      } 
+      }
+   }
+   
+   if ( remainingLetters < biggestWordLeft ) {
       state.gameOver()
       gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
       scene.addChild(gameOverOverlay)
       return
    }
+
+   // // if any in the last row are lost, game over
+   // if (row == ROWS-1) {
+   //    for (let r = 0; r < ROWS; r++) {
+   //       for (let c = 0; c < COLS; c++) {
+   //          grid[r][c].replace( "" )
+   //       }
+   //    } 
+   //    state.gameOver()
+   //    gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
+   //    scene.addChild(gameOverOverlay)
+   //    return
+   // }
    let isInWord = false 
    word.forEach( wl => {
       if (wl.fromRow == row && wl.fromCol == col) {
