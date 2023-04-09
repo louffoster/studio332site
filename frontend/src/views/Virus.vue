@@ -394,8 +394,9 @@ const letterLost = (( row, col ) => {
 
    let biggestWordLeft = 0 
    gauges.forEach( g =>{
+      console.log("gauge "+g.maxValue+": is full "+g.isFull())
       if (g.isFull() == false) {
-         biggestWordLeft = Math.max(g.maxValue)   
+         biggestWordLeft = Math.max(g.maxValue, biggestWordLeft)   
       }
    })
 
@@ -408,6 +409,7 @@ const letterLost = (( row, col ) => {
       }
    }
    
+   console.log("Letters left: "+remainingLetters+", biggestWordLeft: "+biggestWordLeft)
    if ( remainingLetters < biggestWordLeft ) {
       state.gameOver()
       gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
@@ -415,18 +417,6 @@ const letterLost = (( row, col ) => {
       return
    }
 
-   // // if any in the last row are lost, game over
-   // if (row == ROWS-1) {
-   //    for (let r = 0; r < ROWS; r++) {
-   //       for (let c = 0; c < COLS; c++) {
-   //          grid[r][c].replace( "" )
-   //       }
-   //    } 
-   //    state.gameOver()
-   //    gameOverOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
-   //    scene.addChild(gameOverOverlay)
-   //    return
-   // }
    let isInWord = false 
    word.forEach( wl => {
       if (wl.fromRow == row && wl.fromCol == col) {
