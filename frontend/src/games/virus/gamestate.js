@@ -24,7 +24,14 @@ export default class GameState {
       this.stateDuration = 0.2
       this.stateRepeatCount = wordSize
    }
-
+   clearVirus() {
+      this.state = GameState.CLEAR_ALL
+      this.stateDuration = 1
+      this.stateRepeatCount = 1   
+   }
+   isWinning() {
+      return this.state == GameState.CLEAR_ALL
+   }
    isPlaying() {
       return this.state == GameState.PLAY
    }
@@ -69,6 +76,9 @@ export default class GameState {
                statusCallback(GameState.SUCCESS, this.state)
                this.stateDuration = 0.2
             }
+         } else if ( this.state == GameState.CLEAR_ALL ) {
+            this.state = GameState.GAME_OVER
+            statusCallback(GameState.CLEAR_ALL, this.state) 
          }
       }
    }
@@ -81,4 +91,5 @@ GameState.SUBMIT = 3
 GameState.FAIL = 4
 GameState.SUCCESS = 5
 GameState.REMOVE = 6
-GameState.GAME_OVER = 7
+GameState.CLEAR_ALL = 7
+GameState.GAME_OVER = 8

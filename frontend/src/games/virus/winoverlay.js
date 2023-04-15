@@ -61,7 +61,6 @@ export default class WinOverlay extends PIXI.Container {
       })
 
       this.wordStats = []
-      let btnY = 130
       let xPos = [10,150,10,150]
       let yPos = [130,130,152,152]
       for ( let i=0; i<4; i++) { 
@@ -84,7 +83,6 @@ export default class WinOverlay extends PIXI.Container {
       let timeStr = `Recovery Time: ${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       this.uptime.text = timeStr
 
-      console.log(this.wordStats)
       for ( let i=0; i<4; i++) { 
          this.wordStats[i].text = `${i+3} Letters: ${stats[i]}`
       }

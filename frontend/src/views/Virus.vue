@@ -232,7 +232,7 @@ const addInfectedTile = (() => {
 })
 
 const shuffleGrid =(() => {
-   if (state.isGameOver()) return 
+   if (state.isPlaying() == false) return 
    
    clearWord()
    let newLetters = pickNewLetters(ROWS*COLS) 
@@ -244,14 +244,17 @@ const shuffleGrid =(() => {
 })
 
 const enterWord = (() => {
-   if (state.isGameOver()) return
+   console.log("ENTER CLICKED")
+   console.log(state)
+   if (state.isPlaying() == false) return 
+   
+   console.log("SUBMIT")
    state.requestSubmit()
    setWordColor(0xaaddff)  
 })
 
 const doSubmission = ( async () => {
    // 3 letters or more required!
-   // TODO flash error
    if ( letterIndex < 3) {
       addInfectedTile()
       failedWord()
@@ -303,11 +306,6 @@ const disinfectLetter = (() =>{
       startExplode( selR, selC)
       return
    } 
-
-   // // no infected tiles cleared for first letter
-   // if (letterIndex == 0) {
-   //    return
-   // }
 
    // go from bottom right to top left and clear one infected or lost tile
    let done = false
@@ -393,10 +391,10 @@ const letterLost = (( row, col ) => {
    if ( state.isGameOver()) return
 
    let biggestWordLeft = 0 
-   gauges.forEach( g =>{
-      console.log("gauge "+g.maxValue+": is full "+g.isFull())
+   let sizes = [3,4,5,6]
+   gauges.forEach( (g, idx) =>{
       if (g.isFull() == false) {
-         biggestWordLeft = Math.max(g.maxValue, biggestWordLeft)   
+         biggestWordLeft = sizes[idx]   
       }
    })
 
@@ -452,33 +450,7 @@ const areGaugesFull =(() => {
 })
 
 const restartHandler = (() => {
-   Letter.wordFull = false 
-   Letter.infectRatePerSec = 5.0
-   letterIndex = 0
-   lastWordSize = 0
-   checkCountdown = 1000
-   addCountdown = 1000
-   lastIncreasedTimeSec = 0
-   gameTime = 0.0
-   for ( let i=0; i<6; i++) {
-     word[i].letter.text = ""
-     word[i].fromRow = -1
-     word[i].fromCol = -1
-   }
-   wordCounts = []
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         grid[r][c].reset( "" )
-         grid[r][c].update(0, letterLost)
-      }
-   } 
-
-   gauges.forEach( g => g.reset() )
-   
-   scene.removeChild(winOverlay)
-   scene.removeChild(gameOverOverlay)
-   scene.addChild(initGameOverlay)
-   initGameOverlay.startGameInit( startGame )
+   location.reload()
 })
 
 const wordDisinfectFinished = ( () => {
@@ -497,9 +469,23 @@ const wordDisinfectFinished = ( () => {
 
    // is the game over?
    if ( areGaugesFull()) {
-      state.gameOver()
-      winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
-      scene.addChild(winOverlay)
+      state.clearVirus()
+      clearAllInfections()
+   }
+})
+
+const clearAllInfections = (()=>{   
+   for (let r = (ROWS-1); r >= 0; r--) {
+      for (let c = (COLS-1); c  >= 0; c--) {
+         console.log("clear "+r+","+c)
+         if ( grid[r][c].isLost()  || grid[r][c].infected ) {
+            grid[r][c].reset( pickNewLetter() )
+            startExplode( r, c )
+            console.log("   boom")
+         } else {
+            console.log("   not infected")
+         }
+      }
    }
 })
 
@@ -526,7 +512,7 @@ const gameLoop = (() => {
    }
 
    state.update( app.ticker.deltaMS, gameStateChanged)
-   if ( state.isSubmitting() ) {
+   if ( state.isSubmitting() || state.isWinning() ) {
       // dont advance infections while a word is being submitted
       return
    }
@@ -583,6 +569,11 @@ const gameStateChanged = (( oldState, newState, ) => {
    } else if ( newState == GameState.SUCCESS) {
       letterIndex--
       disinfectLetter( )
+   } else if ( newState == GameState.GAME_OVER )  {
+      if ( oldState == GameState.CLEAR_ALL ) {
+         winOverlay.updateStats(Math.round(gameTime / 1000), wordCounts)
+         scene.addChild(winOverlay)
+      }
    }
 })
 
