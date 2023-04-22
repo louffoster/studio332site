@@ -26,8 +26,16 @@ export default class GameState {
    }
    clearVirus() {
       this.state = GameState.CLEAR_ALL
-      this.stateDuration = 1
+      this.stateDuration = 2
       this.stateRepeatCount = 1   
+   }
+   gameLost() {
+      this.state = GameState.PLAYER_LOST
+      this.stateDuration = 2
+      this.stateRepeatCount = 1   
+   }
+   isLosing() {
+      return this.state == GameState.PLAYER_LOST
    }
    isWinning() {
       return this.state == GameState.CLEAR_ALL
@@ -79,6 +87,9 @@ export default class GameState {
          } else if ( this.state == GameState.CLEAR_ALL ) {
             this.state = GameState.GAME_OVER
             statusCallback(GameState.CLEAR_ALL, this.state) 
+         } else if ( this.state == GameState.PLAYER_LOST ) {
+            this.state = GameState.GAME_OVER
+            statusCallback(GameState.PLAYER_LOST, this.state) 
          }
       }
    }
@@ -92,4 +103,5 @@ GameState.FAIL = 4
 GameState.SUCCESS = 5
 GameState.REMOVE = 6
 GameState.CLEAR_ALL = 7
-GameState.GAME_OVER = 8
+GameState.PLAYER_LOST = 8
+GameState.GAME_OVER = 9

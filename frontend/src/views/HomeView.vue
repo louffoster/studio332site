@@ -41,6 +41,27 @@ function toggleVirusHelp(event) {
                <div class="rules">
                   <h3>Virus</h3>
                   <p>The system has a virus! Repel it by entering codewords.</p>
+                  <ul>
+                     <li>
+                        Tap letters to form a codeword then tap the enter key to submit it.
+                     </li>
+                     <li>
+                        To deselect all letters in the current word, tap a selected letter.
+                     </li>
+                     <li>
+                        Tap the shuffle key to randmonize all letters.
+                     </li>
+                     <li>
+                        Each codeword you successfully submit clears a number of infected letters matching 
+                        the length of the codeword and fills a segment the corresponding gauge.
+                     </li>
+                     <li>
+                        Once all gauges are filled, the virus is removed.
+                     </li>
+                     <li>
+                        If the virus takes over too many letters, the system fails and you lose.
+                     </li>
+                  </ul>
                </div>
             </OverlayPanel>
          </li>

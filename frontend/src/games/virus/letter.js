@@ -44,7 +44,7 @@ export default class Letter extends PIXI.Container {
    }
 
    static increseInfectionRate() {
-      Letter.infectRatePerSec +=  0.75
+      Letter.infectRatePerSec +=  0.70
       Letter.infectRatePerSec = Math.min(10.0, Letter.infectRatePerSec)
    }
 
@@ -94,7 +94,21 @@ export default class Letter extends PIXI.Container {
    infect() {
       if ( this.infected == false) {
          this.infected = true
+         this.draw()
       }
+   }
+   fullyInfect() {
+      this.infected = true
+      this.virusPercent = 100.0
+      this.selected = false
+      this.letter.text = ""
+      this.graphics.cursor = 'default'
+      this.eventMode = 'none'
+      this.draw()
+      this.virusGfx.clear()
+      this.virusGfx.beginFill(0x660055)
+      this.virusGfx.drawCircle(0, 0, 25)
+      this.virusGfx.endFill()
    }
 
    destroy() {
@@ -108,6 +122,9 @@ export default class Letter extends PIXI.Container {
          this.letter.style.fill = 0xaaddff
       } else {
          this.graphics.lineStyle(1, 0xcccccc, 1)
+         if ( this.isLost() ) {
+            this.graphics.lineStyle(1, 0x885588, 1)
+         } 
          if ( this.isInfected() ) {
             this.letter.style.fill = 0x33aa33
          } else {
@@ -118,7 +135,6 @@ export default class Letter extends PIXI.Container {
    }
 
    update(deltaMS, infectedCallback) {
-      this.draw()
       if ( this.isInfected() ) {
          this.virusGfx.clear()
 
@@ -132,15 +148,13 @@ export default class Letter extends PIXI.Container {
             this.virusPercent = 100.0
             this.selected = false
             this.letter.text = ""
-            this.graphics.clear()
-            this.graphics.lineStyle(3, 0x008800, 1)
-            this.graphics.drawCircle(0,0, 25)
             this.graphics.cursor = 'default'
             this.eventMode = 'none'
+            this.draw()
             infectedCallback(this.row, this.col)
          }
+
          let radius = 25.0 * (this.virusPercent/100.0)
-      
          this.virusGfx.lineStyle(1, 0x660055, 1)
          let color = 0xaa0099
          if ( this.virusPercent == 100) {
