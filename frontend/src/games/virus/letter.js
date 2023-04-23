@@ -44,7 +44,7 @@ export default class Letter extends PIXI.Container {
    }
 
    static increseInfectionRate() {
-      Letter.infectRatePerSec +=  0.70
+      Letter.infectRatePerSec +=  0.75
       Letter.infectRatePerSec = Math.min(10.0, Letter.infectRatePerSec)
    }
 
@@ -88,6 +88,8 @@ export default class Letter extends PIXI.Container {
       this.virusPercent = 0
       this.virusGfx.clear()
       this.letter.text = newLetter 
+      this.graphics.eventMode = 'static'
+      this.eventMode = 'static'
       this.draw()  
    }
 
@@ -104,6 +106,7 @@ export default class Letter extends PIXI.Container {
       this.letter.text = ""
       this.graphics.cursor = 'default'
       this.eventMode = 'none'
+      this.graphics.eventMode = 'none'
       this.draw()
       this.virusGfx.clear()
       this.virusGfx.beginFill(0x660055)

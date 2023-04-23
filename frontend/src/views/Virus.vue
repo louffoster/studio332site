@@ -27,7 +27,7 @@ const ROWS = 6
 const COLS = 5
 const GAME_WIDTH = 300
 const GAME_HEIGHT = 600
-const MAX_INFECTIONS = 5//8
+const MAX_INFECTIONS = 10//8
 
 var app = null
 var scene = null
@@ -198,11 +198,18 @@ const checkInfectedCount = (() => {
    }
 
    // If there is nothing, always start with 3 in alternating columns in first row
-   if (cnt == 0) {
-      grid[0][0].infect()
-      grid[0][2].infect()
-      grid[0][4].infect()
-      cnt = 3
+   if ( cnt < 4){
+      let tgtR = [0, 0,ROWS-1, ROWS-1]
+      let tgtC = [0, COLS-1, 0, COLS-1]
+      for ( let i = 0; i<=4; i++) {
+         if ( grid[ tgtR[i] ][ tgtC[i] ].isInfected() == false ) {
+            grid[ tgtR[i] ][ tgtC[i] ].infect()
+            cnt++
+            if (cnt == 4) {
+               break
+            }
+         }  
+      }
    }
 
    // keep the number of infected tiles at a minum of the current level
@@ -299,30 +306,30 @@ const disinfectLetter = (() =>{
 
    // If this letter was infected, nothing left to do
    if ( isSelectedInfected ) {
-      startExplode( selR, selC)
+      startVirusExplode( selR, selC)
       return
    } 
 
    // go from bottom right to top left and clear one infected or lost tile
+   // start with restoring lost tiles. when there are none, reset infected
    let done = false
-   for (let r = (ROWS-1); r >= 0; r--) {
-      for (let c = (COLS-1); c  >= 0; c--) {
-         // restore infected or lost letter from the grid
-         if ( grid[r][c].isLost()  || grid[r][c].infected ) {
-            let type = "infected"
-            if (grid[r][c].isLost()) {
-               type = "LOST"
+   let pass = 0
+   while ( done == false && pass < 2) {
+      for (let r = (ROWS-1); r >= 0; r--) {
+         for (let c = (COLS-1); c  >= 0; c--) {
+            if ( (pass == 0 && grid[r][c].isLost()) || 
+                 (pass == 1 && grid[r][c].infected) )  {       
+               grid[r][c].reset( pickNewLetter() )
+               done = true
+               startVirusExplode( r, c )
+               break
             }
-            console.log(`clear ${type} tile at ${r}, ${c}`)
-            grid[r][c].reset( pickNewLetter() )
-            done = true
-            startExplode( r, c )
+         }
+         if (done) {
             break
          }
       }
-      if (done) {
-         break
-      }
+      pass++
    }
 })
 
@@ -372,7 +379,7 @@ const letterClicked = (( selected, row, col, letter) => {
    }
 })
 
-const startExplode = ((row, col) => {
+const startVirusExplode = ((row, col) => {
    var emitter = new particles.Emitter(scene, virusExplode )
 
    // start of grid is 40,40 each letter is 55x55
@@ -517,7 +524,7 @@ const clearAllInfections = (()=>{
          console.log("clear "+r+","+c)
          if ( grid[r][c].isLost()  || grid[r][c].infected ) {
             grid[r][c].reset( pickNewLetter() )
-            startExplode( r, c )
+            startVirusExplode( r, c )
             console.log("   boom")
          } else {
             console.log("   not infected")
@@ -593,7 +600,7 @@ const gameLoop = (() => {
 })
 
 const gameStateChanged = (( oldState, newState, ) => {
-   console.log("NEW STATE FROM "+oldState+" TO "+newState)
+   // console.log("NEW STATE FROM "+oldState+" TO "+newState)
    if (newState == GameState.SUBMIT) {
       doSubmission()
    } else if (newState == GameState.PLAY) {
