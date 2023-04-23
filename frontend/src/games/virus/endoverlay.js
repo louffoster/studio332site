@@ -83,7 +83,6 @@ export default class EndOverlay extends PIXI.Container {
       let timeStr = `Uptime: ${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       this.uptime.text = timeStr
 
-      console.log(this.wordStats)
       for ( let i=0; i<4; i++) { 
          this.wordStats[i].text = `${i+3} Letters: ${stats[i]}`
       }

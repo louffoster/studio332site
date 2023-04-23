@@ -249,7 +249,6 @@ const shuffleGrid =(() => {
 })
 
 const enterWord = (() => {
-   console.log(state)
    if (state.isPlaying() == false) return 
    
    state.requestSubmit()
@@ -304,10 +303,8 @@ const disinfectLetter = (() =>{
    word[letterIndex].fromCol = -1
    word[letterIndex].fromRow = -1  
 
-   // If this letter was infected, nothing left to do
    if ( isSelectedInfected ) {
       startVirusExplode( selR, selC)
-      return
    } 
 
    // go from bottom right to top left and clear one infected or lost tile
@@ -315,18 +312,35 @@ const disinfectLetter = (() =>{
    let done = false
    let pass = 0
    while ( done == false && pass < 2) {
-      for (let r = (ROWS-1); r >= 0; r--) {
-         for (let c = (COLS-1); c  >= 0; c--) {
-            if ( (pass == 0 && grid[r][c].isLost()) || 
-                 (pass == 1 && grid[r][c].infected) )  {       
-               grid[r][c].reset( pickNewLetter() )
-               done = true
-               startVirusExplode( r, c )
+      if ( letterIndex % 2) {
+         for (let r = (ROWS-1); r >= 0; r--) {
+            for (let c = (COLS-1); c  >= 0; c--) {
+               if ( (pass == 0 && grid[r][c].isLost()) || 
+                    (pass == 1 && grid[r][c].infected) )  {       
+                  grid[r][c].reset( pickNewLetter() )
+                  done = true
+                  startVirusExplode( r, c )
+                  break
+               }
+            }
+            if (done) {
                break
             }
          }
-         if (done) {
-            break
+      } else {
+         for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c  < COLS; c++) {
+               if ( (pass == 0 && grid[r][c].isLost()) || 
+                    (pass == 1 && grid[r][c].infected) )  {       
+                  grid[r][c].reset( pickNewLetter() )
+                  done = true
+                  startVirusExplode( r, c )
+                  break
+               }
+            }
+            if (done) {
+               break
+            }
          }
       }
       pass++
@@ -453,7 +467,7 @@ const letterLost = (( row, col ) => {
       }
    }
    
-   console.log("Letters left: "+remainingLetters+", biggestWordLeft: "+biggestWordLeft)
+   // console.log("Letters left: "+remainingLetters+", biggestWordLeft: "+biggestWordLeft)
    if ( remainingLetters < biggestWordLeft ) {
       beginGameOver()
       return
@@ -521,14 +535,10 @@ const wordDisinfectFinished = ( () => {
 const clearAllInfections = (()=>{   
    for (let r = (ROWS-1); r >= 0; r--) {
       for (let c = (COLS-1); c  >= 0; c--) {
-         console.log("clear "+r+","+c)
          if ( grid[r][c].isLost()  || grid[r][c].infected ) {
             grid[r][c].reset( pickNewLetter() )
             startVirusExplode( r, c )
-            console.log("   boom")
-         } else {
-            console.log("   not infected")
-         }
+         } 
       }
    }
 })
@@ -568,16 +578,16 @@ const gameLoop = (() => {
       if (infectionLevel < MAX_INFECTIONS) {
          infectionLevel++
       }
-      console.log("NEW RATE: "+Letter.infectRatePerSec+"  LEVEL "+infectionLevel)
+      // console.log("NEW RATE: "+Letter.infectRatePerSec+"  LEVEL "+infectionLevel)
    }
 
    // is it time to check for infectedd tile counts (very second)?
    checkCountdown -= app.ticker.deltaMS 
    if (checkCountdown <= 0 ) {
       checkInfectedCount()
-      if (pendingInfections > 0) {
-         console.log("Checked infections. NEW pending: "+pendingInfections)
-      }
+      // if (pendingInfections > 0) {
+      //    console.log("Checked infections. NEW pending: "+pendingInfections)
+      // }
    }
 
    // if more infections are pending add them once per second
@@ -587,7 +597,6 @@ const gameLoop = (() => {
          addCountdown = 1000
          addInfectedTile()
          pendingInfections--
-         console.log("ADDED pending infection. Pending: "+pendingInfections)
       }
    }
 
