@@ -144,7 +144,7 @@ const layoutGameScreen =(() => {
 
    // word count gauges
    gauges = []
-   let maxValues = [10,6,4,3] 
+   let maxValues = [8,6,5,4] 
    let gaugeY = 430
    for (let i=0; i<4; i++) {
       let g = new Gauge(10,gaugeY,`${i+3}`, maxValues[i])
@@ -303,8 +303,10 @@ const disinfectLetter = (() =>{
    word[letterIndex].fromCol = -1
    word[letterIndex].fromRow = -1  
 
+   // If this letter was infected, nothing left to do
    if ( isSelectedInfected ) {
       startVirusExplode( selR, selC)
+      return
    } 
 
    // go from bottom right to top left and clear one infected or lost tile
