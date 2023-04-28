@@ -11,7 +11,7 @@ export default class GameState {
 
    requestSubmit() {
       this.state = GameState.SUBMIT_REQUESTED
-      this.stateDuration = 0.25
+      this.stateDuration = 0.1
       this.stateRepeatCount = 1
    }
    submitFailed() {
@@ -21,7 +21,7 @@ export default class GameState {
    }
    submitSuccess( wordSize ) {
       this.state = GameState.SUCCESS
-      this.stateDuration = 0.1
+      this.stateDuration = 0.05
       this.stateRepeatCount = wordSize
    }
    clearVirus() {
@@ -82,7 +82,7 @@ export default class GameState {
                statusCallback(GameState.SUCCESS, this.state)
             } else {
                statusCallback(GameState.SUCCESS, this.state)
-               this.stateDuration = 0.1
+               this.stateDuration = 0.05
             }
          } else if ( this.state == GameState.CLEAR_ALL ) {
             this.state = GameState.GAME_OVER

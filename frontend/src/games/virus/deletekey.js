@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 
-export default class ShuttleKey extends PIXI.Container {
+export default class DeleteKey extends PIXI.Container {
    constructor( x,y, listener) {
       super()
       this.eventMode = 'static'
@@ -22,10 +22,10 @@ export default class ShuttleKey extends PIXI.Container {
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 16,
       })
-      let btnTxt = new PIXI.Text("Randomize", style)
-      btnTxt.anchor.set(0.5)
-      btnTxt.x = 75
-      btnTxt.y = 16
+      let btnTxt = new PIXI.Text("DEL", style)
+      btnTxt.anchor.set(0.5, 0.5)
+      btnTxt.x = 25
+      btnTxt.y = 17
       btnTxt.eventMode = 'static' 
       btnTxt.cursor ="pointer"
       this.addChild(btnTxt)
@@ -38,11 +38,11 @@ export default class ShuttleKey extends PIXI.Container {
       if ( this.pointerDown) {
          this.graphics.beginFill(0x77aaff)
       }
-      this.graphics.drawRect(0,0, 150,30)
+      this.graphics.drawRect(0,0, 50,35)
       if ( this.pointerDown) {
          this.graphics.lineStyle(1, 0x333333, 1)
       }
-      
+ 
       this.graphics.eventMode = 'static' 
       this.graphics.hitArea = new PIXI.Rectangle(0,0,50,35)
    }

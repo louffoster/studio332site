@@ -59,9 +59,11 @@ export default class Letter extends PIXI.Container {
       if ( Letter.wordFull && this.selected == false ) { 
          return
       }
-      this.selected = !this.selected
-      this.draw()
-      this.clickCallback(this.selected, this.row, this.col, this.letter.text)
+      if (this.selected == false) {
+         this.selected = !this.selected
+         this.draw()
+         this.clickCallback(this.selected, this.row, this.col, this.letter.text)
+      }
    }
 
    isInfected() {
@@ -141,10 +143,8 @@ export default class Letter extends PIXI.Container {
       if ( this.isInfected() ) {
          this.virusGfx.clear()
 
-         if ( this.selected ) {
-            // selecting a letter slows growth
-            this.virusPercent += (deltaMS/1000.0)
-         } else {
+         // only unselected letters grow
+         if ( this.selected == false ) {
             this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
          }
          if (this.virusPercent >= 100.0) {

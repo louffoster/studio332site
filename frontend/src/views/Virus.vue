@@ -8,6 +8,7 @@ import GameState from "@/games/virus/gamestate"
 import Letter from "@/games/virus/letter"
 import EnterKey from "@/games/virus/enterkey"
 import ShuffleKey from "@/games/virus/shufflekey"
+import DeleteKey from "@/games/virus/deletekey"
 import StartOverlay from "@/games/virus/startoverlay"
 import EndOverlay from "@/games/virus/endoverlay"
 import WinOverlay from "@/games/virus/winoverlay"
@@ -58,6 +59,7 @@ var wordCounts = []
 var gauges = []
 var enterKey = null 
 var shuffleKey = null
+var deleteKey = null
 var gameplayToken = ""
 
 onMounted(async () => {
@@ -139,12 +141,14 @@ const layoutGameScreen =(() => {
 
    enterKey = new EnterKey(170,365, enterWord)
    scene.addChild(enterKey)
-   shuffleKey = new ShuffleKey(170+70 ,365, shuffleGrid)
+   deleteKey = new DeleteKey(170+70 ,365, backspaceClicked)
+   scene.addChild(deleteKey)
+   shuffleKey = new ShuffleKey(8,560, shuffleGrid)
    scene.addChild(shuffleKey)
 
    // word count gauges
    gauges = []
-   let maxValues = [8,6,5,4] 
+   let maxValues = [7,6,5,4] 
    let gaugeY = 430
    for (let i=0; i<4; i++) {
       let g = new Gauge(10,gaugeY,`${i+3}`, maxValues[i])
@@ -156,13 +160,13 @@ const layoutGameScreen =(() => {
    // timer 
    gfx.moveTo(0, 550)
    gfx.lineTo(GAME_WIDTH, 550)
-   timerDisplay = new PIXI.Text("System Time: 00:00", {
+   timerDisplay = new PIXI.Text("00:00", {
       fill: "#44cc44",
       fontFamily: "\"Courier New\", Courier, monospace",
       fontSize: 18,
    })
-   timerDisplay.anchor.set(0.5,0)
-   timerDisplay.x = GAME_WIDTH/2
+   // timerDisplay.anchor.set(0.5,0)
+   timerDisplay.x = 200
    timerDisplay.y = 565
    scene.addChild(timerDisplay)
 })
@@ -378,6 +382,16 @@ const pickNewLetters = (( cnt ) => {
    return out
 })
 
+const backspaceClicked = (() => {
+   letterIndex--  
+   let c = word[letterIndex].fromCol
+   let r = word[letterIndex].fromRow
+   grid[r][c].deselect() 
+   word[letterIndex].letter.text = ""
+   word[letterIndex].fromCol = -1
+   word[letterIndex].fromRow = -1
+})
+
 const letterClicked = (( selected, row, col, letter) => {
    if (state.isGameOver()) return 
 
@@ -563,7 +577,7 @@ const gameLoop = (() => {
       if ( mins > 0) {
          secs = timeSec - mins*60
       }
-      let timeStr = "Uptime: "+`${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       timerDisplay.text = timeStr
    }
 
