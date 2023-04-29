@@ -3,17 +3,21 @@ import * as PIXI from "pixi.js"
 export default class EnterKey extends PIXI.Container {
    constructor( x,y, listener) {
       super()
+
+      this.x = x
+      this.y = y
+      this.btnWidth = 60 
+      this.btnHeight = 35
+
       this.eventMode = 'static'
       this.pointerDown = false
       this.on('pointerdown', this.handlePointerDown)
       this.on('pointerup', this.clickHandler)
       this.clickListener = listener
-      this.x = x
-      this.y = y
+      this.hitArea = new PIXI.Rectangle(0,0, this.btnWidth, this.btnHeight)
+      this.cursor ="pointer"
+
       this.graphics = new PIXI.Graphics()
-      this.graphics.eventMode = 'static'
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,75,25)
-      this.graphics.cursor ="pointer"
       this.drawButton()
       this.addChild(this.graphics)
    }
@@ -37,7 +41,7 @@ export default class EnterKey extends PIXI.Container {
       this.graphics.moveTo(10,20)
       this.graphics.lineTo(25,26)  
       this.graphics.eventMode = 'static'
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,60,35)
+      this.graphics.hitArea = new PIXI.Rectangle(0,0, this.btnWidth, this.btnHeight)
    }
 
    handlePointerDown() {

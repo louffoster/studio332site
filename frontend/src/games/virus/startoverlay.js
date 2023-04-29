@@ -4,15 +4,17 @@ import axios from 'axios'
 export default class StartOverlay extends PIXI.Container {
    constructor(apiURL) {
       super()
+
       this.x = 10 
       this.y = 100
+      this.btnWidth = 100 
+      this.btnHeight = 35
       this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(2, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
       this.graphics.drawRect(0,0, 280,150)
-      this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({
          fill: "#55dd55",
@@ -23,7 +25,9 @@ export default class StartOverlay extends PIXI.Container {
       this.msg.anchor.set(0.5)
       this.msg.x = 145
       this.msg.y = 50
-      this.addChild(this.msg)
+
+      this.addChild(this.graphics)
+      this.graphics.addChild(this.msg)
    }
 
    async startGameInit( callback ) {
@@ -37,12 +41,15 @@ export default class StartOverlay extends PIXI.Container {
    }
 
    addStartButton() {
+      this.btnX = 95 
+      this.btnY = 90
+      this.graphics.cursor = "pointer"
       this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(95,90, 100,35)
-      this.graphics.cursor ="pointer"
+      this.graphics.hitArea = new PIXI.Rectangle(this.btnX, this.btnY, this.btnWidth, this.btnHeight)
+
       this.graphics.lineStyle(1, 0x55dd55, 1)
       this.graphics.beginFill(0x114a11)
-      this.graphics.drawRect(95,90, 100,35)
+      this.graphics.drawRect(this.btnX, this.btnY, this.btnWidth, this.btnHeight)
       let style = new PIXI.TextStyle({
          fill: "#55dd55",
          fontFamily: "\"Courier New\", Courier, monospace",
@@ -52,9 +59,7 @@ export default class StartOverlay extends PIXI.Container {
       btnTxt.anchor.set(0.5)
       btnTxt.x = 145
       btnTxt.y = 108
-      btnTxt.eventMode = 'static' 
-      btnTxt.cursor ="pointer"
-      this.addChild(btnTxt)
+      this.graphics.addChild(btnTxt)
 
       // add the this param as context for the click event. If not, any reference
       // to click in the clickHandler will bet to the txt or graphics, not the overlay class

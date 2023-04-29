@@ -3,19 +3,22 @@ import * as PIXI from "pixi.js"
 export default class DeleteKey extends PIXI.Container {
    constructor( x,y, listener) {
       super()
+
+      this.x = x
+      this.y = y
+      this.btnWidth = 50
+      this.btnHeight = 35
+
       this.eventMode = 'static'
       this.pointerDown = false
       this.on('pointerdown', this.handlePointerDown)
       this.on('pointerup', this.clickHandler)
+      this.hitArea = new PIXI.Rectangle(0,0, this.btnWidth, this.btnHeight)
+      this.cursor = "pointer"
       this.clickListener = listener
-      this.x = x
-      this.y = y
+
       this.graphics = new PIXI.Graphics()
-      this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,75,25)
-      this.graphics.cursor ="pointer"
       this.drawButton()
-      this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({
          fill: "#ffffff",
@@ -26,9 +29,9 @@ export default class DeleteKey extends PIXI.Container {
       btnTxt.anchor.set(0.5, 0.5)
       btnTxt.x = 25
       btnTxt.y = 17
-      btnTxt.eventMode = 'static' 
-      btnTxt.cursor ="pointer"
-      this.addChild(btnTxt)
+
+      this.addChild(this.graphics)
+      this.graphics.addChild(btnTxt)
    }
 
    drawButton() {
@@ -38,13 +41,11 @@ export default class DeleteKey extends PIXI.Container {
       if ( this.pointerDown) {
          this.graphics.beginFill(0x77aaff)
       }
-      this.graphics.drawRect(0,0, 50,35)
+
+      this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
       if ( this.pointerDown) {
          this.graphics.lineStyle(1, 0x333333, 1)
       }
- 
-      this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,50,35)
    }
 
    handlePointerDown() {

@@ -3,19 +3,22 @@ import * as PIXI from "pixi.js"
 export default class ShuttleKey extends PIXI.Container {
    constructor( x,y, listener) {
       super()
+
+      this.x = x
+      this.y = y
+      this.btnWidth = 150
+      this.btnHeight = 30
+
       this.eventMode = 'static'
       this.pointerDown = false
       this.on('pointerdown', this.handlePointerDown)
       this.on('pointerup', this.clickHandler)
+      this.hitArea = new PIXI.Rectangle(0,0, this.btnWidth, this.btnHeight)
+      this.cursor ="pointer"
       this.clickListener = listener
-      this.x = x
-      this.y = y
+
       this.graphics = new PIXI.Graphics()
-      this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,75,25)
-      this.graphics.cursor ="pointer"
       this.drawButton()
-      this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({
          fill: "#ffffff",
@@ -23,12 +26,12 @@ export default class ShuttleKey extends PIXI.Container {
          fontSize: 16,
       })
       let btnTxt = new PIXI.Text("Randomize", style)
-      btnTxt.anchor.set(0.5)
+      btnTxt.anchor.set(0.5, 0.5)
       btnTxt.x = 75
       btnTxt.y = 16
-      btnTxt.eventMode = 'static' 
-      btnTxt.cursor ="pointer"
-      this.addChild(btnTxt)
+
+      this.addChild(this.graphics)
+      this.graphics.addChild(btnTxt)
    }
 
    drawButton() {
@@ -38,13 +41,10 @@ export default class ShuttleKey extends PIXI.Container {
       if ( this.pointerDown) {
          this.graphics.beginFill(0x77aaff)
       }
-      this.graphics.drawRect(0,0, 150,30)
+      this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
       if ( this.pointerDown) {
          this.graphics.lineStyle(1, 0x333333, 1)
       }
-      
-      this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(0,0,50,35)
    }
 
    handlePointerDown() {

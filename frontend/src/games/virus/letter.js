@@ -4,13 +4,14 @@ export default class Letter extends PIXI.Container {
    constructor(letter, x, y, r,c ) {
       super()
       this.eventMode = 'static'
+      this.hitArea =  new PIXI.Circle(0,0,25)
+      this.cursor ="pointer"
       this.on('pointerdown', this.clickHandler)
 
       this.selected = false
       this.infected = false
       this.virusGfx = new PIXI.Graphics() 
       this.virusPercent = 0.0 
-      this.addChild(this.virusGfx)
 
       // set the container position. all other drawing is in reference 
       // of the container, so x and y for drawing and letters is based in 0,0
@@ -28,19 +29,18 @@ export default class Letter extends PIXI.Container {
       })
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.eventMode = 'static'
-      this.graphics.hitArea = new PIXI.Circle(0,0,25)
-      this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0xcccccc, 1)
       this.graphics.drawCircle(0,0, 25)
-      this.addChild(this.graphics)
 
       this.letter = new PIXI.Text(letter, this.style)
       this.letter.anchor.set(0.5)
       this.letter.x = 0
       this.letter.y = 0
       this.letter.resolution = window.devicePixelRatio
-      this.addChild(this.letter)
+
+      this.addChild(this.graphics)
+      this.graphics.addChild(this.virusGfx)
+      this.graphics.addChild(this.letter)
    }
 
    static increseInfectionRate() {

@@ -383,13 +383,15 @@ const pickNewLetters = (( cnt ) => {
 })
 
 const backspaceClicked = (() => {
-   letterIndex--  
-   let c = word[letterIndex].fromCol
-   let r = word[letterIndex].fromRow
-   grid[r][c].deselect() 
-   word[letterIndex].letter.text = ""
-   word[letterIndex].fromCol = -1
-   word[letterIndex].fromRow = -1
+   if (letterIndex > 0) {
+      letterIndex--  
+      let c = word[letterIndex].fromCol
+      let r = word[letterIndex].fromRow
+      grid[r][c].deselect() 
+      word[letterIndex].letter.text = ""
+      word[letterIndex].fromCol = -1
+      word[letterIndex].fromRow = -1
+   }
 })
 
 const letterClicked = (( selected, row, col, letter) => {
