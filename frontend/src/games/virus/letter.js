@@ -29,14 +29,13 @@ export default class Letter extends PIXI.Container {
       })
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(1, 0xcccccc, 1)
-      this.graphics.drawCircle(0,0, 25)
-
       this.letter = new PIXI.Text(letter, this.style)
       this.letter.anchor.set(0.5)
       this.letter.x = 0
       this.letter.y = 0
       this.letter.resolution = window.devicePixelRatio
+
+      this.draw()
 
       this.addChild(this.graphics)
       this.graphics.addChild(this.virusGfx)
@@ -90,8 +89,6 @@ export default class Letter extends PIXI.Container {
       this.virusPercent = 0
       this.virusGfx.clear()
       this.letter.text = newLetter 
-      this.graphics.eventMode = 'static'
-      this.eventMode = 'static'
       this.draw()  
    }
 
@@ -106,14 +103,9 @@ export default class Letter extends PIXI.Container {
       this.virusPercent = 100.0
       this.selected = false
       this.letter.text = ""
-      this.graphics.cursor = 'default'
-      this.eventMode = 'none'
-      this.graphics.eventMode = 'none'
+      this.cursor = 'default'
       this.draw()
-      this.virusGfx.clear()
-      this.virusGfx.beginFill(0x660055)
-      this.virusGfx.drawCircle(0, 0, 25)
-      this.virusGfx.endFill()
+      this.drawVirus()
    }
 
    destroy() {
@@ -122,6 +114,8 @@ export default class Letter extends PIXI.Container {
 
    draw() {
       this.graphics.clear()
+      this.graphics.beginFill(0x4f4f55)
+
       if (this.selected) {
          this.graphics.lineStyle(2, 0xaaddff, 1)
          this.letter.style.fill = 0xaaddff
@@ -137,12 +131,24 @@ export default class Letter extends PIXI.Container {
          }
       }
       this.graphics.drawCircle(0,0, 25)
+      this.graphics.endFill()
+   }
+
+   drawVirus() {
+      let radius = 25.0 * (this.virusPercent/100.0)
+      this.virusGfx.lineStyle(1, 0x885588, 1)
+      let color = 0x990099
+      if ( this.virusPercent == 100) {
+         color = 0x550044
+      }
+      this.virusGfx.clear()
+      this.virusGfx.beginFill(color)
+      this.virusGfx.drawCircle(0, 0, radius)
+      this.virusGfx.endFill()
    }
 
    update(deltaMS, infectedCallback) {
       if ( this.isInfected() ) {
-         this.virusGfx.clear()
-
          // only unselected letters grow
          if ( this.selected == false ) {
             this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
@@ -151,21 +157,12 @@ export default class Letter extends PIXI.Container {
             this.virusPercent = 100.0
             this.selected = false
             this.letter.text = ""
-            this.graphics.cursor = 'default'
-            this.eventMode = 'none'
+            this.cursor = 'default'
             this.draw()
             infectedCallback(this.row, this.col)
          }
 
-         let radius = 25.0 * (this.virusPercent/100.0)
-         this.virusGfx.lineStyle(1, 0x660055, 1)
-         let color = 0xaa0099
-         if ( this.virusPercent == 100) {
-            color = 0x660055
-         }
-         this.virusGfx.beginFill(color)
-         this.virusGfx.drawCircle(0, 0, radius)
-         this.virusGfx.endFill()
+         this.drawVirus()
       }
    }
 }
@@ -174,4 +171,4 @@ export default class Letter extends PIXI.Container {
 Letter.wordFull = false 
 
 // 100% is full so take 100 / rate to get time for total infection
-Letter.infectRatePerSec = 5.0 // 20 sec to fill
+Letter.infectRatePerSec = 25.0 // 20 sec to fill
