@@ -195,7 +195,8 @@ const checkInfectedCount = (() => {
    let cnt = 0
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         if ( grid[r][c].isInfected() ) {
+         // selected tiles don't expand the virus, so they don't count 
+         if ( grid[r][c].isInfected() &&  grid[r][c].selected == false) {
             cnt++
          }
       }
@@ -371,6 +372,7 @@ const pickNewLetter = (() => {
    let l = pickNewLetters(1)
    return l[0]
 })
+
 const pickNewLetters = (( cnt ) => {
    let out = [] 
    for (let i=0; i<cnt; i++ ) {
