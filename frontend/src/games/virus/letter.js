@@ -171,4 +171,4 @@ export default class Letter extends PIXI.Container {
 Letter.wordFull = false 
 
 // 100% is full so take 100 / rate to get time for total infection
-Letter.infectRatePerSec = 25.0 // 20 sec to fill
+Letter.infectRatePerSec = 5.0 // 20 sec to fill

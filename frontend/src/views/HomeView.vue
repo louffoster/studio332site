@@ -5,13 +5,19 @@ import OverlayPanel from 'primevue/overlaypanel'
 
 const lwhelp = ref()
 const vhelp = ref()
+const mosaichelp = ref()
 
-function toggleLWHelp(event) {
+const toggleLWHelp = ((event) => {
    lwhelp.value.toggle(event)
-}
-function toggleVirusHelp(event) {
+})
+
+const toggleVirusHelp = ((event) => {
    vhelp.value.toggle(event)
-}
+})
+
+const toggleMosiacHelp = ((event) => {
+   mosaichelp.value.toggle(event)
+})
 </script>
 
 <template>
@@ -29,6 +35,17 @@ function toggleVirusHelp(event) {
                   <p>Slide the rows and columns of the letter lattice to form words.</p>
                   <p>Longer words (up to 6 letters) score more points. Forming multiple words adds bonuses.</p>
                   <p>Score as many points as possible before time runs out!</p>
+               </div>
+            </OverlayPanel>
+         </li>
+         <li>
+            <div class="game-info">
+               <router-link to="mosaic">Mosaic</router-link>
+               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleMosiacHelp" />
+            </div>
+            <OverlayPanel ref="mosaichelp">
+               <div class="rules">
+                  <h3>Mosaic</h3>
                </div>
             </OverlayPanel>
          </li>
