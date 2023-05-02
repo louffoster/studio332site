@@ -202,11 +202,11 @@ const checkInfectedCount = (() => {
       }
    }
 
-   // If there is nothing, always start with 3 in alternating columns in first row
+   // If there is nothing, always start fill in the 4 corners
    if ( cnt < 4){
-      let tgtR = [0, 0,ROWS-1, ROWS-1]
+      let tgtR = [0, 0, ROWS-1, ROWS-1]
       let tgtC = [0, COLS-1, 0, COLS-1]
-      for ( let i = 0; i<=4; i++) {
+      for ( let i = 0; i<4; i++) {
          if ( grid[ tgtR[i] ][ tgtC[i] ].isInfected() == false ) {
             grid[ tgtR[i] ][ tgtC[i] ].infect()
             cnt++
