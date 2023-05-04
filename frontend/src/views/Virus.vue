@@ -366,6 +366,8 @@ const clearWord = (() => {
    letterIndex = 0
    lastWordSize = 0
    Letter.wordFull = false
+   enterKey.setEnabled(false)
+   deleteKey.setEnabled(false)
 })
 
 const pickNewLetter = (() => {
@@ -394,23 +396,26 @@ const backspaceClicked = (() => {
       word[letterIndex].fromCol = -1
       word[letterIndex].fromRow = -1
    }
+   letterIndex = Math.max(letterIndex, 0)
+   enterKey.setEnabled( letterIndex > 2 )
+   deleteKey.setEnabled( letterIndex > 0 )
 })
 
-const letterClicked = (( selected, row, col, letter) => {
+const letterClicked = (( row, col, letter) => {
    if (state.isGameOver()) return 
 
    Letter.wordFull = false
-   if (selected) {
-      word[letterIndex].letter.text = letter
-      word[letterIndex].fromCol = col
-      word[letterIndex].fromRow = row 
-      letterIndex++ 
-      if (letterIndex == 6) {
-         Letter.wordFull = true
-      }
-   } else {
-      clearWord()
+   word[letterIndex].letter.text = letter
+   word[letterIndex].fromCol = col
+   word[letterIndex].fromRow = row 
+   letterIndex++ 
+   if ( letterIndex > 2) {
+      enterKey.setEnabled(true)
    }
+   if (letterIndex == 6) {
+      Letter.wordFull = true
+   }
+   deleteKey.setEnabled( true )
 })
 
 const startVirusExplode = ((row, col) => {
@@ -457,6 +462,7 @@ const beginGameOver = (() => {
       })
       scene.removeChild(enterKey)
       scene.removeChild(shuffleKey)
+      scene.removeChild(deleteKey)
    }, 500)
 })
 

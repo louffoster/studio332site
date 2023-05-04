@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
-   constructor(letter, x, y, r,c ) {
+   constructor(letter, x,y, r,c ) {
       super()
       this.eventMode = 'static'
       this.hitArea =  new PIXI.Circle(0,0,25)
@@ -52,24 +52,19 @@ export default class Letter extends PIXI.Container {
    }
 
    clickHandler() {
-      if ( this.isLost() ) {
+      if ( Letter.wordFull || this.selected  || this.isLost() ) { 
          return
       }
-      if ( Letter.wordFull && this.selected == false ) { 
-         return
-      }
-      if (this.selected == false) {
-         this.selected = !this.selected
-         this.draw()
-         this.clickCallback(this.selected, this.row, this.col, this.letter.text)
-      }
+      this.selected = true
+      this.draw()
+      this.clickCallback(this.row, this.col, this.letter.text)
    }
 
    isInfected() {
-      return this.infected && this.virusPercent < 100
+      return this.infected && this.virusPercent < 100.0
    }
    isLost() {
-      return this.infected && this.virusPercent == 100
+      return this.infected && this.virusPercent == 100.0
    }
 
    deselect() {

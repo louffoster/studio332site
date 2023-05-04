@@ -8,6 +8,7 @@ export default class EnterKey extends PIXI.Container {
       this.y = y
       this.btnWidth = 60 
       this.btnHeight = 35
+      this.enabled = false
 
       this.eventMode = 'static'
       this.pointerDown = false
@@ -22,10 +23,20 @@ export default class EnterKey extends PIXI.Container {
       this.addChild(this.graphics)
    }
 
+   setEnabled( flag ) {
+      this.enabled = flag
+      this.drawButton()
+   }
+
    drawButton() {
       this.graphics.clear()
       this.graphics.lineStyle(1, 0xcccccc, 1)
-      this.graphics.beginFill(0x445577)
+      let fill = 0x445577
+      if ( this.enabled == false ) {
+         fill = 0x444a66
+         this.graphics.lineStyle(1, 0x666666, 1)
+      }
+      this.graphics.beginFill(fill)
       if ( this.pointerDown) {
          this.graphics.beginFill(0x77aaff)
       }
@@ -45,13 +56,17 @@ export default class EnterKey extends PIXI.Container {
    }
 
    handlePointerDown() {
-      this.pointerDown = true 
-      this.drawButton()
+      if ( this.enabled ) {
+         this.pointerDown = true 
+         this.drawButton()
+      }
    }
 
    clickHandler() {
-      this.pointerDown = false 
-      this.drawButton()   
-      this.clickListener()
+      if ( this.enabled ) {
+         this.pointerDown = false 
+         this.drawButton()   
+         this.clickListener()
+      }
    }
 }
