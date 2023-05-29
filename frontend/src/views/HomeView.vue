@@ -63,10 +63,7 @@ const toggleMosiacHelp = ((event) => {
                         Tap letters to form a codeword then tap the enter key to submit it.
                      </li>
                      <li>
-                        To deselect all letters in the current word, tap a selected letter.
-                     </li>
-                     <li>
-                        Tap the shuffle key to randmonize all letters.
+                        Tap the Randomize key to replace all letters.
                      </li>
                      <li>
                         Each codeword you successfully submit clears a number of infected letters matching 
