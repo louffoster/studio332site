@@ -10,8 +10,8 @@ import { onMounted, onBeforeUnmount } from "vue"
 import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
 
-const GAME_WIDTH = 400
-const GAME_HEIGHT = 575
+const GAME_WIDTH = 388
+const GAME_HEIGHT = 600
 const ROWS = 6
 const COLS = 6
 
@@ -87,8 +87,8 @@ onBeforeUnmount(() => {
 
 const initGame = ( () => {
    tiles = Array(ROWS).fill().map(() => Array(COLS))
-   let x = 5
-   let y = 5
+   let x = 2
+   let y = 2
    let color = 0
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -102,7 +102,7 @@ const initGame = ( () => {
             color = 0
          }
       }
-      x = 5
+      x = 2
       y += Tile.height
       if (color == 0) {
          color = 1
@@ -112,8 +112,8 @@ const initGame = ( () => {
    }
 
    spinners = Array(ROWS-1).fill().map(() => Array(COLS-1))
-   x = 5+Tile.width
-   y = 5+Tile.height
+   x = 2+Tile.width
+   y = 2+Tile.height
    for (let r = 0; r < ROWS-1; r++) {
       for (let c = 0; c < COLS-1; c++) {
          let s = new Spinner(x,y, r,c, spinnerCallback)
@@ -122,7 +122,7 @@ const initGame = ( () => {
          x+= Tile.width
       }
       y+= Tile.height
-      x = 5+Tile.width
+      x = 2+Tile.width
    }
 })
 
@@ -137,7 +137,7 @@ const spinnerCallback = ( ( tgtTiles ) => {
    new TWEEDLE.Tween(br).to({ x: br.x-Tile.width}, 100).start()
 
    let bl = tiles[ tgtTiles[3].row ][ tgtTiles[3].col ]
-   new TWEEDLE.Tween(bl).to({ y: bl.y-Tile.h}, 100).start()
+   new TWEEDLE.Tween(bl).to({ y: bl.y-Tile.height}, 100).start()
 
    setTimeout( () => {
       tiles[ tgtTiles[0].row ][ tgtTiles[0].col ] = bl

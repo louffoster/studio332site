@@ -21,5 +21,5 @@ export default class Tile extends PIXI.Graphics {
    }
 }
 
-Tile.width = 65 
-Tile.height = 65
+Tile.width = 64
+Tile.height = 64
