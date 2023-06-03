@@ -70,6 +70,7 @@ onMounted(async () => {
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
+      antialias: true,
       backgroundColor: 0x44444a,
       width: GAME_WIDTH,
       height: GAME_HEIGHT,

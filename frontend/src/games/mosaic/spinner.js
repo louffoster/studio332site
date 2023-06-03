@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 
-export default class Spinner extends PIXI.Container {
+export default class Spinner extends PIXI.Graphics {
    constructor(x,y, r,c, clickCallback) {
       super()
 
@@ -18,15 +18,10 @@ export default class Spinner extends PIXI.Container {
       this.on('pointerup', this.clickHandler)
       this.clickCallback = clickCallback
 
-      // set the container position. all other drawing is in reference 
-      // of the container, so x and y for drawing and letters is based in 0,0
       this.x = x 
       this.y = y
 
-      this.graphics = new PIXI.Graphics()
       this.draw()
-
-      this.addChild(this.graphics)
    }
 
    handlePointerDown() {
@@ -41,17 +36,17 @@ export default class Spinner extends PIXI.Container {
    }
 
    draw() {
-      this.graphics.clear()
-      this.graphics.alpha = 0.4
+      this.clear()
+      this.alpha = 0.3
       if (this.pointerDown ) {
-         this.graphics.alpha = 0.8
+         this.alpha = 0.8
       }
-      this.graphics.beginFill( 0x55ccdd)
-      this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawCircle(0,0, 24)
-      this.graphics.endFill()
-      this.graphics.beginFill( 0x333333)
-      this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawCircle(0,0, 5)
+      this.beginFill( 0x55ccdd)
+      this.lineStyle(2, 0x333333, 1)
+      this.drawCircle(0,0, 24)
+      this.endFill()
+      this.beginFill( 0x333333)
+      this.lineStyle(2, 0x333333, 1)
+      this.drawCircle(0,0, 5)
    }
 }
