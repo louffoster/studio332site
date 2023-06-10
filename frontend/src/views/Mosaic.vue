@@ -10,15 +10,16 @@ import { onMounted, onBeforeUnmount } from "vue"
 import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
 
-const GAME_WIDTH = 388
-const GAME_HEIGHT = 600
-const ROWS = 6
-const COLS = 6
+const GAME_WIDTH = 360
+const GAME_HEIGHT = 540
+const ROWS = 5
+const COLS = 5
 
 var app = null
 var scene = null
 var gfx = null
 var tiles = null
+var targetTiles = null
 var spinners = null
 
 // const actualWidth = (() => {
@@ -87,8 +88,8 @@ onBeforeUnmount(() => {
 
 const initGame = ( () => {
    tiles = Array(ROWS).fill().map(() => Array(COLS))
-   let x = 2
-   let y = 2
+   let x = 5
+   let y = 5
    let color = 0
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -102,18 +103,13 @@ const initGame = ( () => {
             color = 0
          }
       }
-      x = 2
+      x = 5
       y += Tile.height
-      if (color == 0) {
-         color = 1
-      } else {
-         color = 0
-      }
    }
 
    spinners = Array(ROWS-1).fill().map(() => Array(COLS-1))
-   x = 2+Tile.width
-   y = 2+Tile.height
+   x = 5+Tile.width
+   y = 5+Tile.height
    for (let r = 0; r < ROWS-1; r++) {
       for (let c = 0; c < COLS-1; c++) {
          let s = new Spinner(x,y, r,c, spinnerCallback)
@@ -122,8 +118,56 @@ const initGame = ( () => {
          x+= Tile.width
       }
       y+= Tile.height
-      x = 2+Tile.width
+      x = 5+Tile.width
    }
+
+   generateTargetPuzzle()
+})
+
+const generateTargetPuzzle = (() => {
+   let colors = [
+      0,0,0,0,0,0,0,0,0,0,0,0,0,
+      1,1,1,1,1,1,1,1,1,1,1,1
+   ]
+   colors = shuffle(colors)
+   let x = 5
+   let y = 360
+   let r = 0
+   let c = 0
+   targetTiles = Array(ROWS).fill().map(() => Array(COLS))
+   colors.forEach( colorCode => {
+      let t = new Tile(colorCode,x,y,r,x,true) // true makes the tile small 
+      scene.addChild(t)
+      console.log("add tatrget "+r+","+c)
+      targetTiles[r][c] = t
+      x += t.tileW 
+      c++
+      if (c == (COLS)) {
+         c = 0
+         x = 5
+         r++
+         y+= t.tileH
+      }
+   })   
+})
+
+
+const shuffle = ((array) => {
+  let currentIndex = array.length,  randomIndex
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]]
+  }
+
+  return array;
 })
 
 const spinnerCallback = ( ( tgtTiles ) => {
