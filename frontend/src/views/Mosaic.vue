@@ -11,7 +11,7 @@ import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
 
 const GAME_WIDTH = 360
-const GAME_HEIGHT = 540
+const GAME_HEIGHT = 545
 const ROWS = 5
 const COLS = 5
 
@@ -21,6 +21,8 @@ var gfx = null
 var tiles = null
 var targetTiles = null
 var spinners = null
+var gameTime = 0.0
+var timerDisplay = null
 
 // const actualWidth = (() => {
 //    const { width, height } = app.screen;
@@ -68,6 +70,7 @@ onMounted(async () => {
 
    // Update the shared group
    app.ticker.add(() => TWEEDLE.Group.shared.update())
+   app.ticker.add( gameTick )
 
    initGame()
 })
@@ -87,6 +90,16 @@ onBeforeUnmount(() => {
 })
 
 const initGame = ( () => {
+   timerDisplay = new PIXI.Text("00:00", {
+      fill: "0x80D3E1",
+      fontFamily: "\"Courier New\", Courier, monospace",
+      fontSize: 18,
+   })
+   // timerDisplay.anchor.set(0.5,0)
+   timerDisplay.x = 240
+   timerDisplay.y = 380
+   scene.addChild(timerDisplay)
+
    tiles = Array(ROWS).fill().map(() => Array(COLS))
    let x = 5
    let y = 5
@@ -121,6 +134,16 @@ const initGame = ( () => {
       x = 5+Tile.width
    }
 
+   gfx.beginFill(0x34565c)
+   gfx.drawRect(0,360,GAME_WIDTH, GAME_HEIGHT-360)
+   gfx.endFill()
+   gfx.lineStyle(2, 0x80D3E1,1 )
+   gfx.moveTo(0,360)
+   gfx.lineTo(GAME_WIDTH, 360)
+
+   gfx.moveTo(185, 360)
+   gfx.lineTo(185, GAME_HEIGHT)
+
    generateTargetPuzzle()
 })
 
@@ -131,14 +154,13 @@ const generateTargetPuzzle = (() => {
    ]
    colors = shuffle(colors)
    let x = 5
-   let y = 360
+   let y = 365
    let r = 0
    let c = 0
    targetTiles = Array(ROWS).fill().map(() => Array(COLS))
-   colors.forEach( colorCode => {
-      let t = new Tile(colorCode,x,y,r,x,true) // true makes the tile small 
+   colors.forEach( colorIndex => {
+      let t = new Tile(colorIndex,x,y,r,x,true) // true makes the tile small 
       scene.addChild(t)
-      console.log("add tatrget "+r+","+c)
       targetTiles[r][c] = t
       x += t.tileW 
       c++
@@ -148,7 +170,9 @@ const generateTargetPuzzle = (() => {
          r++
          y+= t.tileH
       }
-   })   
+   }) 
+   // gfx.lineStyle(5, 0x00ff00, 1)  
+   // gfx.drawRect(0,365, 35*5+5, GAME_HEIGHT-365)
 })
 
 
@@ -170,6 +194,26 @@ const shuffle = ((array) => {
   return array;
 })
 
+const checkMatch = (() => {
+   let match = true
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if (targetTiles[r][c].colorIndex != tiles[r][c].colorIndex) {
+            match = false 
+            break
+         }
+      }
+      if ( match == false ) {
+         break
+      }
+   }
+
+   if ( match == true ) {
+      console.log("MATCHED!!")
+      setTimeout( (()=> {generateTargetPuzzle()}), 3000 )
+   }
+})
+
 const spinnerCallback = ( ( tgtTiles ) => {
    let tl = tiles[ tgtTiles[0].row ][ tgtTiles[0].col ]
    new TWEEDLE.Tween(tl).to({ x: tl.x+Tile.width}, 100).start()
@@ -188,7 +232,26 @@ const spinnerCallback = ( ( tgtTiles ) => {
       tiles[ tgtTiles[1].row ][ tgtTiles[1].col ] = tl
       tiles[ tgtTiles[2].row ][ tgtTiles[2].col ] = tr
       tiles[ tgtTiles[3].row ][ tgtTiles[3].col ] = br
+      checkMatch()
    }, 110)
+})
+
+const gameTick = (() => {
+   // get prior time and new time. necessary to check if a new second has gone by
+   let origTimeSec = Math.round(gameTime / 1000)
+   gameTime += app.ticker.deltaMS
+   let timeSec = Math.round(gameTime / 1000)
+
+   // Update the timer and display it
+   if ( timeSec > origTimeSec) {
+      let secs = timeSec
+      let mins = Math.floor(timeSec / 60)
+      if ( mins > 0) {
+         secs = timeSec - mins*60
+      }
+      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+      timerDisplay.text = timeStr
+   }
 })
 
 </script>

@@ -46,6 +46,18 @@ const toggleMosiacHelp = ((event) => {
             <OverlayPanel ref="mosaichelp">
                <div class="rules">
                   <h3>Mosaic</h3>
+                  <p>Match mosaic patterns by rotating groups of tiles.</p>
+                  <ul>
+                     <li>
+                        Tap the circular area on the large mosaic to rotate groups of 4 tiles.
+                     </li>
+                     <li>
+                        Match the layout of the mosaic in the lower left to ge biven a new pattern.
+                     </li>
+                     <li>
+                        Match as many layouts as possible before time runs out!
+                     </li>
+                  </ul>
                </div>
             </OverlayPanel>
          </li>
