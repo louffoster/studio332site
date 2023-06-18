@@ -9,6 +9,7 @@ import * as TWEEDLE from "tweedle.js"
 import { onMounted, onBeforeUnmount } from "vue"
 import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
+import StartOverlay from "@/games/mosaic/startoverlay"
 
 const GAME_WIDTH = 360
 const GAME_HEIGHT = 545
@@ -21,30 +22,12 @@ var gfx = null
 var tiles = null
 var targetTiles = null
 var spinners = null
-var gameTime = 0.0
+var gameTimeMS = 300.0 * 1000.0
 var timerDisplay = null
-
-// const actualWidth = (() => {
-//    const { width, height } = app.screen;
-//    const isWidthConstrained = width < height * 9 / 16;
-//    return isWidthConstrained ? width : height * 9 / 16;
-// })
-
-// const actualHeight = (() => {
-//    const { width, height } = app.screen;
-//    const isHeightConstrained = width * 16 / 9 > height;
-//    return isHeightConstrained ? height : width * 16 / 10;
-// })
-
-// const createScene =(() => {
-//    scene = new PIXI.Container();
-//    scene.width = GAME_WIDTH;
-//    scene.height = GAME_HEIGHT;
-//    scene.scale.x = actualWidth() / GAME_WIDTH;
-//    scene.scale.y = actualHeight() / GAME_HEIGHT;
-//    scene.x = app.screen.width / 2 - actualWidth() / 2;
-//    scene.y = app.screen.height / 2 - actualHeight() / 2;
-// })
+var matchCount = 0
+var matchDisplay = null
+var gameState = "start"
+var startOverlay = null
 
 onMounted(async () => {
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
@@ -73,6 +56,9 @@ onMounted(async () => {
    app.ticker.add( gameTick )
 
    initGame()
+
+   startOverlay = new StartOverlay(gameTimeMS, startHandler) 
+   scene.addChild(startOverlay)
 })
 
 onBeforeUnmount(() => {
@@ -90,15 +76,32 @@ onBeforeUnmount(() => {
 })
 
 const initGame = ( () => {
-   timerDisplay = new PIXI.Text("00:00", {
+   let style = {
       fill: "0x80D3E1",
-      fontFamily: "\"Courier New\", Courier, monospace",
+      fontFamily: "Arial",
       fontSize: 18,
-   })
-   // timerDisplay.anchor.set(0.5,0)
-   timerDisplay.x = 240
-   timerDisplay.y = 380
+   }
+   let timeLabel = new PIXI.Text("Time Remaining", style)
+   timeLabel.x = 275
+   timeLabel.y = 390
+   timeLabel.anchor.set(0.5, 0.5)
+   scene.addChild(timeLabel)
+   timerDisplay = new PIXI.Text("05:00", style)
+   timerDisplay.x = 275
+   timerDisplay.y = 420
+   timerDisplay.anchor.set(0.5, 0.5)
    scene.addChild(timerDisplay)
+
+   let patternLabel = new PIXI.Text("Patterns Matched", style)
+   patternLabel.x = 275
+   patternLabel.y = 470
+   patternLabel.anchor.set(0.5, 0.5)
+   scene.addChild(patternLabel)
+   matchDisplay = new PIXI.Text("0", style)
+   matchDisplay.x = 275
+   matchDisplay.y = 500
+   matchDisplay.anchor.set(0.5, 0.5)
+   scene.addChild(matchDisplay)
 
    tiles = Array(ROWS).fill().map(() => Array(COLS))
    let x = 5
@@ -145,6 +148,12 @@ const initGame = ( () => {
    gfx.lineTo(185, GAME_HEIGHT)
 
    generateTargetPuzzle()
+})
+
+const startHandler = (() => {
+   gameState = "play"
+   scene.removeChild(startOverlay)
+   gameTimeMS =  300.0 * 1000.0
 })
 
 const generateTargetPuzzle = (() => {
@@ -210,6 +219,8 @@ const checkMatch = (() => {
 
    if ( match == true ) {
       console.log("MATCHED!!")
+      matchCount++
+      matchDisplay.text = `${matchCount}`
       setTimeout( (()=> {generateTargetPuzzle()}), 3000 )
    }
 })
@@ -237,13 +248,20 @@ const spinnerCallback = ( ( tgtTiles ) => {
 })
 
 const gameTick = (() => {
+   if (gameState != "play") return
+
    // get prior time and new time. necessary to check if a new second has gone by
-   let origTimeSec = Math.round(gameTime / 1000)
-   gameTime += app.ticker.deltaMS
-   let timeSec = Math.round(gameTime / 1000)
+   let origTimeSec = Math.round(gameTimeMS / 1000.0)
+   gameTimeMS -= app.ticker.deltaMS
+   let timeSec = Math.round(gameTimeMS / 1000.0)
+   timeSec = Math.max(timeSec, 0)
+   if (timeSec == 0) {
+      // TODO
+      gameState = "gameOver"
+   }
 
    // Update the timer and display it
-   if ( timeSec > origTimeSec) {
+   if ( timeSec != origTimeSec) {
       let secs = timeSec
       let mins = Math.floor(timeSec / 60)
       if ( mins > 0) {
