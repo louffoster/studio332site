@@ -10,6 +10,8 @@ import { onMounted, onBeforeUnmount } from "vue"
 import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
 import StartOverlay from "@/games/mosaic/startoverlay"
+import EndOverlay from "@/games/mosaic/endoverlay"
+import ResetButton from "@/games/mosaic/resetbutton"
 
 const GAME_WIDTH = 360
 const GAME_HEIGHT = 545
@@ -19,7 +21,9 @@ const COLS = 5
 var app = null
 var scene = null
 var gfx = null
+var tileContainer = null
 var tiles = null
+var targetContainer = null
 var targetTiles = null
 var spinners = null
 var gameTimeMS = 300.0 * 1000.0
@@ -28,6 +32,11 @@ var matchCount = 0
 var matchDisplay = null
 var gameState = "start"
 var startOverlay = null
+var endOverlay = null
+var resetButton = null
+var filter = null
+// var hue = 0.0
+// var hueDir = 1
 
 onMounted(async () => {
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
@@ -45,7 +54,6 @@ onMounted(async () => {
    let gameEle = document.getElementById("game")
    gameEle.appendChild(app.view)
    scene = new PIXI.Container()
-   // createScene()
    app.stage.addChild(scene)
 
    gfx = new PIXI.Graphics() 
@@ -57,8 +65,14 @@ onMounted(async () => {
 
    initGame()
 
+   filter = new PIXI.NoiseFilter(100)
+   filter = new PIXI.ColorMatrixFilter()
+   // hue = 0
+   targetContainer.filters = [filter]
+
    startOverlay = new StartOverlay(gameTimeMS, startHandler) 
    scene.addChild(startOverlay)
+   endOverlay = new EndOverlay(replayHandler) 
 })
 
 onBeforeUnmount(() => {
@@ -83,59 +97,36 @@ const initGame = ( () => {
    }
    let timeLabel = new PIXI.Text("Time Remaining", style)
    timeLabel.x = 275
-   timeLabel.y = 390
+   timeLabel.y = 380
    timeLabel.anchor.set(0.5, 0.5)
    scene.addChild(timeLabel)
    timerDisplay = new PIXI.Text("05:00", style)
    timerDisplay.x = 275
-   timerDisplay.y = 420
+   timerDisplay.y = 410
    timerDisplay.anchor.set(0.5, 0.5)
    scene.addChild(timerDisplay)
 
    let patternLabel = new PIXI.Text("Patterns Matched", style)
    patternLabel.x = 275
-   patternLabel.y = 470
+   patternLabel.y = 450
    patternLabel.anchor.set(0.5, 0.5)
    scene.addChild(patternLabel)
    matchDisplay = new PIXI.Text("0", style)
    matchDisplay.x = 275
-   matchDisplay.y = 500
+   matchDisplay.y = 480
    matchDisplay.anchor.set(0.5, 0.5)
    scene.addChild(matchDisplay)
 
-   tiles = Array(ROWS).fill().map(() => Array(COLS))
-   let x = 5
-   let y = 5
-   let color = 0
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         let t = new Tile(color, x,y, r,c)
-         scene.addChild(t)
-         tiles[r][c] = t
-         x+= Tile.width
-         if (color == 0) {
-            color = 1
-         } else {
-            color = 0
-         }
-      }
-      x = 5
-      y += Tile.height
-   }
+   resetButton = new ResetButton(190, 500, resetClicked)
+   scene.addChild(resetButton)
 
-   spinners = Array(ROWS-1).fill().map(() => Array(COLS-1))
-   x = 5+Tile.width
-   y = 5+Tile.height
-   for (let r = 0; r < ROWS-1; r++) {
-      for (let c = 0; c < COLS-1; c++) {
-         let s = new Spinner(x,y, r,c, spinnerCallback)
-         scene.addChild(s)
-         spinners[r][c] = s
-         x+= Tile.width
-      }
-      y+= Tile.height
-      x = 5+Tile.width
-   }
+   tileContainer = new PIXI.Container()
+   tileContainer.x = 5 
+   tileContainer.y = 5 
+   scene.addChild(tileContainer)
+   initTiles()
+
+   // tileContainer.alpha = 0.2
 
    gfx.beginFill(0x34565c)
    gfx.drawRect(0,360,GAME_WIDTH, GAME_HEIGHT-360)
@@ -147,13 +138,60 @@ const initGame = ( () => {
    gfx.moveTo(185, 360)
    gfx.lineTo(185, GAME_HEIGHT)
 
+   targetContainer = new PIXI.Container() 
+   targetContainer.x =  5
+   targetContainer.y = 365
+   scene.addChild(targetContainer)
    generateTargetPuzzle()
+})
+
+const initTiles = (()=> {
+   tiles = Array(ROWS).fill().map(() => Array(COLS))
+   let x = 0
+   let y = 0
+   let color = 0
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         let t = new Tile(color, x,y, r,c)
+         tileContainer.addChild(t)
+         tiles[r][c] = t
+         x+= Tile.width
+         if (color == 0) {
+            color = 1
+         } else {
+            color = 0
+         }
+      }
+      x = 0
+      y += Tile.height
+   }
+
+   spinners = Array(ROWS-1).fill().map(() => Array(COLS-1))
+   x = Tile.width
+   y = Tile.height
+   for (let r = 0; r < ROWS-1; r++) {
+      for (let c = 0; c < COLS-1; c++) {
+         let s = new Spinner(x,y, r,c, spinnerCallback)
+         tileContainer.addChild(s)
+         spinners[r][c] = s
+         x+= Tile.width
+      }
+      y+= Tile.height
+      x = Tile.width
+   }
+})
+
+const resetClicked = (() => {
+   initTiles()
+})
+
+const replayHandler = (() => {
+   window.location.reload()
 })
 
 const startHandler = (() => {
    gameState = "play"
    scene.removeChild(startOverlay)
-   gameTimeMS =  300.0 * 1000.0
 })
 
 const generateTargetPuzzle = (() => {
@@ -162,26 +200,24 @@ const generateTargetPuzzle = (() => {
       1,1,1,1,1,1,1,1,1,1,1,1
    ]
    colors = shuffle(colors)
-   let x = 5
-   let y = 365
+   let x = 0
+   let y = 0
    let r = 0
    let c = 0
    targetTiles = Array(ROWS).fill().map(() => Array(COLS))
    colors.forEach( colorIndex => {
       let t = new Tile(colorIndex,x,y,r,x,true) // true makes the tile small 
-      scene.addChild(t)
+      targetContainer.addChild(t)
       targetTiles[r][c] = t
       x += t.tileW 
       c++
       if (c == (COLS)) {
          c = 0
-         x = 5
+         x = 0
          r++
          y+= t.tileH
       }
    }) 
-   // gfx.lineStyle(5, 0x00ff00, 1)  
-   // gfx.drawRect(0,365, 35*5+5, GAME_HEIGHT-365)
 })
 
 
@@ -247,6 +283,17 @@ const spinnerCallback = ( ( tgtTiles ) => {
    }, 110)
 })
 
+const gameOver = (()=>{
+   for (let r = 0; r < ROWS-1; r++) {
+      for (let c = 0; c < COLS-1; c++) {
+         tileContainer.removeChild(spinners[r][c] )
+      }
+   }
+   scene.removeChild(resetButton)
+   scene.addChild(endOverlay)
+   gameState = "gameOver"
+})
+
 const gameTick = (() => {
    if (gameState != "play") return
 
@@ -255,10 +302,14 @@ const gameTick = (() => {
    gameTimeMS -= app.ticker.deltaMS
    let timeSec = Math.round(gameTimeMS / 1000.0)
    timeSec = Math.max(timeSec, 0)
-   if (timeSec == 0) {
-      // TODO
-      gameState = "gameOver"
-   }
+
+   // hue += 5*hueDir
+   // if ( hue > 60 ) {
+   //    hueDir = -1
+   // } else if (hue < 0) {
+   //    hueDir = 1
+   // }
+   // filter.hue(hue,false)
 
    // Update the timer and display it
    if ( timeSec != origTimeSec) {
@@ -269,6 +320,10 @@ const gameTick = (() => {
       }
       let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       timerDisplay.text = timeStr
+   }
+
+   if (timeSec == 0) {
+      gameOver() 
    }
 })
 

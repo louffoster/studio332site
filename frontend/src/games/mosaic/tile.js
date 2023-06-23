@@ -25,8 +25,7 @@ export default class Tile extends PIXI.Graphics {
       this.beginFill( colors[ this.colorIndex ])
       this.lineStyle(2, 0x333333, 1)
       if ( this.border === false) {
-         // this.lineStyle(2, colors[ this.colorIndex ], 1)
-         this.lineStyle(1, 0x333333, 1)
+         this.lineStyle(1, 0x777777, 0.5)
       }
       this.drawRect(0,0, this.tileW, this.tileH)
       this.endFill()

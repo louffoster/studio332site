@@ -1,12 +1,13 @@
 import * as PIXI from "pixi.js"
 
-export default class StartOverlay extends PIXI.Container {
-   constructor(startTimeMS, startHandler) {
+export default class EndOverlay extends PIXI.Container {
+   constructor(replayHandler) {
       super()
 
       this.x = 10 
       this.y = 100
-      this.startCallback = startHandler
+      this.popupW = 340
+      this.replayHandler = replayHandler
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0x80D3E1, 1)
@@ -30,16 +31,11 @@ export default class StartOverlay extends PIXI.Container {
          align: "center"
       })
 
-      let secs = startTimeMS / 1000
-      let mins = Math.floor(secs / 60)
-      if ( mins > 0) {
-         secs = secs - mins*60
-      }
-      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
 
-      this.msg = new PIXI.Text(`Match as many patterns as possible in ${timeStr}`, style)
-      this.msg.x = 40
-      this.msg.y = 26
+      this.msg = new PIXI.Text(`GAME OVER`, style)
+      this.msg.anchor.set(0.5, 0.5)
+      this.msg.x = this.popupW / 2
+      this.msg.y = 40
 
       this.addChild(this.graphics)
       this.graphics.addChild(this.msg)
@@ -47,10 +43,10 @@ export default class StartOverlay extends PIXI.Container {
    }
 
    addStartButton() {
-      this.btnX = 120 
-      this.btnY = 85
-      this.btnWidth = 100 
+      this.btnWidth = 150 
       this.btnHeight = 40
+      this.btnX = (this.popupW - this.btnWidth) / 2.0
+      this.btnY = 85
       this.graphics.cursor = "pointer"
       this.graphics.eventMode = 'static' 
       this.graphics.hitArea = new PIXI.Rectangle(this.btnX, this.btnY, this.btnWidth, this.btnHeight)
@@ -70,7 +66,7 @@ export default class StartOverlay extends PIXI.Container {
          dropShadowDistance: 1,
          align: "center"
       })
-      let btnTxt = new PIXI.Text("Begin", style)
+      let btnTxt = new PIXI.Text("Play Again", style)
       btnTxt.anchor.set(0.5, 0.5)
       btnTxt.x = 170
       btnTxt.y = 105
@@ -83,6 +79,6 @@ export default class StartOverlay extends PIXI.Container {
    }
 
    clickHandler() {
-      this.startCallback()
+      this.replayHandler()
    }
 }
