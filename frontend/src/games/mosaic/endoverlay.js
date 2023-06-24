@@ -7,15 +7,16 @@ export default class EndOverlay extends PIXI.Container {
       this.x = 10 
       this.y = 100
       this.popupW = 340
+      this.popupH = 150
       this.replayHandler = replayHandler
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0x80D3E1, 1)
       this.graphics.beginFill(0x34565c)
-      this.graphics.drawRect(0,0, 340,150)
+      this.graphics.drawRect(0,0, this.popupW, this.popupH )
       this.graphics.endFill()
       this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawRect(0,0, 340,150)
+      this.graphics.drawRect(0,0, this.popupW, this.popupH )
 
       let style = new PIXI.TextStyle({
          fill: "#f0f0ff",
@@ -68,7 +69,7 @@ export default class EndOverlay extends PIXI.Container {
       })
       let btnTxt = new PIXI.Text("Play Again", style)
       btnTxt.anchor.set(0.5, 0.5)
-      btnTxt.x = 170
+      btnTxt.x = this.popupW / 2
       btnTxt.y = 105
       this.graphics.addChild(btnTxt)
 

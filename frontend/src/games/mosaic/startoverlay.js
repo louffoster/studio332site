@@ -7,14 +7,15 @@ export default class StartOverlay extends PIXI.Container {
       this.x = 10 
       this.y = 100
       this.startCallback = startHandler
+      this.panelW = 340
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0x80D3E1, 1)
       this.graphics.beginFill(0x34565c)
-      this.graphics.drawRect(0,0, 340,150)
+      this.graphics.drawRect(0,0, this.panelW,150)
       this.graphics.endFill()
       this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawRect(0,0, 340,150)
+      this.graphics.drawRect(0,0, this.panelW,150)
 
       let style = new PIXI.TextStyle({
          fill: "#f0f0ff",
@@ -22,7 +23,7 @@ export default class StartOverlay extends PIXI.Container {
          fontSize: 20,
          wordWrap: true,
          fontWeight: 'bold',
-         wordWrapWidth: 330,
+         wordWrapWidth: this.panelW - 20,
          dropShadow: true,
          dropShadowColor: '#000000',
          dropShadowBlur: 2,
@@ -38,8 +39,9 @@ export default class StartOverlay extends PIXI.Container {
       let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
 
       this.msg = new PIXI.Text(`Match as many patterns as possible in ${timeStr}`, style)
-      this.msg.x = 40
-      this.msg.y = 26
+      this.msg.anchor.set(0.5,0.5)
+      this.msg.x = this.panelW/2
+      this.msg.y = 40
 
       this.addChild(this.graphics)
       this.graphics.addChild(this.msg)
