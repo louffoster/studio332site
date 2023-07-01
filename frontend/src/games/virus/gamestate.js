@@ -48,8 +48,7 @@ export default class GameState {
    }
    isSubmitting() {
       return (
-         this.state == GameState.SUBMIT_REQUESTED || 
-         this.state == GameState.FAIL
+         this.state == GameState.SUBMIT_REQUESTED //|| this.state == GameState.FAIL
       ) 
    }
    isGameOver() {

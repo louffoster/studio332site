@@ -64,9 +64,12 @@ export default class EnterKey extends PIXI.Container {
 
    clickHandler() {
       if ( this.enabled ) {
-         this.pointerDown = false 
-         this.drawButton()   
          this.clickListener()
       }
+   }
+
+   wordSubmitted() {
+      this.pointerDown = false
+      this.drawButton()   
    }
 }

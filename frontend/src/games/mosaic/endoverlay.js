@@ -83,3 +83,5 @@ export default class EndOverlay extends PIXI.Container {
       this.replayHandler()
    }
 }
+// LIGHT: #514c49
+// DARK: #464340

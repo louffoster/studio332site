@@ -274,9 +274,11 @@ const doSubmission = ( async () => {
    let url = `${API_SERVICE}/virus/check?w=${testWord}`
    await axios.post(url).then( () => {
       wordAccepted( )
+      enterKey.wordSubmitted()
    }).catch( _e => {
       failedWord()
       addInfectedTile()
+      enterKey.wordSubmitted()
    })
 })
 
@@ -576,6 +578,13 @@ const gameLoop = (() => {
       return
    }
 
+   state.update( app.ticker.deltaMS, gameStateChanged)
+
+   if ( state.isSubmitting() || state.isWinning() || state.isLosing() ) {
+      // dont advance time or infections while a word is being submitted
+      return
+   }
+
    // get prior time and new time. necessary to check if a new second has gone by
    let origTimeSec = Math.round(gameTime / 1000)
    gameTime += app.ticker.deltaMS
@@ -590,12 +599,6 @@ const gameLoop = (() => {
       }
       let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       timerDisplay.text = timeStr
-   }
-
-   state.update( app.ticker.deltaMS, gameStateChanged)
-   if ( state.isSubmitting() || state.isWinning() || state.isLosing() ) {
-      // dont advance infections while a word is being submitted
-      return
    }
 
    // Every 30 seconds, increase rate by 10%, and raise infection level
