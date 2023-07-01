@@ -22,8 +22,10 @@ var app = null
 var scene = null
 var gfx = null
 var tileContainer = null
+var tileFilter = null
 var tiles = null
 var targetContainer = null
+var targetFilter = null
 var targetTiles = null
 var spinners = null
 var gameTimeMS = 300.0 * 1000.0
@@ -34,9 +36,10 @@ var gameState = "start"
 var startOverlay = null
 var endOverlay = null
 var resetButton = null
-var filter = null
-// var hue = 0.0
-// var hueDir = 1
+var matching = false 
+var matchingTimer = 0.0
+var hue = 0.0
+var hueDir = 1
 
 onMounted(async () => {
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
@@ -64,11 +67,6 @@ onMounted(async () => {
    app.ticker.add( gameTick )
 
    initGame()
-
-   filter = new PIXI.NoiseFilter(100)
-   filter = new PIXI.ColorMatrixFilter()
-   // hue = 0
-   targetContainer.filters = [filter]
 
    startOverlay = new StartOverlay(gameTimeMS, startHandler) 
    scene.addChild(startOverlay)
@@ -124,9 +122,9 @@ const initGame = ( () => {
    tileContainer.x = 5 
    tileContainer.y = 5 
    scene.addChild(tileContainer)
+   tileFilter = new PIXI.ColorMatrixFilter()
+   tileContainer.filters = [tileFilter]
    initTiles()
-
-   // tileContainer.alpha = 0.2
 
    gfx.beginFill(0x34565c)
    gfx.drawRect(0,360,GAME_WIDTH, GAME_HEIGHT-360)
@@ -142,6 +140,8 @@ const initGame = ( () => {
    targetContainer.x =  5
    targetContainer.y = 365
    scene.addChild(targetContainer)
+   targetFilter = new PIXI.ColorMatrixFilter()
+   targetContainer.filters = [targetFilter]
    generateTargetPuzzle()
 })
 
@@ -257,7 +257,10 @@ const checkMatch = (() => {
       console.log("MATCHED!!")
       matchCount++
       matchDisplay.text = `${matchCount}`
-      setTimeout( (()=> {generateTargetPuzzle()}), 3000 )
+      matching = true 
+      matchingTimer = 1000.0
+      tileFilter.polaroid(true)
+      // setTimeout( (()=> {generateTargetPuzzle()}), 3000 )
    }
 })
 
@@ -303,13 +306,22 @@ const gameTick = (() => {
    let timeSec = Math.round(gameTimeMS / 1000.0)
    timeSec = Math.max(timeSec, 0)
 
-   // hue += 5*hueDir
-   // if ( hue > 60 ) {
-   //    hueDir = -1
-   // } else if (hue < 0) {
-   //    hueDir = 1
-   // }
-   // filter.hue(hue,false)
+   if (matching) {
+      matchingTimer -= app.ticker.deltaMS
+      hue += 5*hueDir
+      if ( hue > 60 ) {
+         hueDir = -1
+      } else if (hue < 0) {
+         hueDir = 1
+      }
+      targetFilter.hue(hue,false)
+      if (matchingTimer <= 0 ) {
+         matching = false
+         targetFilter.reset()
+         tileFilter.reset()
+         generateTargetPuzzle()
+      }
+   }
 
    // Update the timer and display it
    if ( timeSec != origTimeSec) {
