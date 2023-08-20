@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js"
 
 export default class EndOverlay extends PIXI.Container {
-   constructor( restartCallback ) {
+   constructor( restartCallback, backCallback ) {
       super()
       this.x = 10
       this.y = 100
@@ -9,7 +9,8 @@ export default class EndOverlay extends PIXI.Container {
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(2, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
-      this.graphics.drawRect(0,0, 280,250)
+      this.graphics.drawRect(0,0, 280,280)
+      this.graphics.cursor ="default"
       this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({
@@ -32,20 +33,18 @@ export default class EndOverlay extends PIXI.Container {
       this.graphics.moveTo(10,75)
       this.graphics.lineTo(270, 75)
 
-      this.graphics.eventMode = 'static'
-      this.graphics.hitArea = new PIXI.Rectangle(95,195, 100,35)
-      this.graphics.cursor ="pointer"
       this.graphics.lineStyle(1, 0x55dd55, 1)
       this.graphics.beginFill(0x114a11)
       this.graphics.drawRect(95,195, 100,35)
+
       let btnTxt = new PIXI.Text("Retry", style)
       btnTxt.anchor.set(0.5)
       btnTxt.x = 145
       btnTxt.y = 212
       btnTxt.eventMode = 'static'
       btnTxt.cursor ="pointer"
+      btnTxt.hitArea = new PIXI.Rectangle(-50,-20, 100,35)
       this.addChild(btnTxt)
-      this.graphics.on('pointerup', restartCallback) 
       btnTxt.on('pointerup', restartCallback)
 
       this.uptime = new PIXI.Text("Uptime: 00:00", style)
@@ -72,6 +71,14 @@ export default class EndOverlay extends PIXI.Container {
          this.wordStats.push(stats)
       }
 
+      let backTxt = new PIXI.Text("Back to Studio332 Site", style)
+      backTxt.anchor.set(0.5)
+      backTxt.x = 145
+      backTxt.y = 260
+      backTxt.eventMode = 'static'
+      backTxt.cursor ="pointer"
+      this.addChild(backTxt)
+      backTxt.on('click', backCallback)
    }
 
    updateStats(gameTime, stats) {

@@ -1,20 +1,20 @@
 <template>
    <div class="header">
-      <router-link :to="{ name: 'home'}">
+      <router-link @click="homeClicked" :to="{ name: 'home'}">
          <img class="s332" src="@/assets/s332logotype.png" />
       </router-link>
-      <!-- <ul class="menu">
-         <router-link to="/home">
-            <li>Home</li>
-         </router-link>
-         <router-link to="/games">
-            <li>Games</li>
-         </router-link>
-      </ul> -->
    </div>
 </template>
 
 <script setup>
+import { useGamesStore } from '@/stores/games'
+
+const gamesStore = useGamesStore()
+
+const homeClicked = (() => {
+   gamesStore.fullScreen = false
+   gamesStore.currentGame = ""
+})
 </script>
 
 <style scoped>

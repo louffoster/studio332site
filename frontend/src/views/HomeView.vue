@@ -1,11 +1,27 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import Button from 'primevue/button'
 import OverlayPanel from 'primevue/overlaypanel'
+import { useGamesStore } from '@/stores/games'
+
+const gamesStore = useGamesStore()
 
 const lwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
+const gameframe = ref()
+
+
+onMounted(() => {
+   window.addEventListener( "message", (e) => {
+      if ( e.data.studio332) {
+         if (e.data.studio332.command == 'home') {
+            gamesStore.currentGame = ""
+            gamesStore.fullScreen = false  
+         } 
+      } 
+   })
+})
 
 const toggleLWHelp = ((event) => {
    lwhelp.value.toggle(event)
@@ -18,10 +34,28 @@ const toggleVirusHelp = ((event) => {
 const toggleMosiacHelp = ((event) => {
    mosaichelp.value.toggle(event)
 })
+
+const gameClicked = ((gameName) => {
+   gamesStore.currentGame = gameName
+   nextTick( () => {
+      let info = gamesStore.gameInfo
+      gameframe.value.style.width = info.width+"px"
+      gameframe.value.style.height = info.height+"px"
+      console.log(window.innerWidth)
+      if (window.innerWidth <= info.width || window.innerWidth <= info.height   ) {
+         gamesStore.fullScreen = true
+         gameframe.value.style.width = window.innerWidth+"px"
+         gameframe.value.style.height = window.innerHeight+"px"
+         gameframe.value.style.margin = 0
+      }
+      gameframe.value.src = `/${gameName}`
+   })
+
+})
 </script>
 
 <template>
-   <div class="content">
+   <div class="content" v-if="gamesStore.currentGame == ''">
       <h2>Games</h2>
       <ul>
          <li>
@@ -40,7 +74,7 @@ const toggleMosiacHelp = ((event) => {
          </li>
          <li>
             <div class="game-info">
-               <router-link to="mosaic">Mosaic</router-link>
+               <span class="game-start" role="button" @click="gameClicked('mosaic')">Mosaic</span>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleMosiacHelp" />
             </div>
             <OverlayPanel ref="mosaichelp">
@@ -63,7 +97,7 @@ const toggleMosiacHelp = ((event) => {
          </li>
          <li>
             <div class="game-info">
-               <router-link to="virus">Virus</router-link>
+               <span class="game-start" role="button" @click="gameClicked('virus')">Virus</span>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleVirusHelp" />
             </div>
             <OverlayPanel ref="vhelp">
@@ -93,9 +127,21 @@ const toggleMosiacHelp = ((event) => {
          </li>
       </ul>
    </div>
+   <div class="game" v-else >
+      <iframe ref="gameframe" class="gameframe"/>
+   </div>
 </template>
 
 <style lang="scss" scoped>
+.gameframe {
+   margin-top: 15px;
+   border: none;
+   body {
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+   }
+}
 div.rules {
    font-size: 0.85;
    h3 {
@@ -149,14 +195,14 @@ h2 {
    border-bottom: 1px solid crimson;
    padding-bottom: 10px;
 }
-a {
+a, .game-start {
    color: crimson;
    font-weight: bold;
    cursor: pointer;
    text-decoration: none;
-}
-a:hover {
-   text-decoration: underline;
+   &:hover {
+      text-decoration: underline;
+   }
 }
 p.list {
    margin: 0 40px;

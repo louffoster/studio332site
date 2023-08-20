@@ -41,6 +41,21 @@ var matchingTimer = 0.0
 var hue = 0.0
 var hueDir = 1
 
+const resize = (() => {
+    // Determine which screen dimension is most constrained
+    let ratioW = window.innerWidth / GAME_WIDTH
+    let ratioH = window.innerHeight / GAME_HEIGHT
+    if (ratioH < ratioW) {
+      scene.position.x = ((window.innerWidth - GAME_WIDTH) / 2.0) / ratioH
+      scene.scale.x = scene.scale.y = ratioH 
+      
+    } else {
+      scene.scale.x = scene.scale.y = ratioW
+    }
+
+   app.renderer.resize( window.innerWidth, window.innerHeight)
+})
+
 onMounted(async () => {
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
@@ -59,6 +74,8 @@ onMounted(async () => {
    scene = new PIXI.Container()
    app.stage.addChild(scene)
 
+   resize()
+
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
 
@@ -70,7 +87,7 @@ onMounted(async () => {
 
    startOverlay = new StartOverlay(gameTimeMS, startHandler) 
    scene.addChild(startOverlay)
-   endOverlay = new EndOverlay(replayHandler) 
+   endOverlay = new EndOverlay(replayHandler, backHandler) 
 })
 
 onBeforeUnmount(() => {
@@ -183,6 +200,16 @@ const initTiles = (()=> {
 
 const resetClicked = (() => {
    initTiles()
+})
+
+const backHandler = (() =>{
+   const message = {
+      studio332: {
+         from: 'mosaic',
+         command: 'home'
+      }
+   }
+   window.top.postMessage(message, "*")
 })
 
 const replayHandler = (() => {
@@ -343,6 +370,6 @@ const gameTick = (() => {
 
 <style scoped>
 #game {
-   margin-top: 15px;
+   margin: 0;
 }
 </style> 

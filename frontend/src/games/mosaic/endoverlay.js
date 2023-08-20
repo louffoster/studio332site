@@ -1,14 +1,16 @@
 import * as PIXI from "pixi.js"
 
 export default class EndOverlay extends PIXI.Container {
-   constructor(replayHandler) {
+   constructor(replayHandler, backHandler) {
       super()
 
       this.x = 10 
       this.y = 100
       this.popupW = 340
-      this.popupH = 150
+      this.popupH = 200
       this.replayHandler = replayHandler
+      this.backHandler = backHandler
+
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0x80D3E1, 1)
@@ -48,9 +50,6 @@ export default class EndOverlay extends PIXI.Container {
       this.btnHeight = 40
       this.btnX = (this.popupW - this.btnWidth) / 2.0
       this.btnY = 85
-      this.graphics.cursor = "pointer"
-      this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(this.btnX, this.btnY, this.btnWidth, this.btnHeight)
 
       this.graphics.lineStyle(2, 0x333333, 1)
       this.graphics.beginFill(0x33aabf)
@@ -71,16 +70,20 @@ export default class EndOverlay extends PIXI.Container {
       btnTxt.anchor.set(0.5, 0.5)
       btnTxt.x = this.popupW / 2
       btnTxt.y = 105
+      btnTxt.eventMode = 'static' 
+      btnTxt.cursor ="pointer"
+      btnTxt.hitArea = new PIXI.Rectangle(-70, -20, this.btnWidth, this.btnHeight)
       this.graphics.addChild(btnTxt)
+      btnTxt.on('pointerup', this.replayHandler, this)
 
-      // add the this param as context for the click event. If not, any reference
-      // to click in the clickHandler will bet to the txt or graphics, not the overlay class
-      this.graphics.on('pointerup', this.clickHandler, this) 
-      btnTxt.on('pointerup', this.clickHandler, this)
-   }
-
-   clickHandler() {
-      this.replayHandler()
+      let backTxt = new PIXI.Text("Back to Studio332 Site", style)
+      backTxt.anchor.set(0.5, 0.5)
+      backTxt.x = this.popupW / 2
+      backTxt.y = 160
+      backTxt.eventMode = 'static' 
+      backTxt.cursor ="pointer"
+      this.graphics.addChild(backTxt)
+      backTxt.on('click', this.backHandler, this)
    }
 }
 // LIGHT: #514c49
