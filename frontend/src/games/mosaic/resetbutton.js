@@ -6,7 +6,7 @@ export default class ResetButton extends PIXI.Container {
 
       this.x = x
       this.y = y
-      this.btnWidth = 166
+      this.btnWidth = 170
       this.btnHeight = 41
 
       this.eventMode = 'static'

@@ -64,15 +64,28 @@ var gameplayToken = ""
 
 
 const resize = (() => {
-    // Determine which screen dimension is most constrained
-    let ratioW = window.innerWidth / GAME_WIDTH
-    let ratioH = window.innerHeight / GAME_HEIGHT
-    if (ratioH < ratioW) {
-      scene.position.x = ((window.innerWidth - GAME_WIDTH) / 2.0) / ratioH
-      scene.scale.x = scene.scale.y = ratioH 
+   //  // Determine which screen dimension is most constrained
+   //  let ratioW = window.innerWidth / GAME_WIDTH
+   //  let ratioH = window.innerHeight / GAME_HEIGHT
+   //  if (ratioH < ratioW) {
+   //    scene.position.x = ((window.innerWidth - GAME_WIDTH) / 2.0) / ratioH
+   //    scene.scale.x = scene.scale.y = ratioH 
       
+   //  } else {
+   //    scene.scale.x = scene.scale.y = ratioW
+   //  }
+
+   // app.renderer.resize( window.innerWidth, window.innerHeight)
+
+   let ratioW = window.innerWidth / GAME_WIDTH
+    let ratioH = window.innerHeight / GAME_HEIGHT
+    if ( window.innerWidth <  GAME_WIDTH ) {
+      scene.scale.x = scene.scale.y = ratioW 
     } else {
-      scene.scale.x = scene.scale.y = ratioW
+      if ( window.innerHeight <  GAME_HEIGHT ) {
+         scene.scale.x = scene.scale.y = ratioH
+      }
+      scene.position.x = ((window.innerWidth - GAME_WIDTH) / 2.0) / ratioW
     }
 
    app.renderer.resize( window.innerWidth, window.innerHeight)

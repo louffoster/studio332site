@@ -8,7 +8,7 @@ export const useGamesStore = defineStore({
       games: [
          { name: "latticewords", width: 460, height: 550, pixijs: false },
          { name: "virus", width: 300, height: 615, pixijs: true },
-         { name: "mosaic", width: 360, height: 545, pixijs: true },
+         { name: "mosaic", width: 360, height: 540, pixijs: true },
       ]
    }),
    getters: {

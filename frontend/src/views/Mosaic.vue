@@ -14,7 +14,7 @@ import EndOverlay from "@/games/mosaic/endoverlay"
 import ResetButton from "@/games/mosaic/resetbutton"
 
 const GAME_WIDTH = 360
-const GAME_HEIGHT = 545
+const GAME_HEIGHT = 540
 const ROWS = 5
 const COLS = 5
 
@@ -45,12 +45,13 @@ const resize = (() => {
     // Determine which screen dimension is most constrained
     let ratioW = window.innerWidth / GAME_WIDTH
     let ratioH = window.innerHeight / GAME_HEIGHT
-    if (ratioH < ratioW) {
-      scene.position.x = ((window.innerWidth - GAME_WIDTH) / 2.0) / ratioH
-      scene.scale.x = scene.scale.y = ratioH 
-      
+    if ( window.innerWidth <  GAME_WIDTH ) {
+      scene.scale.x = scene.scale.y = ratioW 
     } else {
-      scene.scale.x = scene.scale.y = ratioW
+      if ( window.innerHeight <  GAME_HEIGHT ) {
+         scene.scale.x = scene.scale.y = ratioH
+      }
+      scene.position.x = ((window.innerWidth - GAME_WIDTH) / 2.0) / ratioW
     }
 
    app.renderer.resize( window.innerWidth, window.innerHeight)
@@ -132,7 +133,7 @@ const initGame = ( () => {
    matchDisplay.anchor.set(0.5, 0.5)
    scene.addChild(matchDisplay)
 
-   resetButton = new ResetButton(190, 500, resetClicked)
+   resetButton = new ResetButton(185, 495, resetClicked)
    scene.addChild(resetButton)
 
    tileContainer = new PIXI.Container()
@@ -144,18 +145,12 @@ const initGame = ( () => {
    initTiles()
 
    gfx.beginFill(0x34565c)
-   gfx.drawRect(0,360,GAME_WIDTH, GAME_HEIGHT-360)
+   gfx.drawRect(185,360,GAME_WIDTH-190, GAME_HEIGHT-360)
    gfx.endFill()
-   gfx.lineStyle(2, 0x80D3E1,1 )
-   gfx.moveTo(0,360)
-   gfx.lineTo(GAME_WIDTH, 360)
-
-   gfx.moveTo(185, 360)
-   gfx.lineTo(185, GAME_HEIGHT)
 
    targetContainer = new PIXI.Container() 
-   targetContainer.x =  5
-   targetContainer.y = 365
+   targetContainer.x =  6
+   targetContainer.y = 360
    scene.addChild(targetContainer)
    targetFilter = new PIXI.ColorMatrixFilter()
    targetContainer.filters = [targetFilter]
