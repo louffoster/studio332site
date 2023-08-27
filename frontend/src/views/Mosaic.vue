@@ -12,12 +12,18 @@ import Spinner from "@/games/mosaic/spinner"
 import StartOverlay from "@/games/mosaic/startoverlay"
 import EndOverlay from "@/games/mosaic/endoverlay"
 import ResetButton from "@/games/mosaic/resetbutton"
+import { useGamesStore } from '@/stores/games'
+import { useRouter } from 'vue-router'
 
 const GAME_WIDTH = 360
 const GAME_HEIGHT = 540
 const ROWS = 5
 const COLS = 5
 
+const gameStore = useGamesStore()
+const router = useRouter()
+
+var gameElement = null
 var app = null
 var scene = null
 var gfx = null
@@ -41,6 +47,34 @@ var matchingTimer = 0.0
 var hue = 0.0
 var hueDir = 1
 
+
+const initPixiJS = (() => {
+   gameStore.currentGame = "mosaic"
+   PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
+   app = new PIXI.Application({
+      autoDensity: true, // Handles high DPI screens
+      antialias: true,
+      backgroundColor: 0x44444a,
+      width: GAME_WIDTH,
+      height: GAME_HEIGHT,
+   })
+
+   if (window.innerWidth <= GAME_WIDTH || window.innerHeight <= GAME_HEIGHT   ) {
+      gameStore.fullScreen = true
+      gameElement = document.body
+      gameElement.appendChild(app.view)
+      scene = new PIXI.Container()
+      app.stage.addChild(scene)
+      resize()
+   } else {
+      gameStore.fullScreen = false
+      gameElement = document.getElementById("game")
+      gameElement.appendChild(app.view)
+      scene = new PIXI.Container()
+      app.stage.addChild(scene)
+   }
+})
+
 const resize = (() => {
     // Determine which screen dimension is most constrained
     let ratioW = window.innerWidth / GAME_WIDTH
@@ -58,24 +92,7 @@ const resize = (() => {
 })
 
 onMounted(async () => {
-   PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
-   app = new PIXI.Application({
-      autoDensity: true, // Handles high DPI screens
-      antialias: true,
-      backgroundColor: 0x44444a,
-      width: GAME_WIDTH,
-      height: GAME_HEIGHT,
-   })
-
-   // The application will create a canvas element for you that you
-   // can then insert into the DOM, then add the base scene container 
-   // in this setup, all content added to the scene is auto scaled
-   let gameEle = document.getElementById("game")
-   gameEle.appendChild(app.view)
-   scene = new PIXI.Container()
-   app.stage.addChild(scene)
-
-   resize()
+   initPixiJS()
 
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
@@ -101,8 +118,7 @@ onBeforeUnmount(() => {
    })
    
    app.stage.removeChildren()
-   let gameEle = document.getElementById("game")
-   gameEle.removeChild(app.view)
+   gameElement.removeChild(app.view)
 })
 
 const initGame = ( () => {
@@ -198,13 +214,9 @@ const resetClicked = (() => {
 })
 
 const backHandler = (() =>{
-   const message = {
-      studio332: {
-         from: 'mosaic',
-         command: 'home'
-      }
-   }
-   window.top.postMessage(message, "*")
+   gameStore.fullScreen = false
+   gameStore.currentGame = ""
+   router.push("/")
 })
 
 const replayHandler = (() => {

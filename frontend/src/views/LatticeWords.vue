@@ -36,7 +36,7 @@ onUnmounted(() => {
 
 <style scoped>
 #lwgame {
-   margin: 10px 0;
+   margin: 0 0;
    display: flex;
    flex-flow: row nowrap;
    justify-content: center;

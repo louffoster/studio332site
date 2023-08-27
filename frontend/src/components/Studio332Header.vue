@@ -22,7 +22,7 @@ div.header {
    background-color: white;
    color: #666;
    padding: 2px 5px 0 5px;
-   border-bottom: 3px solid red;
+   border-bottom: 1px solid #666;
    display: flex;
    flex-flow: row;
    align-items: flex-end;

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref } from 'vue'
 import Button from 'primevue/button'
 import OverlayPanel from 'primevue/overlaypanel'
 import { useGamesStore } from '@/stores/games'
@@ -11,18 +11,6 @@ const vhelp = ref()
 const mosaichelp = ref()
 const gameframe = ref()
 
-
-onMounted(() => {
-   window.addEventListener( "message", (e) => {
-      if ( e.data.studio332) {
-         if (e.data.studio332.command == 'home') {
-            gamesStore.currentGame = ""
-            gamesStore.fullScreen = false  
-         } 
-      } 
-   })
-})
-
 const toggleLWHelp = ((event) => {
    lwhelp.value.toggle(event)
 })
@@ -33,24 +21,6 @@ const toggleVirusHelp = ((event) => {
 
 const toggleMosiacHelp = ((event) => {
    mosaichelp.value.toggle(event)
-})
-
-const gameClicked = ((gameName) => {
-   gamesStore.currentGame = gameName
-   nextTick( () => {
-      let info = gamesStore.gameInfo
-      gameframe.value.style.width = info.width+"px"
-      gameframe.value.style.height = info.height+"px"
-      console.log(window.innerWidth)
-      if (window.innerWidth <= info.width || window.innerWidth <= info.height   ) {
-         gamesStore.fullScreen = true
-         gameframe.value.style.width = window.innerWidth+"px"
-         gameframe.value.style.height = window.innerHeight+"px"
-         gameframe.value.style.margin = 0
-      }
-      gameframe.value.src = `/${gameName}`
-   })
-
 })
 </script>
 
@@ -74,7 +44,7 @@ const gameClicked = ((gameName) => {
          </li>
          <li>
             <div class="game-info">
-               <span class="game-start" role="button" @click="gameClicked('mosaic')">Mosaic</span>
+               <router-link to="/mosaic">Mosaic</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleMosiacHelp" />
             </div>
             <OverlayPanel ref="mosaichelp">
@@ -97,7 +67,7 @@ const gameClicked = ((gameName) => {
          </li>
          <li>
             <div class="game-info">
-               <span class="game-start" role="button" @click="gameClicked('virus')">Virus</span>
+               <router-link to="/virus">Virus</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleVirusHelp" />
             </div>
             <OverlayPanel ref="vhelp">

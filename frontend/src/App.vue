@@ -1,14 +1,10 @@
 <script setup>
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView } from 'vue-router'
 import Studio332Header from '@/components/Studio332Header.vue'
-import { useGamesStore } from '@/stores/games'
-
-const gamesStore = useGamesStore()
-const route = useRoute()
 </script>
 
 <template>
-   <Studio332Header v-if="route.name == 'home' && gamesStore.fullScreen == false" />
+   <Studio332Header />
    <RouterView />
 </template>
 
