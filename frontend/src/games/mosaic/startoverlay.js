@@ -1,21 +1,23 @@
 import * as PIXI from "pixi.js"
+import Button from "@/games/mosaic/button"
 
 export default class StartOverlay extends PIXI.Container {
    constructor(startTimeMS, startHandler) {
       super()
 
       this.x = 10 
-      this.y = 100
+      this.y = 55
       this.startCallback = startHandler
       this.panelW = 340
+      this.panelH = 250
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0x80D3E1, 1)
       this.graphics.beginFill(0x34565c)
-      this.graphics.drawRect(0,0, this.panelW,150)
+      this.graphics.drawRect(0,0, this.panelW, this.panelH)
       this.graphics.endFill()
       this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawRect(0,0, this.panelW,150)
+      this.graphics.drawRect(0,0, this.panelW, this.panelH)
 
       let style = new PIXI.TextStyle({
          fill: "#f0f0ff",
@@ -45,46 +47,26 @@ export default class StartOverlay extends PIXI.Container {
 
       this.addChild(this.graphics)
       this.graphics.addChild(this.msg)
-      this.addStartButton()
-   }
 
-   addStartButton() {
-      this.btnX = 120 
-      this.btnY = 85
-      this.btnWidth = 100 
-      this.btnHeight = 40
-      this.graphics.cursor = "pointer"
-      this.graphics.eventMode = 'static' 
-      this.graphics.hitArea = new PIXI.Rectangle(this.btnX, this.btnY, this.btnWidth, this.btnHeight)
+      let note1 = new PIXI.Text(`Standard mode uses two colors`, style)
+      note1.anchor.set(0.5,0.5)
+      note1.x = this.panelW/2
+      note1.y = 100
+      this.graphics.addChild(note1)
+      let note2 = new PIXI.Text(`Advanced mode uses three`, style)
+      note2.anchor.set(0.5,0.5)
+      note2.x = this.panelW/2
+      note2.y = 130
+      this.graphics.addChild(note2)
 
-      this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.beginFill(0x33aabf)
-      this.graphics.drawRect(this.btnX, this.btnY, this.btnWidth, this.btnHeight)
-      this.graphics.endFill()
-      let style = new PIXI.TextStyle({
-         fill: "#f0f0ff",
-         fontFamily: "Arial",
-         fontSize: 18,
-         fontWeight: "bold",
-         dropShadow: true,
-         dropShadowColor: '#000000',
-         dropShadowBlur: 2,
-         dropShadowDistance: 1,
-         align: "center"
+      let stdButton = new Button( 50, 180, "Standard", () => {
+         startHandler("standard")
       })
-      let btnTxt = new PIXI.Text("Begin", style)
-      btnTxt.anchor.set(0.5, 0.5)
-      btnTxt.x = 170
-      btnTxt.y = 105
-      this.graphics.addChild(btnTxt)
+      this.addChild(stdButton)
 
-      // add the this param as context for the click event. If not, any reference
-      // to click in the clickHandler will bet to the txt or graphics, not the overlay class
-      this.graphics.on('pointerup', this.clickHandler, this) 
-      btnTxt.on('pointerup', this.clickHandler, this)
-   }
-
-   clickHandler() {
-      this.startCallback()
+      let advButton = new Button( 180, 180, "Advanced", () => {
+         startHandler("advanced")
+      })
+      this.addChild(advButton)
    }
 }

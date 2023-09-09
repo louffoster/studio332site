@@ -11,7 +11,7 @@ import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
 import StartOverlay from "@/games/mosaic/startoverlay"
 import EndOverlay from "@/games/mosaic/endoverlay"
-import ResetButton from "@/games/mosaic/resetbutton"
+import Button from "@/games/mosaic/button"
 import { useGamesStore } from '@/stores/games'
 import { useRouter } from 'vue-router'
 
@@ -46,7 +46,12 @@ var matching = false
 var matchingTimer = 0.0
 var hue = 0.0
 var hueDir = 1
+var advanced = false
 
+/*
+TODO
+Warning when time is low
+*/
 
 const initPixiJS = (() => {
    gameStore.currentGame = "mosaic"
@@ -128,28 +133,28 @@ const initGame = ( () => {
       fontSize: 18,
    }
    let timeLabel = new PIXI.Text("Time Remaining", style)
-   timeLabel.x = 275
+   timeLabel.x = 270
    timeLabel.y = 380
    timeLabel.anchor.set(0.5, 0.5)
    scene.addChild(timeLabel)
    timerDisplay = new PIXI.Text("05:00", style)
-   timerDisplay.x = 275
-   timerDisplay.y = 410
+   timerDisplay.x = 270
+   timerDisplay.y = 405
    timerDisplay.anchor.set(0.5, 0.5)
    scene.addChild(timerDisplay)
 
    let patternLabel = new PIXI.Text("Patterns Matched", style)
-   patternLabel.x = 275
-   patternLabel.y = 450
+   patternLabel.x = 270
+   patternLabel.y = 435
    patternLabel.anchor.set(0.5, 0.5)
    scene.addChild(patternLabel)
    matchDisplay = new PIXI.Text("0", style)
-   matchDisplay.x = 275
-   matchDisplay.y = 480
+   matchDisplay.x = 270
+   matchDisplay.y = 460
    matchDisplay.anchor.set(0.5, 0.5)
    scene.addChild(matchDisplay)
 
-   resetButton = new ResetButton(185, 495, resetClicked)
+   resetButton = new Button(203, 480, "Reset Tiles", resetClicked)
    scene.addChild(resetButton)
 
    tileContainer = new PIXI.Container()
@@ -177,18 +182,41 @@ const initTiles = (()=> {
    tiles = Array(ROWS).fill().map(() => Array(COLS))
    let x = 0
    let y = 0
-   let color = 0
+   let color = 1
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         let t = new Tile(color, x,y, r,c)
-         tileContainer.addChild(t)
-         tiles[r][c] = t
-         x+= Tile.width
-         if (color == 0) {
-            color = 1
+         if ( advanced == 1) {
+            if ( r == 2 && c == 2) {
+               color = 2
+            } else {
+               if ( r == 1 || r == 3) {
+                  color = 1
+                  if ( c == 1 || c == 3 ) {
+                     color = 2
+                  }
+               } else {
+                  if (color == 0 || color == 2) {
+                     color = 1
+                  } else {
+                     color = 0
+                  }
+               }
+            }
+            let t = new Tile(color, x,y, r,c)
+            tileContainer.addChild(t)
+            tiles[r][c] = t
          } else {
-            color = 0
+            let t = new Tile(color, x,y, r,c)
+            tileContainer.addChild(t)
+            tiles[r][c] = t
+            if (color == 0) {
+               color = 1
+            } else {
+               color = 0
+            }
          }
+         
+         x+= Tile.width
       }
       x = 0
       y += Tile.height
@@ -223,16 +251,33 @@ const replayHandler = (() => {
    window.location.reload()
 })
 
-const startHandler = (() => {
+const startHandler = ((startMode) => {
    gameState = "play"
+   advanced = false
+   if (startMode == "advanced" ) {
+      advanced = true
+   }
+   
+   initTiles()
+   generateTargetPuzzle()
+
    scene.removeChild(startOverlay)
 })
 
 const generateTargetPuzzle = (() => {
-   let colors = [
-      0,0,0,0,0,0,0,0,0,0,0,0,0,
-      1,1,1,1,1,1,1,1,1,1,1,1
-   ]
+   let colors = null 
+   if (advanced == 1 ) {
+      colors = [
+         0,0,0,0,0,0,0,0,
+         1,1,1,1,1,1,1,1,1,1,1,1,
+         2,2,2,2,2
+      ]
+   } else { 
+      colors = [
+         0,0,0,0,0,0,0,0,0,0,0,0,0,
+         1,1,1,1,1,1,1,1,1,1,1,1
+      ]   
+   }
    colors = shuffle(colors)
    let x = 0
    let y = 0
@@ -294,7 +339,6 @@ const checkMatch = (() => {
       matching = true 
       matchingTimer = 1000.0
       tileFilter.polaroid(true)
-      // setTimeout( (()=> {generateTargetPuzzle()}), 3000 )
    }
 })
 
