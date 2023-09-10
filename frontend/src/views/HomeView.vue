@@ -6,14 +6,14 @@ import { useGamesStore } from '@/stores/games'
 
 const gamesStore = useGamesStore()
 
-const lwhelp = ref()
+// const lwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
 const gameframe = ref()
 
-const toggleLWHelp = ((event) => {
-   lwhelp.value.toggle(event)
-})
+// const toggleLWHelp = ((event) => {
+//    lwhelp.value.toggle(event)
+// })
 
 const toggleVirusHelp = ((event) => {
    vhelp.value.toggle(event)
@@ -28,7 +28,7 @@ const toggleMosiacHelp = ((event) => {
    <div class="content" v-if="gamesStore.currentGame == ''">
       <h2>Games</h2>
       <ul>
-         <li>
+         <!-- <li>
             <div class="game-info">
                <router-link to="/latticewords">LatticeWords</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleLWHelp" />
@@ -41,7 +41,7 @@ const toggleMosiacHelp = ((event) => {
                   <p>Score as many points as possible before time runs out!</p>
                </div>
             </OverlayPanel>
-         </li>
+         </li> -->
          <li>
             <div class="game-info">
                <router-link to="/mosaic">Mosaic</router-link>

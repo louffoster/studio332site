@@ -47,6 +47,7 @@ var matchingTimer = 0.0
 var hue = 0.0
 var hueDir = 1
 var advanced = false
+var flash = false
 
 /*
 TODO
@@ -114,6 +115,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+   console.log("UNMOUNT")
    app.ticker.stop()
    
    scene.destroy({
@@ -132,6 +134,12 @@ const initGame = ( () => {
       fontFamily: "Arial",
       fontSize: 18,
    }
+
+   gfx.beginFill(0x44444a)
+   gfx.lineStyle(1, 0x44444a, 1)
+   gfx.drawRect(0,0,GAME_WIDTH, GAME_HEIGHT)
+   gfx.endFill()
+
    let timeLabel = new PIXI.Text("Time Remaining", style)
    timeLabel.x = 270
    timeLabel.y = 380
@@ -333,7 +341,6 @@ const checkMatch = (() => {
    }
 
    if ( match == true ) {
-      console.log("MATCHED!!")
       matchCount++
       matchDisplay.text = `${matchCount}`
       matching = true 
@@ -375,6 +382,18 @@ const gameOver = (()=>{
    gameState = "gameOver"
 })
 
+const showTimerFlash = (() => {
+   flash = !flash
+   if ( flash ) {
+      gfx.lineStyle(5, 0xcc2222, 1)
+      timerDisplay.style.fill = 0xff6666
+   } else {
+      gfx.lineStyle(5, 0x44444a, 1)
+      timerDisplay.style.fill = 0x80D3E1
+   }
+   gfx.drawRect(1,1,356,356)
+})
+
 const gameTick = (() => {
    if (gameState != "play") return
 
@@ -408,6 +427,11 @@ const gameTick = (() => {
       if ( mins > 0) {
          secs = timeSec - mins*60
       }
+
+      if (timeSec < 15) { 
+         showTimerFlash()
+      }
+      
       let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       timerDisplay.text = timeStr
    }

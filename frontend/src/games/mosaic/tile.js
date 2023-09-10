@@ -23,7 +23,7 @@ export default class Tile extends PIXI.Graphics {
       let colors = [0xeeefff, 0x33aabf, 0x19545E]
       this.clear()
       this.beginFill( colors[ this.colorIndex ])
-      this.lineStyle(2, 0x333333, 1)
+      this.lineStyle(1, 0x222222, 1)
       if ( this.border === false) {
          this.lineStyle(1, 0x777777, 0.5)
       }
