@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
-   constructor(letter, x,y, r,c ) {
+   constructor(letter, x,y, r,c, clickHandler ) {
       super()
 
       this.x = x
@@ -11,11 +11,11 @@ export default class Letter extends PIXI.Container {
       this.selected = false
 
       this.style = new PIXI.TextStyle({
-         fill: "#bbccff",
+         fill: "#CAF0F8",
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 36,
-         stroke: '#111111',
-         strokeThickness: 3,
+         stroke: '#03045E',
+         strokeThickness: 4,
       })
 
       this.graphics = new PIXI.Graphics()
@@ -25,6 +25,18 @@ export default class Letter extends PIXI.Container {
       this.letter.y = Letter.HEIGHT / 2.0
 
       this.draw()
+
+      this.eventMode = 'static'
+      this.hitArea =  new PIXI.Rectangle(0,0,Letter.WIDTH,Letter.HEIGHT)
+      this.cursor ="pointer"
+      this.pointerDown = false
+      this.on('pointerup', () => {
+         if ( this.selected == false ) {
+            this.selected = true 
+            clickHandler( this.row, this.col, this.letter.text )
+            this.draw()
+         }
+      })
 
       this.addChild(this.graphics)
       this.addChild(this.letter)
@@ -36,11 +48,11 @@ export default class Letter extends PIXI.Container {
 
    draw() {
       this.graphics.clear()
-      this.graphics.beginFill(0x445599)
-      this.graphics.lineStyle(1, 0x001155, 1)
+      this.graphics.beginFill(0x0077B6)
+      this.graphics.lineStyle(1, 0x03045E, 1)
 
       if (this.selected) {
-         this.graphics.lineStyle(2, 0xaaddff, 1)
+         this.graphics.beginFill(0x00B4D8)
       } 
       this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
       this.graphics.endFill()

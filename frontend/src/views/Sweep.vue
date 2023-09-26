@@ -30,7 +30,7 @@ const initPixiJS = (() => {
    app = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
       antialias: true,
-      backgroundColor: 0x44444a,
+      backgroundColor: 0x023E8A,
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
    })
@@ -98,7 +98,7 @@ const initGame = (() => {
    let y = 5
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         let l = new Letter(pool.pop(), x,y, r,c)
+         let l = new Letter(pool.pop(), x,y, r,c, letterClicked)
          scene.addChild(l)
          grid[r][c] = l
          x += Letter.WIDTH
@@ -106,6 +106,10 @@ const initGame = (() => {
       y += Letter.HEIGHT
       x = 5
    } 
+})
+
+const letterClicked = ((r,c, letter) => {
+   console.log(r+", "+c+": " +letter)
 })
 
 const gameTick = (() => {

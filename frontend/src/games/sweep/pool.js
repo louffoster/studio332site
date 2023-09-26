@@ -17,9 +17,9 @@ export default class Pool {
       this.pool = []
       var i,j
       var dist = {
-         1: "J,K,Q,X,Z", 3: "B,C,F,H,M,P,V,W,Y",
-         4: "G", 5: "L", 6: "D,S,U", 7: "N",
-         8: "T,R", 9: "O,I,A,E"}
+         1: "J,K,Q,X,Z", 2: "B,C,F,H,M,P,V,W,Y",
+         3: "G", 4: "L", 5: "D,S,U", 6: "N",
+         7: "T,R", 8: "O,I,A,E"}
       for ( var key in dist) {
          var letters = dist[key].split(",")
          var cnt = parseInt(key, 10)
