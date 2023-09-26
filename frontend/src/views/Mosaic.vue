@@ -49,11 +49,6 @@ var hueDir = 1
 var advanced = false
 var flash = false
 
-/*
-TODO
-Warning when time is low
-*/
-
 const initPixiJS = (() => {
    gameStore.currentGame = "mosaic"
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1

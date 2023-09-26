@@ -2,14 +2,11 @@
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import OverlayPanel from 'primevue/overlaypanel'
-import { useGamesStore } from '@/stores/games'
-
-const gamesStore = useGamesStore()
 
 // const lwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
-const gameframe = ref()
+const sweephelp = ref()
 
 // const toggleLWHelp = ((event) => {
 //    lwhelp.value.toggle(event)
@@ -19,13 +16,17 @@ const toggleVirusHelp = ((event) => {
    vhelp.value.toggle(event)
 })
 
+const toggleSweepHelp = ((event) => {
+   sweephelp.value.toggle(event)
+})
+
 const toggleMosiacHelp = ((event) => {
    mosaichelp.value.toggle(event)
 })
 </script>
 
 <template>
-   <div class="content" v-if="gamesStore.currentGame == ''">
+   <div class="content">
       <h2>Games</h2>
       <ul>
          <!-- <li>
@@ -95,23 +96,23 @@ const toggleMosiacHelp = ((event) => {
                </div>
             </OverlayPanel>
          </li>
+         <li>
+            <div class="game-info">
+               <router-link to="/sweep">Sweep</router-link>
+               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleSweepHelp" />
+            </div>
+            <OverlayPanel ref="sweephelp">
+               <div class="rules">
+                  <h3>Sweep</h3>
+                  <p>Clear all letters from the board by uing them in 3-10 letter words.</p>
+               </div>
+            </OverlayPanel>
+         </li>
       </ul>
-   </div>
-   <div class="game" v-else >
-      <iframe ref="gameframe" class="gameframe"/>
    </div>
 </template>
 
 <style lang="scss" scoped>
-.gameframe {
-   margin-top: 15px;
-   border: none;
-   body {
-      overflow: hidden;
-      padding: 0;
-      margin: 0;
-   }
-}
 div.rules {
    font-size: 0.85;
    h3 {

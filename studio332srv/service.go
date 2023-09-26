@@ -36,7 +36,7 @@ func (svc *GameService) IsValidWord(value string) bool {
 
 func initializeGameService(cfg *serviceConfig) (*GameService, error) {
 	// Read the disctionary into an array for checking word valididty
-	dict, err := os.ReadFile("data/words.txt")
+	dict, err := os.ReadFile("data/words_3to10.txt")
 	if err != nil {
 		log.Printf("Unable to load distionary: %s", err.Error())
 		return nil, err
