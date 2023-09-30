@@ -1,14 +1,17 @@
 import * as PIXI from "pixi.js"
 
 export default class Button extends PIXI.Container {
-   constructor( x,y, txt, listener) {
+   constructor( x,y, txt, listener, txtColor="white", btnColor=0x33aabf, highlight=0x44bbcf) {
       super()
 
       this.x = x
       this.y = y
+      this.btnColor = new PIXI.Color(btnColor)
+      this.highlight = new PIXI.Color(highlight)
+      this.txtColor = new PIXI.Color(txtColor)
 
       let style = new PIXI.TextStyle({
-         fill: "#ffffff",
+         fill: this.txtColor,
          fontFamily: "Arial",
          fontSize: 18,
          fontWeight: "bold",
@@ -44,10 +47,10 @@ export default class Button extends PIXI.Container {
 
    drawButton() {
       this.graphics.clear()
-      this.graphics.lineStyle(1, 0x333333, 1)
-      this.graphics.beginFill(0x33aabf)
+      this.graphics.lineStyle(1, this.txtColor, 1)
+      this.graphics.beginFill( this.btnColor.toHex() )
       if ( this.pointerDown) {
-         this.graphics.beginFill(0x44bbcf)
+         this.graphics.beginFill( this.highlight.toHex())// 0x44bbcf)
       }
       this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
    }

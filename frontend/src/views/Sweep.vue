@@ -9,11 +9,13 @@ import { onMounted, onBeforeUnmount } from "vue"
 import { useGamesStore } from '@/stores/games'
 import Pool from "@/games/sweep/pool"
 import Letter from "@/games/sweep/letter"
+import StartOverlay from "@/games/sweep/startoverlay"
 
 const GAME_WIDTH = 370
 const GAME_HEIGHT = 540
 const ROWS = 6
 const COLS = 6
+const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 const gameStore = useGamesStore()
 
@@ -22,7 +24,9 @@ var app = null
 var scene = null
 var gfx = null
 var pool = new Pool()
+var gameState = "init"
 var grid = null
+var startOverlay = null
 
 const initPixiJS = (() => {
    gameStore.currentGame = "mosaic"
@@ -76,6 +80,14 @@ onMounted(async () => {
    app.ticker.add( gameTick )
 
    initGame()
+
+   startOverlay = new StartOverlay(API_SERVICE, startHandler) 
+   scene.addChild(startOverlay)
+})
+
+const startHandler = (() => {
+   gameState = "play"
+   console.log("PLAY")
 })
 
 onBeforeUnmount(() => {
@@ -113,6 +125,7 @@ const letterClicked = ((r,c, letter) => {
 })
 
 const gameTick = (() => {
+   if (gameState != "play" ) return
 })
 
 </script>

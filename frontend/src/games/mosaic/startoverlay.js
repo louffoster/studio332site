@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js"
-import Button from "@/games/mosaic/button"
+import Button from "@/games/common/button"
 
 export default class StartOverlay extends PIXI.Container {
    constructor(startTimeMS, startHandler) {

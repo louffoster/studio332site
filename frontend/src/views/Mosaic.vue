@@ -11,7 +11,7 @@ import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"
 import StartOverlay from "@/games/mosaic/startoverlay"
 import EndOverlay from "@/games/mosaic/endoverlay"
-import Button from "@/games/mosaic/button"
+import Button from "@/games/common/button"
 import { useGamesStore } from '@/stores/games'
 import { useRouter } from 'vue-router'
 
