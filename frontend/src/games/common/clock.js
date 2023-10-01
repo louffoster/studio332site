@@ -14,16 +14,34 @@ export default class Clock extends PIXI.Container {
       }
 
       let labelWidth = 0
+      let timerY = 0
       if ( label != "") {
-         let timeLabel = new PIXI.Text(label+":", style)
+         let twoLines = false 
+         if (label.includes("\n")) {
+            twoLines = true 
+            label = label.replace("\n", "")
+         } else {
+            label = label.replace("\n", ":")
+         }
+      
+         let timeLabel = new PIXI.Text(label, style)
          timeLabel.x = 0
          timeLabel.y = 0
          this.addChild(timeLabel)
-         labelWidth = timeLabel.width + 5
+         if ( twoLines ) {
+            labelWidth = timeLabel.width / 2.0
+            timerY = timeLabel.height + 5
+         } else {
+            labelWidth = timeLabel.width + 5
+            timerY = 0
+         }
       }
       this.timerDisplay = new PIXI.Text("00:00", style)
       this.timerDisplay.x = labelWidth
-      this.timerDisplay.y = 0
+      this.timerDisplay.y = timerY
+      if ( timerY != 0) {
+         this.timerDisplay.anchor.set(0.5, 0)
+      } 
       this.addChild(this.timerDisplay)
 
       this.pivot.x = this.width / 2;
@@ -34,10 +52,11 @@ export default class Clock extends PIXI.Container {
       this.flash = false
    }
 
-   setCountdownMode( startTimeMS, timeoutListener) {
-      this.countdownn = true 
+   setCountdownMode( startTimeMS, timeoutListener, warningListener) {
+      this.countdown = true 
       this.timeMS = startTimeMS 
       this.timeoutListener = timeoutListener
+      this.warningListener = warningListener
       let timeSec = this.gameTimeSec()
       let secs = timeSec
       let mins = Math.floor(timeSec / 60)
@@ -55,6 +74,7 @@ export default class Clock extends PIXI.Container {
       } else {
          this.timerDisplay.style.fill = this.clockColor
       }
+      this.warningListener( this.flash )
    }
 
    gameTimeSec() {

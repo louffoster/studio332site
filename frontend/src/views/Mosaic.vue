@@ -12,6 +12,8 @@ import Spinner from "@/games/mosaic/spinner"
 import StartOverlay from "@/games/mosaic/startoverlay"
 import EndOverlay from "@/games/mosaic/endoverlay"
 import Button from "@/games/common/button"
+import Clock from "@/games/common/clock"
+
 import { useGamesStore } from '@/stores/games'
 import { useRouter } from 'vue-router'
 
@@ -34,8 +36,8 @@ var targetContainer = null
 var targetFilter = null
 var targetTiles = null
 var spinners = null
-var gameTimeMS = 300.0 * 1000.0
-var timerDisplay = null
+var clock = null
+var gameDurationMS = 300.0 * 1000.0
 var matchCount = 0
 var matchDisplay = null
 var gameState = "start"
@@ -47,7 +49,6 @@ var matchingTimer = 0.0
 var hue = 0.0
 var hueDir = 1
 var advanced = false
-var flash = false
 
 const initPixiJS = (() => {
    gameStore.currentGame = "mosaic"
@@ -104,7 +105,7 @@ onMounted(async () => {
 
    initGame()
 
-   startOverlay = new StartOverlay(gameTimeMS, startHandler) 
+   startOverlay = new StartOverlay(gameDurationMS, startHandler) 
    scene.addChild(startOverlay)
    endOverlay = new EndOverlay(replayHandler, backHandler) 
 })
@@ -134,16 +135,9 @@ const initGame = ( () => {
    gfx.drawRect(0,0,GAME_WIDTH, GAME_HEIGHT)
    gfx.endFill()
 
-   let timeLabel = new PIXI.Text("Time Remaining", style)
-   timeLabel.x = 270
-   timeLabel.y = 380
-   timeLabel.anchor.set(0.5, 0.5)
-   scene.addChild(timeLabel)
-   timerDisplay = new PIXI.Text("05:00", style)
-   timerDisplay.x = 270
-   timerDisplay.y = 405
-   timerDisplay.anchor.set(0.5, 0.5)
-   scene.addChild(timerDisplay)
+   clock = new Clock(270, 390, "Time Remaining\n")
+   clock.setCountdownMode(gameDurationMS,  timeExpired, timerWarning)
+   scene.addChild(clock)
 
    let patternLabel = new PIXI.Text("Patterns Matched", style)
    patternLabel.x = 270
@@ -365,7 +359,7 @@ const spinnerCallback = ( ( tgtTiles ) => {
    }, 110)
 })
 
-const gameOver = (()=>{
+const timeExpired = (()=>{
    for (let r = 0; r < ROWS-1; r++) {
       for (let c = 0; c < COLS-1; c++) {
          tileContainer.removeChild(spinners[r][c] )
@@ -376,14 +370,11 @@ const gameOver = (()=>{
    gameState = "gameOver"
 })
 
-const showTimerFlash = (() => {
-   flash = !flash
+const timerWarning = ((flash) => {
    if ( flash ) {
       gfx.lineStyle(5, 0xcc2222, 1)
-      timerDisplay.style.fill = 0xff6666
    } else {
       gfx.lineStyle(5, 0x44444a, 1)
-      timerDisplay.style.fill = 0x80D3E1
    }
    gfx.drawRect(1,1,356,356)
 })
@@ -391,11 +382,7 @@ const showTimerFlash = (() => {
 const gameTick = (() => {
    if (gameState != "play") return
 
-   // get prior time and new time. necessary to check if a new second has gone by
-   let origTimeSec = Math.round(gameTimeMS / 1000.0)
-   gameTimeMS -= app.ticker.deltaMS
-   let timeSec = Math.round(gameTimeMS / 1000.0)
-   timeSec = Math.max(timeSec, 0)
+   clock.tick(app.ticker.deltaMS)
 
    if (matching) {
       matchingTimer -= app.ticker.deltaMS
@@ -415,24 +402,20 @@ const gameTick = (() => {
    }
 
    // Update the timer and display it
-   if ( timeSec != origTimeSec) {
-      let secs = timeSec
-      let mins = Math.floor(timeSec / 60)
-      if ( mins > 0) {
-         secs = timeSec - mins*60
-      }
+   // if ( timeSec != origTimeSec) {
+   //    let secs = timeSec
+   //    let mins = Math.floor(timeSec / 60)
+   //    if ( mins > 0) {
+   //       secs = timeSec - mins*60
+   //    }
 
-      if (timeSec < 15) { 
-         showTimerFlash()
-      }
+   //    // if (timeSec < 15) { 
+   //    //    showTimerFlash()
+   //    // }
       
-      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
-      timerDisplay.text = timeStr
-   }
-
-   if (timeSec == 0) {
-      gameOver() 
-   }
+   //    // let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+   //    // timerDisplay.text = timeStr
+   // }
 })
 
 </script>
