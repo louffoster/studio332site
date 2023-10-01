@@ -12,7 +12,7 @@ export default class Letter extends PIXI.Container {
 
       this.style = new PIXI.TextStyle({
          fill: "#CAF0F8",
-         fontFamily: "\"Courier New\", Courier, monospace",
+         fontFamily: "Arial",
          fontSize: 36,
          stroke: '#03045E',
          strokeThickness: 4,
@@ -31,7 +31,7 @@ export default class Letter extends PIXI.Container {
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerup', () => {
-         if ( this.selected == false ) {
+         if ( Letter.Active && this.selected == false ) {
             this.selected = true 
             clickHandler( this.row, this.col, this.letter.text )
             this.draw()
@@ -40,6 +40,13 @@ export default class Letter extends PIXI.Container {
 
       this.addChild(this.graphics)
       this.addChild(this.letter)
+   }
+
+   deselect() {
+      if (this.selected) {
+         this.selected = false 
+         this.draw(0)
+      }
    }
 
    destroy() {
@@ -61,3 +68,4 @@ export default class Letter extends PIXI.Container {
 
 Letter.WIDTH = 60 
 Letter.HEIGHT = 60 
+Letter.Active = true
