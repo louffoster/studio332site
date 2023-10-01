@@ -110,7 +110,6 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-   console.log("UNMOUNT")
    app.ticker.stop()
    
    scene.destroy({

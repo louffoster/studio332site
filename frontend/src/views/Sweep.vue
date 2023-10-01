@@ -10,6 +10,7 @@ import { useGamesStore } from '@/stores/games'
 import Pool from "@/games/sweep/pool"
 import Letter from "@/games/sweep/letter"
 import StartOverlay from "@/games/sweep/startoverlay"
+import Clock from "@/games/common/clock"
 
 const GAME_WIDTH = 370
 const GAME_HEIGHT = 540
@@ -26,6 +27,7 @@ var gfx = null
 var pool = new Pool()
 var gameState = "init"
 var grid = null
+var clock = null
 var startOverlay = null
 
 const initPixiJS = (() => {
@@ -87,7 +89,7 @@ onMounted(async () => {
 
 const startHandler = (() => {
    gameState = "play"
-   console.log("PLAY")
+   scene.removeChild(startOverlay)
 })
 
 onBeforeUnmount(() => {
@@ -118,6 +120,9 @@ const initGame = (() => {
       y += Letter.HEIGHT
       x = 5
    } 
+
+   clock = new Clock(185, 440, "Elapsed Time", 0xCAF0F8)
+   scene.addChild(clock)
 })
 
 const letterClicked = ((r,c, letter) => {
@@ -126,6 +131,8 @@ const letterClicked = ((r,c, letter) => {
 
 const gameTick = (() => {
    if (gameState != "play" ) return
+
+   clock.tick(app.ticker.deltaMS)
 })
 
 </script>
