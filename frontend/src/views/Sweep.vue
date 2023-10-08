@@ -5,6 +5,7 @@
 
 <script setup>
 import * as PIXI from "pixi.js"
+import axios from 'axios'
 import { onMounted, onBeforeUnmount } from "vue"
 import { useGamesStore } from '@/stores/games'
 import Pool from "@/games/sweep/pool"
@@ -142,7 +143,7 @@ const initGame = (() => {
    gfx.moveTo(80, 405)
    gfx.lineTo(290,405)
 
-   clearButton = new Button( 30, 420, "Clear Word", () => {
+   clearButton = new Button( 30, 425, "Clear Word", () => {
          word.text = ""
          for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
@@ -153,13 +154,21 @@ const initGame = (() => {
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
    scene.addChild(clearButton)
    
-   submitButton = new Button( 190, 420, "Submit Word", () => {
-         word.text = ""
-      }, 0xCAF0F8,0x0077B6,0x48CAE4)
+   submitButton = new Button( 190, 425, "Submit Word", submitWord, 0xCAF0F8,0x0077B6,0x48CAE4)
    scene.addChild(submitButton)
 
    clock = new Clock(185, 500, "Elapsed Time", 0xCAF0F8)
    scene.addChild(clock)
+})
+
+const submitWord = (() => {
+   let testWord = word.text
+   let url = `${API_SERVICE}/sweep/check?w=${testWord}`
+   axios.post(url).then( () => {
+      console.log("ACCEPTED")
+   }).catch( _e => {
+      console.log("FAILED")
+   })
 })
 
 const letterClicked = ((r,c, letter) => {

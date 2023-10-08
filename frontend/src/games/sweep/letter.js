@@ -31,7 +31,7 @@ export default class Letter extends PIXI.Container {
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerup', () => {
-         if ( Letter.Active && this.selected == false ) {
+         if ( Letter.Active === true && this.selected == false ) {
             this.selected = true 
             clickHandler( this.row, this.col, this.letter.text )
             this.draw()

@@ -49,6 +49,10 @@ func main() {
 	{
 		virus.POST("/check", svc.virusWordCheck)
 	}
+	sweep := router.Group("/sweep")
+	{
+		sweep.POST("/check", svc.sweepWordCheck)
+	}
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)
