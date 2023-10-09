@@ -14,6 +14,9 @@ import StartOverlay from "@/games/sweep/startoverlay"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
 
+import * as particles from '@pixi/particle-emitter'
+import stars from '@/assets/stars.json'
+
 const GAME_WIDTH = 370
 const GAME_HEIGHT = 540
 const ROWS = 6
@@ -34,6 +37,7 @@ var word = null
 var clearButton = null 
 var submitButton = null
 var startOverlay = null
+var explode = null
 
 const initPixiJS = (() => {
    gameStore.currentGame = "mosaic"
@@ -80,6 +84,8 @@ const resize = (() => {
 
 onMounted(async () => {
    initPixiJS()
+
+   explode = particles.upgradeConfig(stars, ['snow.png'])
 
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
@@ -165,10 +171,26 @@ const submitWord = (() => {
    let testWord = word.text
    let url = `${API_SERVICE}/sweep/check?w=${testWord}`
    axios.post(url).then( () => {
-      console.log("ACCEPTED")
+      explodeTiles()
+      word.text = ""
    }).catch( _e => {
       console.log("FAILED")
    })
+})
+
+const explodeTiles = (() => {
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if ( grid[r][c].selected) {
+            var tile = grid[r][c]
+            var emitter = new particles.Emitter(scene, explode )
+            emitter.updateOwnerPos(0,0)
+            emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
+            emitter.playOnceAndDestroy()
+            tile.clear()
+         }
+      }
+   }
 })
 
 const letterClicked = ((r,c, letter) => {

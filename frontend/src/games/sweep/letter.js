@@ -9,6 +9,7 @@ export default class Letter extends PIXI.Container {
       this.row = r 
       this.col = c 
       this.selected = false
+      this.cleared = false
 
       this.style = new PIXI.TextStyle({
          fill: "#CAF0F8",
@@ -31,7 +32,7 @@ export default class Letter extends PIXI.Container {
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerup', () => {
-         if ( Letter.Active === true && this.selected == false ) {
+         if ( Letter.Active === true && this.selected == false && this.cleared == false) {
             this.selected = true 
             clickHandler( this.row, this.col, this.letter.text )
             this.draw()
@@ -43,17 +44,30 @@ export default class Letter extends PIXI.Container {
    }
 
    deselect() {
-      if (this.selected) {
+      if (this.selected && !this.cleared) {
          this.selected = false 
          this.draw(0)
       }
    }
 
-   destroy() {
-      this.removeChildren()
+   clear() {
+      this.cleared = true
+      this.selected = false
+      this.removeChild(this.letter)
+      this.eventMode = 'none'
+      this.cursor ="default"
+      this.draw()
    }
 
    draw() {
+      if ( this.cleared) {
+         this.graphics.clear()
+         this.graphics.beginFill(0x005796)
+         this.graphics.lineStyle(1, 0x03045E, 1)
+         this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
+         this.graphics.endFill()
+         return
+      }
       this.graphics.clear()
       this.graphics.beginFill(0x0077B6)
       this.graphics.lineStyle(1, 0x03045E, 1)
