@@ -49,8 +49,7 @@ export default class StartOverlay extends PIXI.Container {
       this.msg .y = 90
       this.graphics.addChild(this.msg )
 
-      // this.startGameInit()
-      this.addStartButton()
+      this.startGameInit()
    }
 
    addStartButton() {
@@ -64,7 +63,7 @@ export default class StartOverlay extends PIXI.Container {
    async startGameInit( callback ) {
       this.clickCallback = callback
       let url = `${this.apiService}/start?game=sweep`
-      await axios.post(url, null, {timeout: 10*1000}).then( response => {
+      await axios.post(url, null, {timeout: 20*1000}).then( response => {
          this.jwt = response.data
          this.addStartButton()
       }).catch( (e) => {

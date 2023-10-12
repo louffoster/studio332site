@@ -140,9 +140,9 @@ const initGame = (() => {
       strokeThickness: 2,
    })
    word = new PIXI.Text("", wordStyle)
-   word.anchor.set(0.5, 0)
+   word.anchor.set(0.5, 1)
    word.x = 185 
-   word.y = 370
+   word.y = 405
    scene.addChild(word)
 
    gfx.lineStyle(1, 0xCAF0F8, 1)
@@ -193,8 +193,7 @@ const explodeTiles = (() => {
    }
 })
 
-const letterClicked = ((r,c, letter) => {
-   console.log(r+", "+c+": " +letter)
+const letterClicked = ((letter) => {
    if (word.text.length < 10) {
       word.text += letter
    }
