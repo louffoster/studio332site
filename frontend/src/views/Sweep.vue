@@ -11,6 +11,7 @@ import { useGamesStore } from '@/stores/games'
 import Pool from "@/games/sweep/pool"
 import Letter from "@/games/sweep/letter"
 import StartOverlay from "@/games/sweep/startoverlay"
+import PickOverlay from "@/games/sweep/pickoverlay"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
 
@@ -18,7 +19,7 @@ import * as particles from '@pixi/particle-emitter'
 import stars from '@/assets/stars.json'
 
 const GAME_WIDTH = 370
-const GAME_HEIGHT = 540
+const GAME_HEIGHT = 560
 const ROWS = 6
 const COLS = 6
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
@@ -34,9 +35,11 @@ var gameState = "init"
 var grid = null
 var clock = null
 var word = null
+var helpers = []
 var clearButton = null 
 var submitButton = null
 var startOverlay = null
+let pickOverlay = null
 var explode = null
 
 const initPixiJS = (() => {
@@ -96,11 +99,20 @@ onMounted(async () => {
 
    startOverlay = new StartOverlay(API_SERVICE, startHandler) 
    scene.addChild(startOverlay)
+   pickOverlay = new PickOverlay( helperHandler )
+})
+
+const helperHandler = (( consonant, vowel ) => {
+   helpers[0].letter.text = consonant
+   helpers[1].letter.text = vowel
+   gameState = "play"
+   scene.removeChild(pickOverlay)
 })
 
 const startHandler = (() => {
-   gameState = "play"
+   gameState = "pick"
    scene.removeChild(startOverlay)
+   scene.addChild(pickOverlay)
 })
 
 onBeforeUnmount(() => {
@@ -123,7 +135,7 @@ const initGame = (() => {
    let y = 5
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         let l = new Letter(pool.pop(), x,y, r,c, letterClicked)
+         let l = new Letter(pool.pop(), x,y, letterClicked)
          scene.addChild(l)
          grid[r][c] = l
          x += Letter.WIDTH
@@ -142,12 +154,8 @@ const initGame = (() => {
    word = new PIXI.Text("", wordStyle)
    word.anchor.set(0.5, 1)
    word.x = 185 
-   word.y = 405
+   word.y = 410
    scene.addChild(word)
-
-   gfx.lineStyle(1, 0xCAF0F8, 1)
-   gfx.moveTo(80, 405)
-   gfx.lineTo(290,405)
 
    clearButton = new Button( 30, 425, "Clear Word", () => {
          word.text = ""
@@ -156,6 +164,7 @@ const initGame = (() => {
                grid[r][c].deselect()
             }
          }
+         helpers.forEach( t => t.deselect())
          Letter.Active = true
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
    scene.addChild(clearButton)
@@ -163,7 +172,19 @@ const initGame = (() => {
    submitButton = new Button( 190, 425, "Submit Word", submitWord, 0xCAF0F8,0x0077B6,0x48CAE4)
    scene.addChild(submitButton)
 
-   clock = new Clock(185, 500, "Elapsed Time", 0xCAF0F8)
+   gfx.beginFill(0x48CAE4)
+   gfx.lineStyle(1, 0xCAF0F8)
+   gfx.drawRect(0, 490, Letter.WIDTH*2+10, 490)
+   gfx.endFill()
+
+   let c = new Letter("?", 6,494, letterClicked)
+   helpers.push( c )
+   let v = new Letter("?", 6+Letter.WIDTH,494, letterClicked)
+   helpers.push( v )
+   scene.addChild(c)
+   scene.addChild(v)
+
+   clock = new Clock(250, 515, "Elapsed Time", 0xCAF0F8)
    scene.addChild(clock)
 })
 

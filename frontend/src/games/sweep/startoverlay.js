@@ -53,7 +53,7 @@ export default class StartOverlay extends PIXI.Container {
    }
 
    addStartButton() {
-      let advButton = new Button( 120, 130, "Start", () => {
+      let advButton = new Button( 130, 130, "OK", () => {
          this.startCallback()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
       this.addChild(advButton)

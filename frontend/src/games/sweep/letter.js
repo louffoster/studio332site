@@ -1,13 +1,11 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
-   constructor(letter, x,y, r,c, clickHandler ) {
+   constructor(letter, x,y, clickHandler ) {
       super()
 
       this.x = x
       this.y = y
-      this.row = r 
-      this.col = c 
       this.selected = false
       this.cleared = false
 

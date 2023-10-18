@@ -6,6 +6,7 @@ export default class Button extends PIXI.Container {
 
       this.x = x
       this.y = y
+      this.disabled = false
       this.btnColor = new PIXI.Color(btnColor)
       this.highlight = new PIXI.Color(highlight)
       this.txtColor = new PIXI.Color(txtColor)
@@ -47,22 +48,42 @@ export default class Button extends PIXI.Container {
 
    drawButton() {
       this.graphics.clear()
-      this.graphics.lineStyle(1, this.txtColor, 1)
-      this.graphics.beginFill( this.btnColor.toHex() )
+      let alpha = 1.0 
+      if ( this.disabled) {
+         alpha = 0.3
+      }
+      this.graphics.lineStyle(1, this.txtColor, alpha)
       if ( this.pointerDown) {
-         this.graphics.beginFill( this.highlight.toHex())// 0x44bbcf)
+         this.graphics.beginFill( this.highlight.toHex())
+      } else {
+         this.graphics.beginFill( this.btnColor.toHex(), alpha )
       }
       this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
+      this.graphics.endFill()
    }
 
-   handlePointerDown() {
-      this.pointerDown = true 
+   disable() {
+      this.disabled = true 
       this.drawButton()
    }
 
+   enable() {
+      this.disabled = false 
+      this.drawButton()
+   }
+
+   handlePointerDown() {
+      if ( this.disabled == false ) {
+         this.pointerDown = true 
+         this.drawButton()
+      }
+   }
+
    clickHandler() {
-      this.pointerDown = false 
-      this.drawButton()   
-      this.clickListener()
+      if (this.disabled == false) {
+         this.pointerDown = false 
+         this.drawButton()   
+         this.clickListener()
+      }
    }
 }
