@@ -35,7 +35,7 @@ export default class StartOverlay extends PIXI.Container {
          align: "center"
       })
 
-      let txt = new PIXI.Text(`Clear the board by creating words with 3 to 10 letters`, style)
+      let txt = new PIXI.Text(`Clear the board by creating words with 4 to 10 letters`, style)
       txt.anchor.set(0.5,0.5)
       txt.x = this.panelW/2
       txt.y = 40

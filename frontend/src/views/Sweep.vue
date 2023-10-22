@@ -107,6 +107,7 @@ const helperHandler = (( consonant, vowel ) => {
    helpers[1].letter.text = vowel
    gameState = "play"
    scene.removeChild(pickOverlay)
+   enableGrid( true )
 })
 
 const startHandler = (() => {
@@ -165,11 +166,13 @@ const initGame = (() => {
             }
          }
          helpers.forEach( t => t.deselect())
-         Letter.Active = true
+         enableGrid( true )
+         submitButton.disable()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
    scene.addChild(clearButton)
    
    submitButton = new Button( 190, 425, "Submit Word", submitWord, 0xCAF0F8,0x0077B6,0x48CAE4)
+   submitButton.disable()
    scene.addChild(submitButton)
 
    gfx.beginFill(0x48CAE4)
@@ -186,6 +189,7 @@ const initGame = (() => {
 
    clock = new Clock(250, 515, "Elapsed Time", 0xCAF0F8)
    scene.addChild(clock)
+   enableGrid( false )
 })
 
 const submitWord = (() => {
@@ -212,6 +216,29 @@ const explodeTiles = (() => {
          }
       }
    }
+   helpers.forEach( tile => {
+      if (tile.selected ) {
+         var emitter = new particles.Emitter(scene, explode )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
+         emitter.playOnceAndDestroy()
+         tile.clear()
+      }
+   })
+})
+
+const enableGrid = ((enabled) => {
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if ( grid[r][c].selected) {
+            if ( enabled ) {
+               grid[r][c].enable() 
+            } else {
+               grid[r][c].disable()   
+            }
+         }
+      }
+   }
 })
 
 const letterClicked = ((letter) => {
@@ -219,7 +246,10 @@ const letterClicked = ((letter) => {
       word.text += letter
    }
    if (word.text.length == 10) {
-      Letter.Active = false
+      enableGrid(false)
+   }
+   if (word.text.length > 3 ) {
+      submitButton.enable()
    }
 })
 
