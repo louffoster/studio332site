@@ -4,8 +4,6 @@ export default class Button extends PIXI.Container {
    constructor( x,y, txt, listener, txtColor="white", btnColor=0x33aabf, highlight=0x44bbcf) {
       super()
 
-      this.x = x
-      this.y = y
       this.disabled = false
       this.btnColor = new PIXI.Color(btnColor)
       this.highlight = new PIXI.Color(highlight)
@@ -31,6 +29,9 @@ export default class Button extends PIXI.Container {
       btnTxt.x = this.btnWidth / 2.0
       btnTxt.y = this.btnHeight / 2.0
 
+      this.x = x-this.btnWidth / 2.0
+      this.y = y-this.btnHeight / 2.0
+
       this.eventMode = 'static'
       this.pointerDown = false
       this.on('pointerdown', this.handlePointerDown)
@@ -44,6 +45,11 @@ export default class Button extends PIXI.Container {
 
       this.addChild(this.graphics)
       this.graphics.addChild(btnTxt)
+   }
+
+   alignTopLeft() {
+      this.x += this.btnWidth / 2.0
+      this.y += this.btnHeight / 2.0
    }
 
    drawButton() {

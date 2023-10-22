@@ -12,8 +12,10 @@ import Pool from "@/games/sweep/pool"
 import Letter from "@/games/sweep/letter"
 import StartOverlay from "@/games/sweep/startoverlay"
 import PickOverlay from "@/games/sweep/pickoverlay"
+import EndOverlay from "@/games/sweep/endoverlay"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
+import { useRouter } from 'vue-router'
 
 import * as particles from '@pixi/particle-emitter'
 import stars from '@/assets/stars.json'
@@ -25,6 +27,7 @@ const COLS = 6
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 const gameStore = useGamesStore()
+const router = useRouter()
 
 var gameElement = null
 var app = null
@@ -36,10 +39,12 @@ var grid = null
 var clock = null
 var word = null
 var helpers = []
+var giveUpButton = null
 var clearButton = null 
 var submitButton = null
 var startOverlay = null
 let pickOverlay = null
+let endOverlay = null
 var explode = null
 
 const initPixiJS = (() => {
@@ -100,6 +105,7 @@ onMounted(async () => {
    startOverlay = new StartOverlay(API_SERVICE, startHandler) 
    scene.addChild(startOverlay)
    pickOverlay = new PickOverlay( helperHandler )
+   endOverlay = new EndOverlay(replayHandler, backHandler)
 })
 
 const helperHandler = (( consonant, vowel ) => {
@@ -114,6 +120,14 @@ const startHandler = (() => {
    gameState = "pick"
    scene.removeChild(startOverlay)
    scene.addChild(pickOverlay)
+})
+
+const backHandler = (() =>{
+   router.push("/")
+})
+
+const replayHandler = (() => {
+   window.location.reload()
 })
 
 onBeforeUnmount(() => {
@@ -158,7 +172,11 @@ const initGame = (() => {
    word.y = 410
    scene.addChild(word)
 
-   clearButton = new Button( 30, 425, "Clear Word", () => {
+   giveUpButton = new Button( 20, 425, "Give Up", giveUpClicked, 0xCAF0F8,0x0077B6,0x48CAE4)
+   giveUpButton.alignTopLeft()
+   scene.addChild(giveUpButton)
+
+   clearButton = new Button( 145, 425, "Clear", () => {
          word.text = ""
          for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
@@ -169,10 +187,12 @@ const initGame = (() => {
          enableGrid( true )
          submitButton.disable()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
+   clearButton.alignTopLeft()
    scene.addChild(clearButton)
    
-   submitButton = new Button( 190, 425, "Submit Word", submitWord, 0xCAF0F8,0x0077B6,0x48CAE4)
+   submitButton = new Button( 247, 425, "Submit", submitWord, 0xCAF0F8,0x0077B6,0x48CAE4)
    submitButton.disable()
+   submitButton.alignTopLeft()
    scene.addChild(submitButton)
 
    gfx.beginFill(0x48CAE4)
@@ -192,15 +212,40 @@ const initGame = (() => {
    enableGrid( false )
 })
 
+const giveUpClicked = (() => {
+  gameState = "over"
+  scene.addChild( endOverlay )
+  enableGrid(false) 
+  submitButton.disable()
+  clearButton.disable()
+  giveUpButton.disable()
+})
+
 const submitWord = (() => {
    let testWord = word.text
    let url = `${API_SERVICE}/sweep/check?w=${testWord}`
    axios.post(url).then( () => {
       explodeTiles()
+      checkForWin()
       word.text = ""
    }).catch( _e => {
       console.log("FAILED")
    })
+})
+
+const checkForWin = (()=>{
+   let win = true
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if (grid[r][c].cleared == false ) {
+            win = false
+         }
+      }
+   }
+   if (win) {
+      gameState = "over"
+      scene.addChild(endOverlay)
+   }
 })
 
 const explodeTiles = (() => {

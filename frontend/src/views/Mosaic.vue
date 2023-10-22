@@ -151,6 +151,7 @@ const initGame = ( () => {
    scene.addChild(matchDisplay)
 
    resetButton = new Button(203, 480, "Reset Tiles", resetClicked)
+   resetButton.alignTopLeft()
    scene.addChild(resetButton)
 
    tileContainer = new PIXI.Container()

@@ -65,7 +65,7 @@ export default class PickOverlay extends PIXI.Container {
          }
       })
 
-      this.startBtn = new Button( 120, 210, "Start", () => {
+      this.startBtn = new Button( 160, 225, "Start", () => {
          pickHandler(this.pickedConsonant, this.pickedVowel)
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
       this.startBtn.disable()

@@ -62,11 +62,13 @@ export default class StartOverlay extends PIXI.Container {
       let stdButton = new Button( 50, 180, "Standard", () => {
          startHandler("standard")
       })
+      stdButton.alignTopLeft()
       this.addChild(stdButton)
 
       let advButton = new Button( 180, 180, "Advanced", () => {
          startHandler("advanced")
       })
+      advButton.alignTopLeft()
       this.addChild(advButton)
    }
 }
