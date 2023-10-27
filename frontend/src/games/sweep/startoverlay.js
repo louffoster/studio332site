@@ -57,7 +57,7 @@ export default class StartOverlay extends PIXI.Container {
          this.startCallback()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
       this.addChild(advButton)
-      this.msg.text = "System Initialized"
+      this.msg.text = "Ready!"
    }
 
    async startGameInit( callback ) {

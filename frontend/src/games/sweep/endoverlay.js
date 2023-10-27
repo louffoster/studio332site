@@ -8,7 +8,7 @@ export default class EndOverlay extends PIXI.Container {
       this.x = 35 
       this.y = 80
       this.popupW = 300
-      this.popupH = 200
+      this.popupH = 240
       this.replayHandler = replayHandler
       this.backHandler = backHandler
 
@@ -34,22 +34,35 @@ export default class EndOverlay extends PIXI.Container {
          align: "center"
       })
 
-      this.msg = new PIXI.Text(`GAME OVER`, style)
+      this.heading = new PIXI.Text(`GAME OVER`, style)
+      this.heading.anchor.set(0.5, 0.5)
+      this.heading.x = this.popupW / 2
+      this.heading.y = 40
+
+      this.msg = new PIXI.Text(`woof`, style)
       this.msg.anchor.set(0.5, 0.5)
       this.msg.x = this.popupW / 2
-      this.msg.y = 35
+      this.msg.y = 75
 
       this.addChild(this.graphics)
-      this.graphics.addChild(this.msg)
+      this.addChild(this.heading)
+      this.addChild(this.msg)
 
-      let againBtn = new Button( 150, 90, "Play Again", replayHandler, 
+      let againBtn = new Button( this.popupW / 2, 130, "Play Again", replayHandler, 
          0xCAF0F8,0x0077B6,0x48CAE4)
       this.addChild(againBtn)
 
-      let backBtn = new Button( 150, 150, "Back to Studio332", backHandler, 
+      let backBtn = new Button( this.popupW / 2, 190, "Back to Studio332", backHandler, 
          0xCAF0F8,0x0077B6,0x48CAE4)
       this.addChild(backBtn)
    }
-
    
+   setWin( timeStr ) {
+      this.heading.text = "Congratulations!"
+      this.msg.text = `Board cleared in ${timeStr}`
+   }
+   setLoss( tilesLeft ) {
+      this.heading.text = "GAME OVER"
+      this.msg.text = `${tilesLeft} letters remain`
+   }
 }

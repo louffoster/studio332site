@@ -214,6 +214,7 @@ const initGame = (() => {
 
 const giveUpClicked = (() => {
   gameState = "over"
+  endOverlay.setLoss( countRemainingLetters() )
   scene.addChild( endOverlay )
   enableGrid(false) 
   submitButton.disable()
@@ -233,17 +234,23 @@ const submitWord = (() => {
    })
 })
 
-const checkForWin = (()=>{
-   let win = true
+const countRemainingLetters = (() => {
+   let cnt = 0
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
          if (grid[r][c].cleared == false ) {
-            win = false
+            cnt++
          }
       }
    }
-   if (win) {
+   return cnt
+})
+
+const checkForWin = (()=>{
+   let cnt = countRemainingLetters()
+   if ( cnt == 0) {
       gameState = "over"
+      endOverlay.setWin(clock.getTimeFormatted())
       scene.addChild(endOverlay)
    }
 })

@@ -83,6 +83,22 @@ export default class Clock extends PIXI.Container {
       return timeSec
    }
 
+   gameTimeFormatted() {
+      let timeSec = this.gameTimeSec()
+      let secs = timeSec
+      let mins = Math.floor(timeSec / 60)
+      if ( mins > 0) {
+         secs = timeSec - mins*60
+      }
+
+      if (timeSec < 15 && this.countdown) { 
+         this.flashTimer()
+      }
+      
+      let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
+      return timeStr
+   }
+
    tick(deltaMS) {
       let origTimeSec = this.gameTimeSec()
 
@@ -100,18 +116,11 @@ export default class Clock extends PIXI.Container {
 
       let timeSec = this.gameTimeSec()
       if ( timeSec != origTimeSec) {
-         let secs = timeSec
-         let mins = Math.floor(timeSec / 60)
-         if ( mins > 0) {
-            secs = timeSec - mins*60
-         }
-   
          if (timeSec < 15 && this.countdown) { 
             this.flashTimer()
          }
          
-         let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
-         this.timerDisplay.text = timeStr
+         this.timerDisplay.text = this.gameTimeFormatted()
       }
    }
 }
