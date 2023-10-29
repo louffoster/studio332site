@@ -229,8 +229,8 @@ const submitWord = (() => {
       explodeTiles()
       checkForWin()
       word.text = ""
-   }).catch( _e => {
-      console.log("FAILED")
+   }).catch( e => {
+      console.log("FAILED "+e)
    })
 })
 
@@ -250,7 +250,7 @@ const checkForWin = (()=>{
    let cnt = countRemainingLetters()
    if ( cnt == 0) {
       gameState = "over"
-      endOverlay.setWin(clock.getTimeFormatted())
+      endOverlay.setWin(clock.gameTimeFormatted())
       scene.addChild(endOverlay)
    }
 })
