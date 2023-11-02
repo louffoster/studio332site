@@ -64,9 +64,17 @@ export default class Letter extends PIXI.Container {
    clear() {
       this.cleared = true
       this.selected = false
-      this.removeChild(this.letter)
+      this.letter.text = ""
       this.eventMode = 'none'
       this.cursor ="default"
+      this.draw()
+   }
+
+   reset( letter ) {
+      this.letter.text = letter 
+      this.cleared = false  
+      this.eventMode = 'static'
+      this.cursor ="pointer"
       this.draw()
    }
 

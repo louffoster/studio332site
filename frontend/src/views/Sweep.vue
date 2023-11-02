@@ -19,6 +19,7 @@ import { useRouter } from 'vue-router'
 
 import * as particles from '@pixi/particle-emitter'
 import stars from '@/assets/stars.json'
+import bad from '@/assets/bad_word.json'
 
 const GAME_WIDTH = 370
 const GAME_HEIGHT = 560
@@ -46,6 +47,7 @@ var startOverlay = null
 let pickOverlay = null
 let endOverlay = null
 var explode = null
+var badWord = null
 
 const initPixiJS = (() => {
    gameStore.currentGame = "mosaic"
@@ -94,6 +96,7 @@ onMounted(async () => {
    initPixiJS()
 
    explode = particles.upgradeConfig(stars, ['snow.png'])
+   badWord = particles.upgradeConfig(bad, ['spark.png'])
 
    gfx = new PIXI.Graphics() 
    scene.addChild(gfx)
@@ -177,15 +180,7 @@ const initGame = (() => {
    scene.addChild(giveUpButton)
 
    clearButton = new Button( 145, 425, "Clear", () => {
-         word.text = ""
-         for (let r = 0; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
-               grid[r][c].deselect()
-            }
-         }
-         helpers.forEach( t => t.deselect())
-         enableGrid( true )
-         submitButton.disable()
+         clearSelections()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
    clearButton.alignTopLeft()
    scene.addChild(clearButton)
@@ -212,6 +207,18 @@ const initGame = (() => {
    enableGrid( false )
 })
 
+const clearSelections = (() => {
+   word.text = ""
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         grid[r][c].deselect()
+      }
+   }
+   helpers.forEach( t => t.deselect())
+   enableGrid( true )
+   submitButton.disable()
+})
+
 const giveUpClicked = (() => {
   gameState = "over"
   endOverlay.setLoss( countRemainingLetters() )
@@ -229,8 +236,8 @@ const submitWord = (() => {
       explodeTiles()
       checkForWin()
       word.text = ""
-   }).catch( e => {
-      console.log("FAILED "+e)
+   }).catch( _e => {
+      submitFailed()
    })
 })
 
@@ -252,6 +259,52 @@ const checkForWin = (()=>{
       gameState = "over"
       endOverlay.setWin(clock.gameTimeFormatted())
       scene.addChild(endOverlay)
+   }
+})
+
+const submitFailed = (() => {
+   let origColor = word.style.fill
+   word.style.fill = 0xFF4500
+   setTimeout( () => {
+      let centerX = GAME_WIDTH / 2.0
+      let wordW = word.width 
+      let coords = [centerX-wordW/2.0, centerX, centerX+wordW/2.0]
+      console.log(coords)
+      for (let i = 0; i<3; i++) {
+         var emitter = new particles.Emitter(scene, badWord )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(coords[i], word.y - 10)
+         emitter.playOnceAndDestroy()   
+      }
+      setTimeout( () => {
+         clearSelections()
+         word.style.fill = origColor
+         addPenaltyLetter()
+      }, 100)
+   }, 800)
+})
+
+const addPenaltyLetter = (() => {
+   let added = false
+   let bad = ["B", "J", "K", "Q", "V", "X", "Z"]
+   let idx = Math.floor(Math.random() * bad.length)
+   let badLetter = bad[idx]
+   for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+         if ( grid[r][c].cleared) {
+            let tile = grid[r][c]
+            tile.reset(badLetter)
+            var emitter = new particles.Emitter(scene, badWord )
+            emitter.updateOwnerPos(0,0)
+            emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
+            emitter.playOnceAndDestroy()
+            added = true 
+            break
+         }
+      }
+      if (added) {
+         break
+      }
    }
 })
 
