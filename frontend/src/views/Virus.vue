@@ -13,7 +13,7 @@ import StartOverlay from "@/games/virus/startoverlay"
 import EndOverlay from "@/games/virus/endoverlay"
 import WinOverlay from "@/games/virus/winoverlay"
 import Gauge from "@/games/virus/gauge"
-import Pool from "@/games/virus/pool"
+import LetterPool from "@/games/common/letterpool"
 import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
 import axios from 'axios'
@@ -44,7 +44,7 @@ var virusExplode = null
 var loseExplode = null
 
 var grid = null
-var pool = new Pool()
+var pool = new LetterPool()
 var initGameOverlay = null
 var gameOverOverlay = null
 var winOverlay = null

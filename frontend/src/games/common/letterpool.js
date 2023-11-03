@@ -1,5 +1,5 @@
 
-export default class Pool {
+export default class LetterPool {
    constructor ()   {
       this.pool = []
    }
@@ -16,10 +16,6 @@ export default class Pool {
       // fill pool with letters based on distribution rules...
       this.pool = []
       var i,j
-      // var dist = {
-      //    1: "J,K,Q,X,Z", 2: "B,C,F,H,M,P,V,W,Y",
-      //    3: "G", 4: "L", 5: "D,S,U", 6: "N",
-      //    7: "T,R", 8: "O,I,A,E"}
       var dist = {
          2: "J,K,Q,X,Z", 3: "B,C,F,H,M,P,V,W,Y",
          4: "G", 5: "L", 6: "D,S,U", 8: "N",

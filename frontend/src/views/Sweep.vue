@@ -8,7 +8,7 @@ import * as PIXI from "pixi.js"
 import axios from 'axios'
 import { onMounted, onBeforeUnmount } from "vue"
 import { useGamesStore } from '@/stores/games'
-import Pool from "@/games/sweep/pool"
+import LetterPool from "@/games/common/letterpool"
 import Letter from "@/games/sweep/letter"
 import StartOverlay from "@/games/sweep/startoverlay"
 import PickOverlay from "@/games/sweep/pickoverlay"
@@ -34,7 +34,7 @@ var gameElement = null
 var app = null
 var scene = null
 var gfx = null
-var pool = new Pool()
+var pool = new LetterPool()
 var gameState = "init"
 var grid = null
 var clock = null
