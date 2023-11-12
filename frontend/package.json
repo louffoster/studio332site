@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@pixi/particle-emitter": "^5.0.8",
-    "axios": "^0.27.2",
+    "axios": "^1.6.1",
     "phaser": "^3.55.2",
     "pinia": "^2.0.14",
     "pixi.js": "^7.2.4",
