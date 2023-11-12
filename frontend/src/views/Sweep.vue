@@ -283,22 +283,6 @@ const submitFailed = (() => {
    }, 500)
 })
 
-// const addPenaltyLetter = (() => {
-//    let added = false
-//    let bad = ["B", "J", "K", "Q", "V", "X", "Z"]
-//    let idx = Math.floor(Math.random() * bad.length)
-//    let badLetter = bad[idx]
-//    for (let r = 0; r < ROWS; r++) {
-//       for (let c = 0; c < COLS; c++) {
-//          if ( grid[r][c].cleared && added == false) {
-//             let tile = grid[r][c]
-//             tile.reset(badLetter)
-//             added = true 
-//          }
-//       }
-//    }
-// })
-
 const explodeTiles = (() => {
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -315,7 +299,8 @@ const explodeTiles = (() => {
       if (tile.selected ) {
          var emitter = new particles.Emitter(scene, explode )
          emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
-         emitter.playOnceAndDestroy( ()=>tile.clear())
+         emitter.playOnceAndDestroy()
+         tile.clear()
       }
    })
 })

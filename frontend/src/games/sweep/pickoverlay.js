@@ -1,16 +1,16 @@
 import * as PIXI from "pixi.js"
-import Button from "@/games/common/button"
 import Letter from "@/games/sweep/letter"
 
 export default class PickOverlay extends PIXI.Container {
    constructor(pickHandler) {
       super()
 
-      this.x = 25 
-      this.y = 70
-      this.panelW = 320
-      this.panelH = 270
+      this.x = 5 
+      this.y = 372
+      this.panelW = 360
+      this.panelH = 182
       this.picks = [] 
+      this.pickHandler = pickHandler
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0xADE8F4, 1)
@@ -35,18 +35,18 @@ export default class PickOverlay extends PIXI.Container {
          align: "center"
       })
 
-      let txt = new PIXI.Text(`Pick any three letters to be used as one time helpers`, style)
+      let txt = new PIXI.Text(`Pick 3 helper letters`, style)
       txt.anchor.set(0.5,0.5)
       txt.x = this.panelW/2
-      txt.y = 35
+      txt.y = 20
       this.addChild( txt )
 
       let choices = [
          "L","N","R","S","T",
          "A","E","I","O","U"
       ]
-      let x=10
-      let y=70
+      let x=30
+      let y=40
       this.letters = []
       choices.forEach( (helpLtr,idx) => {
          let l = new Letter(helpLtr, x,y, this.letterClicked.bind(this))
@@ -55,17 +55,11 @@ export default class PickOverlay extends PIXI.Container {
          x += Letter.WIDTH
          if (idx == 4) {
             y += Letter.HEIGHT
-            x = 10
+            x = 30
          }
          this.letters.push(l)
          
       })
-
-      this.startBtn = new Button( 160, 225, "Start", () => {
-         pickHandler(this.picks)
-      }, 0xCAF0F8,0x0077B6,0x48CAE4)
-      this.startBtn.disable()
-      this.addChild(this.startBtn)
    }
 
    letterClicked( letter ) {
@@ -78,11 +72,7 @@ export default class PickOverlay extends PIXI.Container {
          }
       }
       if ( this.picks.length == 3) {
-         this.startBtn.enable()
-         this.enableLetters( false )
-      } else {
-         this.startBtn.disable()
-         this.enableLetters( true )
+         setTimeout( () => this.pickHandler( this.picks ), 1000)
       }
    }
 

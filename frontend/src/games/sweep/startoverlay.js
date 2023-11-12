@@ -6,11 +6,11 @@ export default class StartOverlay extends PIXI.Container {
    constructor(apiURL, startHandler) {
       super()
 
-      this.x = 25 
-      this.y = 70
+      this.x = 5 
+      this.y = 372
       this.startCallback = startHandler
-      this.panelW = 320
-      this.panelH = 200
+      this.panelW = 360
+      this.panelH = 182
       this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
@@ -24,7 +24,7 @@ export default class StartOverlay extends PIXI.Container {
       let style = new PIXI.TextStyle({
          fill: "#CAF0F8",
          fontFamily: "Arial",
-         fontSize: 20,
+         fontSize: 18,
          wordWrap: true,
          fontWeight: 'bold',
          wordWrapWidth: this.panelW - 20,
@@ -35,7 +35,9 @@ export default class StartOverlay extends PIXI.Container {
          align: "center"
       })
 
-      let txt = new PIXI.Text(`Clear the board by creating words with 4 to 10 letters`, style)
+      let msg = "Clear the board by creating words with 4 to 10 letters. "
+      msg += "You will get to choose 3 letters to help with this goal."
+      let txt = new PIXI.Text(msg, style)
       txt.anchor.set(0.5,0.5)
       txt.x = this.panelW/2
       txt.y = 40
@@ -46,18 +48,18 @@ export default class StartOverlay extends PIXI.Container {
       this.msg = new PIXI.Text(`Initializing...`, style)
       this.msg .anchor.set(0.5,0.5)
       this.msg .x = this.panelW/2
-      this.msg .y = 90
+      this.msg .y = 92
       this.graphics.addChild(this.msg )
 
       this.startGameInit()
    }
 
    addStartButton() {
-      let advButton = new Button( 160, 145, "OK", () => {
+      let advButton = new Button( this.panelW/2, 140, "Pick Helper Letters", () => {
          this.startCallback()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
       this.addChild(advButton)
-      this.msg.text = "Ready!"
+      this.msg.text = "Ready"
    }
 
    async startGameInit( ) {
