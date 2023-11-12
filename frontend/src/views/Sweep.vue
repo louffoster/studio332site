@@ -111,9 +111,10 @@ onMounted(async () => {
    endOverlay = new EndOverlay(replayHandler, backHandler)
 })
 
-const helperHandler = (( consonant, vowel ) => {
-   helpers[0].letter.text = consonant
-   helpers[1].letter.text = vowel
+const helperHandler = (( pickedLetters ) => {
+   pickedLetters.forEach( (l,idx) => {
+      helpers[idx].set( l )
+   })
    gameState = "play"
    scene.removeChild(pickOverlay)
    enableGrid( true )
@@ -170,9 +171,9 @@ const initGame = (() => {
       strokeThickness: 2,
    })
    word = new PIXI.Text("", wordStyle)
-   word.anchor.set(0.5, 1)
+   word.anchor.set(0.5, 0)
    word.x = 185 
-   word.y = 410
+   word.y = 378
    scene.addChild(word)
 
    giveUpButton = new Button( 20, 425, "Give Up", giveUpClicked, 0xCAF0F8,0x0077B6,0x48CAE4)
@@ -192,17 +193,18 @@ const initGame = (() => {
 
    gfx.beginFill(0x48CAE4)
    gfx.lineStyle(1, 0xCAF0F8)
-   gfx.drawRect(0, 490, Letter.WIDTH*2+10, 490)
+   gfx.drawRect(4, 488, Letter.WIDTH*3+8, Letter.HEIGHT+8)
    gfx.endFill()
 
-   let c = new Letter("?", 6,494, letterClicked)
-   helpers.push( c )
-   let v = new Letter("?", 6+Letter.WIDTH,494, letterClicked)
-   helpers.push( v )
-   scene.addChild(c)
-   scene.addChild(v)
+   let helpX = 8
+   for ( let i=0; i<3; i++ ) {
+      let h = new Letter("?", helpX,492, letterClicked)
+      helpers.push( h )
+      helpX += Letter.WIDTH
+      scene.addChild(h)
+   }
 
-   clock = new Clock(250, 515, "Elapsed Time", 0xCAF0F8)
+   clock = new Clock(280, 515, "", 0xCAF0F8)
    scene.addChild(clock)
    enableGrid( false )
 })
@@ -269,44 +271,33 @@ const submitFailed = (() => {
       let centerX = GAME_WIDTH / 2.0
       let wordW = word.width 
       let coords = [centerX-wordW/2.0, centerX, centerX+wordW/2.0]
-      console.log(coords)
       for (let i = 0; i<3; i++) {
          var emitter = new particles.Emitter(scene, badWord )
-         emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(coords[i], word.y - 10)
          emitter.playOnceAndDestroy()   
       }
       setTimeout( () => {
-         clearSelections()
-         word.style.fill = origColor
-         addPenaltyLetter()
-      }, 100)
-   }, 800)
+            clearSelections()
+            word.style.fill = origColor
+         }, 100)
+   }, 500)
 })
 
-const addPenaltyLetter = (() => {
-   let added = false
-   let bad = ["B", "J", "K", "Q", "V", "X", "Z"]
-   let idx = Math.floor(Math.random() * bad.length)
-   let badLetter = bad[idx]
-   for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-         if ( grid[r][c].cleared) {
-            let tile = grid[r][c]
-            tile.reset(badLetter)
-            var emitter = new particles.Emitter(scene, badWord )
-            emitter.updateOwnerPos(0,0)
-            emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
-            emitter.playOnceAndDestroy()
-            added = true 
-            break
-         }
-      }
-      if (added) {
-         break
-      }
-   }
-})
+// const addPenaltyLetter = (() => {
+//    let added = false
+//    let bad = ["B", "J", "K", "Q", "V", "X", "Z"]
+//    let idx = Math.floor(Math.random() * bad.length)
+//    let badLetter = bad[idx]
+//    for (let r = 0; r < ROWS; r++) {
+//       for (let c = 0; c < COLS; c++) {
+//          if ( grid[r][c].cleared && added == false) {
+//             let tile = grid[r][c]
+//             tile.reset(badLetter)
+//             added = true 
+//          }
+//       }
+//    }
+// })
 
 const explodeTiles = (() => {
    for (let r = 0; r < ROWS; r++) {
@@ -314,7 +305,6 @@ const explodeTiles = (() => {
          if ( grid[r][c].selected) {
             var tile = grid[r][c]
             var emitter = new particles.Emitter(scene, explode )
-            emitter.updateOwnerPos(0,0)
             emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
             emitter.playOnceAndDestroy()
             tile.clear()
@@ -324,10 +314,8 @@ const explodeTiles = (() => {
    helpers.forEach( tile => {
       if (tile.selected ) {
          var emitter = new particles.Emitter(scene, explode )
-         emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
-         emitter.playOnceAndDestroy()
-         tile.clear()
+         emitter.playOnceAndDestroy( ()=>tile.clear())
       }
    })
 })
@@ -335,12 +323,10 @@ const explodeTiles = (() => {
 const enableGrid = ((enabled) => {
    for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-         if ( grid[r][c].selected) {
-            if ( enabled ) {
-               grid[r][c].enable() 
-            } else {
-               grid[r][c].disable()   
-            }
+         if ( enabled ) {
+            grid[r][c].enable() 
+         } else {("d")
+            grid[r][c].disable()   
          }
       }
    }
@@ -348,7 +334,7 @@ const enableGrid = ((enabled) => {
 
 const letterClicked = ((letter) => {
    if (word.text.length < 10) {
-      word.text += letter
+      word.text += letter.text
    }
    if (word.text.length == 10) {
       enableGrid(false)

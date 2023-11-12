@@ -10,8 +10,7 @@ export default class PickOverlay extends PIXI.Container {
       this.y = 70
       this.panelW = 320
       this.panelH = 270
-      this.pickedConsonant = ""
-      this.pickedVowel = ""
+      this.picks = [] 
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(6, 0xADE8F4, 1)
@@ -36,7 +35,7 @@ export default class PickOverlay extends PIXI.Container {
          align: "center"
       })
 
-      let txt = new PIXI.Text(`Pick one consonant and one vowel to use as one time helper letters`, style)
+      let txt = new PIXI.Text(`Pick any three letters to be used as one time helpers`, style)
       txt.anchor.set(0.5,0.5)
       txt.x = this.panelW/2
       txt.y = 35
@@ -48,50 +47,54 @@ export default class PickOverlay extends PIXI.Container {
       ]
       let x=10
       let y=70
-      this.consonants = []
-      this.vowels = [] 
+      this.letters = []
       choices.forEach( (helpLtr,idx) => {
          let l = new Letter(helpLtr, x,y, this.letterClicked.bind(this))
+         l.setToggle()
          this.addChild(l)
          x += Letter.WIDTH
          if (idx == 4) {
             y += Letter.HEIGHT
             x = 10
          }
-         if ( idx <= 4) {
-            this.consonants.push(l)
-         } else {
-            this.vowels.push(l)
-         }
+         this.letters.push(l)
+         
       })
 
       this.startBtn = new Button( 160, 225, "Start", () => {
-         pickHandler(this.pickedConsonant, this.pickedVowel)
+         pickHandler(this.picks)
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
       this.startBtn.disable()
       this.addChild(this.startBtn)
    }
 
    letterClicked( letter ) {
-      let vowelIdx = this.vowels.findIndex( v => v.letter.text == letter) 
-      if ( vowelIdx > -1) {
-         this.pickedVowel = letter
-         this.vowels.forEach( v => {
-            if (v.letter.text != letter ) {
-               v.deselect()
-            }
-         })
+      let idx = this.picks.findIndex( p => p == letter.text )
+      if ( idx > -1 ) {
+         this.picks.splice(idx,1)
       } else {
-         this.pickedConsonant = letter
-         this.consonants.forEach( v => {
-            if (v.letter.text != letter ) {
-               v.deselect()
-            }
-         })
+         if ( this.picks.length < 3) {
+            this.picks.push( letter.text )
+         }
       }
-
-      if ( this.pickedVowel != "" && this.pickedConsonant != "") {
+      if ( this.picks.length == 3) {
          this.startBtn.enable()
+         this.enableLetters( false )
+      } else {
+         this.startBtn.disable()
+         this.enableLetters( true )
       }
+   }
+
+   enableLetters( enabled ) {
+      this.letters.forEach( t => {
+         if (enabled) {
+            t.enable()
+         } else {
+            if (t.selected == false ) {
+               t.disable()
+            }
+         }
+      })
    }
 }

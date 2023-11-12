@@ -34,8 +34,19 @@ export default class Button extends PIXI.Container {
 
       this.eventMode = 'static'
       this.pointerDown = false
-      this.on('pointerdown', this.handlePointerDown)
-      this.on('pointerup', this.clickHandler)
+      this.on('pointerdown', () => {
+         if ( this.disabled == false ) {
+            this.pointerDown = true 
+            this.drawButton()
+         }
+      })
+      this.on('pointerup', () => {
+         if (this.disabled == false) {
+            this.pointerDown = false 
+            this.drawButton()   
+            this.clickListener()
+         }
+      })
       this.hitArea = new PIXI.Rectangle(0,0, this.btnWidth, this.btnHeight)
       this.cursor ="pointer"
       this.clickListener = listener
@@ -76,20 +87,5 @@ export default class Button extends PIXI.Container {
    enable() {
       this.disabled = false 
       this.drawButton()
-   }
-
-   handlePointerDown() {
-      if ( this.disabled == false ) {
-         this.pointerDown = true 
-         this.drawButton()
-      }
-   }
-
-   clickHandler() {
-      if (this.disabled == false) {
-         this.pointerDown = false 
-         this.drawButton()   
-         this.clickListener()
-      }
    }
 }

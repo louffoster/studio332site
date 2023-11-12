@@ -16,10 +16,13 @@ export default class LetterPool {
       // fill pool with letters based on distribution rules...
       this.pool = []
       var i,j
+      // var dist = {
+      //    2: "J,K,Q,X,Z", 3: "B,C,F,H,M,P,V,W,Y",
+      //    4: "G", 5: "L", 6: "D,S,U", 8: "N",
+      //    9: "T,R", 11: "O,I", 13: "A", 18: "E"}
       var dist = {
-         2: "J,K,Q,X,Z", 3: "B,C,F,H,M,P,V,W,Y",
-         4: "G", 5: "L", 6: "D,S,U", 8: "N",
-         9: "T,R", 11: "O,I", 13: "A", 18: "E"}
+         1: "Z,X,W,V,Q,K,J", 2: "G,F,C,B", 3:"Y,U,M,H",
+         4: "P,D,L", 7:"T,S,R,O,N", 9: "I,A,E"}
       for ( var key in dist) {
          var letters = dist[key].split(",")
          var cnt = parseInt(key, 10)

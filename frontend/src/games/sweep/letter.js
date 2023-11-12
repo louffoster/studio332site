@@ -9,6 +9,7 @@ export default class Letter extends PIXI.Container {
       this.selected = false
       this.cleared = false
       this.disabled = false
+      this.toggle = false
 
       this.style = new PIXI.TextStyle({
          fill: "#CAF0F8",
@@ -30,17 +31,37 @@ export default class Letter extends PIXI.Container {
       this.hitArea =  new PIXI.Rectangle(0,0,Letter.WIDTH,Letter.HEIGHT)
       this.cursor ="pointer"
       this.pointerDown = false
-      this.on('pointerup', () => {
-         if ( this.selected == false && 
-              this.cleared == false && this.disabled == false) {
+      this.on('pointerdown', () => {
+         if ( this.disabled || this.cleared ) {
+            return
+         }
+         if ( this.selected && this.toggle ) {
+            this.selected = false 
+            clickHandler( this.letter )
+            this.draw()
+            return
+         }
+         if ( this.selected == false ) {
             this.selected = true 
-            clickHandler( this.letter.text )
+            clickHandler( this.letter )
             this.draw()
          }
       })
 
       this.addChild(this.graphics)
       this.addChild(this.letter)
+   }
+
+   text() {
+      return this.letter.text
+   }
+
+   set( letter ) {
+      this.letter.text = letter
+   }
+
+   setToggle() {
+      this.toggle = true
    }
 
    disable() {
