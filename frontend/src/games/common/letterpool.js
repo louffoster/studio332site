@@ -22,7 +22,7 @@ export default class LetterPool {
       //    9: "T,R", 11: "O,I", 13: "A", 18: "E"}
       var dist = {
          1: "Z,X,W,V,Q,K,J", 2: "G,F,C,B", 3:"Y,U,M,H",
-         4: "P,D,L", 7:"T,S,R,O,N", 9: "I,A,E"}
+         4: "P,D,L", 7:"T,S,R,O,N", 8: "I,A,E"}
       for ( var key in dist) {
          var letters = dist[key].split(",")
          var cnt = parseInt(key, 10)
