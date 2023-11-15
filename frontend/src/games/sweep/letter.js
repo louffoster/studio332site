@@ -109,7 +109,11 @@ export default class Letter extends PIXI.Container {
          return
       }
       this.graphics.clear()
-      this.graphics.beginFill(0x0077B6)
+      if ( this.isVowel() ) {
+         this.graphics.beginFill(0x0067a6)
+      } else {
+         this.graphics.beginFill(0x0077B6)
+      }
       this.graphics.lineStyle(1, 0x03045E, 1)
 
       if (this.selected) {
@@ -117,6 +121,11 @@ export default class Letter extends PIXI.Container {
       } 
       this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
       this.graphics.endFill()
+   }
+
+   isVowel() {
+      let vowel = ["A","E","I","O","U","Y"]
+      return ( vowel.includes(this.text()) )
    }
 }
 

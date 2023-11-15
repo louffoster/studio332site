@@ -167,8 +167,6 @@ const initGame = (() => {
       fill: "#CAF0F8",
       fontFamily: "Arial",
       fontSize: 28,
-      stroke: '#03045E',
-      strokeThickness: 2,
    })
    word = new PIXI.Text("", wordStyle)
    word.anchor.set(0.5, 0)

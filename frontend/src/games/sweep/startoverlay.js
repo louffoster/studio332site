@@ -26,8 +26,8 @@ export default class StartOverlay extends PIXI.Container {
          fontFamily: "Arial",
          fontSize: 18,
          wordWrap: true,
-         fontWeight: 'bold',
-         wordWrapWidth: this.panelW - 20,
+         // fontWeight: 'bold',
+         wordWrapWidth: this.panelW - 40,
          dropShadow: true,
          dropShadowColor: '#000000',
          dropShadowBlur: 2,
@@ -38,17 +38,17 @@ export default class StartOverlay extends PIXI.Container {
       let msg = "Clear the board by creating words with 4 to 10 letters. "
       msg += "You will get to choose 3 letters to help with this goal."
       let txt = new PIXI.Text(msg, style)
-      txt.anchor.set(0.5,0.5)
+      txt.anchor.set(0.5, 0)
       txt.x = this.panelW/2
-      txt.y = 40
+      txt.y = 15
 
       this.addChild(this.graphics)
       this.graphics.addChild(txt)
 
       this.msg = new PIXI.Text(`Initializing...`, style)
-      this.msg .anchor.set(0.5,0.5)
+      this.msg .anchor.set(0.5, 0)
       this.msg .x = this.panelW/2
-      this.msg .y = 92
+      this.msg .y = 82
       this.graphics.addChild(this.msg )
 
       this.startGameInit()
