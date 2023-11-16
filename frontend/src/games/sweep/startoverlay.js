@@ -48,18 +48,18 @@ export default class StartOverlay extends PIXI.Container {
       this.msg = new PIXI.Text(`Initializing...`, style)
       this.msg .anchor.set(0.5, 0)
       this.msg .x = this.panelW/2
-      this.msg .y = 82
+      this.msg .y = 105
       this.graphics.addChild(this.msg )
 
       this.startGameInit()
    }
 
    addStartButton() {
-      let advButton = new Button( this.panelW/2, 140, "Pick Helper Letters", () => {
+      let advButton = new Button( this.panelW/2, 130, "Pick Helper Letters", () => {
          this.startCallback()
       }, 0xCAF0F8,0x0077B6,0x48CAE4)
       this.addChild(advButton)
-      this.msg.text = "Ready"
+      this.removeChild(this.msg)
    }
 
    async startGameInit( ) {
