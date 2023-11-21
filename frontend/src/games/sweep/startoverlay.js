@@ -26,7 +26,7 @@ export default class StartOverlay extends PIXI.Container {
          fontFamily: "Arial",
          fontSize: 18,
          wordWrap: true,
-         // fontWeight: 'bold',
+         lineHeight: 18,
          wordWrapWidth: this.panelW - 40,
          dropShadow: true,
          dropShadowColor: '#000000',
