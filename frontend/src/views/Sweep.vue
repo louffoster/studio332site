@@ -170,9 +170,9 @@ const initGame = (() => {
       lineHeight: 28,
    })
    word = new PIXI.Text("", wordStyle)
-   word.anchor.set(0.5, 0)
+   word.anchor.set(0.5, 1)
    word.x = 185 
-   word.y = 375
+   word.y = 410
    scene.addChild(word)
 
    giveUpButton = new Button( 20, 425, "Give Up", giveUpClicked, 0xCAF0F8,0x0077B6,0x48CAE4)
