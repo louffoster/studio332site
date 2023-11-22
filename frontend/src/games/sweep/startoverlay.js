@@ -49,7 +49,7 @@ export default class StartOverlay extends PIXI.Container {
       this.msg .anchor.set(0.5, 0)
       this.msg .x = this.panelW/2
       this.msg .y = 105
-      this.graphics.addChild(this.msg )
+      this.addChild(this.msg )
 
       this.startGameInit()
    }
@@ -64,11 +64,27 @@ export default class StartOverlay extends PIXI.Container {
 
    async startGameInit( ) {
       let url = `${this.apiService}/start?game=sweep`
-      await axios.post(url, null, {timeout: 20*1000}).then( response => {
-         this.jwt = response.data
-         this.addStartButton()
-      }).catch( (e) => {
-         console.error("unable to init game: "+e)
-      })
+      let retries = 3 
+      let done = false
+      while (retries > 0 && done == false) {
+         await axios.post(url, null, {timeout: 20*1000}).then( response => {
+            this.jwt = response.data
+            this.addStartButton()
+            done = true
+         }).catch( (e) => {
+         if (e.message.includes("timeout")) {
+            this.msg.text = "Retry initialize..."
+            retries--
+            console.log("retry")
+         } else {
+            this.msg.text = "Initialize failed: "+e.message
+            done = true
+         }
+         })
+      }
+
+      if ( done == false ) {
+         this.msg.text = "Unable to initialize... try again later"
+      }
    }
 }

@@ -25,8 +25,7 @@ export default class PickOverlay extends PIXI.Container {
          fill: "#CAF0F8",
          fontFamily: "Arial",
          fontSize: 18,
-         wordWrap: true,
-         wordWrapWidth: this.panelW - 40,
+         lineHeight: 18,
          dropShadow: true,
          dropShadowColor: '#000000',
          dropShadowBlur: 2,
@@ -37,7 +36,7 @@ export default class PickOverlay extends PIXI.Container {
       let txt = new PIXI.Text(`Pick 3 helper letters`, style)
       txt.anchor.set(0.5, 0)
       txt.x = this.panelW/2
-      txt.y = 12
+      txt.y = 10
       this.addChild( txt )
 
       let choices = [
