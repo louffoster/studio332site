@@ -14,7 +14,6 @@ import EndOverlay from "@/games/mosaic/endoverlay"
 import Button from "@/games/common/button"
 import Clock from "@/games/common/clock"
 
-import { useGamesStore } from '@/stores/games'
 import { useRouter } from 'vue-router'
 
 const GAME_WIDTH = 360
@@ -22,7 +21,6 @@ const GAME_HEIGHT = 540
 const ROWS = 5
 const COLS = 5
 
-const gameStore = useGamesStore()
 const router = useRouter()
 
 var gameElement = null
@@ -51,7 +49,6 @@ var hueDir = 1
 var advanced = false
 
 const initPixiJS = (() => {
-   gameStore.currentGame = "mosaic"
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
@@ -62,14 +59,12 @@ const initPixiJS = (() => {
    })
 
    if (window.innerWidth <= GAME_WIDTH || window.innerHeight <= GAME_HEIGHT   ) {
-      gameStore.fullScreen = true
       gameElement = document.body
       gameElement.appendChild(app.view)
       scene = new PIXI.Container()
       app.stage.addChild(scene)
       resize()
    } else {
-      gameStore.fullScreen = false
       gameElement = document.getElementById("game")
       gameElement.appendChild(app.view)
       scene = new PIXI.Container()
@@ -239,8 +234,6 @@ const resetClicked = (() => {
 })
 
 const backHandler = (() =>{
-   gameStore.fullScreen = false
-   gameStore.currentGame = ""
    router.push("/")
 })
 

@@ -18,7 +18,6 @@ import * as PIXI from "pixi.js"
 import { onMounted, onBeforeUnmount } from "vue"
 import axios from 'axios'
 import * as particles from '@pixi/particle-emitter'
-import { useGamesStore } from '@/stores/games'
 
 import explode from '@/assets/explode.json'
 import explode2 from '@/assets/explode2.json'
@@ -26,7 +25,6 @@ import { useRouter } from 'vue-router'
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
-const gameStore = useGamesStore()
 const router = useRouter()
 
 var gameElement = null
@@ -67,7 +65,6 @@ var deleteKey = null
 var gameplayToken = ""
 
 const initPixiJS = (() => {
-   gameStore.currentGame = "virus"
    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
    app = new PIXI.Application({
       autoDensity: true, // Handles high DPI screens
@@ -78,14 +75,12 @@ const initPixiJS = (() => {
    })
 
    if (window.innerWidth <= GAME_WIDTH || window.innerHeight <= GAME_HEIGHT   ) {
-      gameStore.fullScreen = true
       gameElement = document.body
       gameElement.appendChild(app.view)
       scene = new PIXI.Container()
       app.stage.addChild(scene)
       resize()
    } else {
-      gameStore.fullScreen = false
       gameElement = document.getElementById("game")
       gameElement.appendChild(app.view)
       scene = new PIXI.Container()
@@ -573,8 +568,6 @@ const restartHandler = (() => {
 })
 
 const backHandler = (() =>{
-   gameStore.fullScreen = false
-   gameStore.currentGame = ""
    router.push("/")
 })
 
