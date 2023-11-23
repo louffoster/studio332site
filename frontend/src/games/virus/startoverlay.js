@@ -33,13 +33,33 @@ export default class StartOverlay extends PIXI.Container {
    async startGameInit( callback ) {
       this.clickCallback = callback
       let url = `${this.apiService}/start?game=virus`
-      await axios.post(url, null, {timeout: 10*1000}).then( response => {
-         this.jwt = response.data
-         this.addStartButton()
-         this.msg.text = "System Initialized"
-      }).catch( (e)=> {
-         console.error("unable to start game: "+e)
-      })
+      let retries = 3 
+      let done = false
+
+      while (retries > 0 && done == false) {
+         await axios.post(url, null, {timeout: 20*1000}).then( response => {
+            this.jwt = response.data
+            this.addStartButton()
+            done = true
+         }).catch( (e) => {
+         if (e.message.includes("timeout")) {
+            if (retries == 1) {
+               this.msg.text = "Finaly initialize attempt..."
+            } else {
+               this.msg.text = "Retry initialize..."
+            }
+            retries--
+            console.log("retry")
+         } else {
+            this.msg.text = "Initialize failed: "+e.message
+            done = true
+         }
+         })
+      }
+
+      if ( done == false ) {
+         this.msg.text = "Unable to initialize... try again later"
+      }
    }
 
    addStartButton() {

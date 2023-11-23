@@ -66,6 +66,7 @@ export default class StartOverlay extends PIXI.Container {
       let url = `${this.apiService}/start?game=sweep`
       let retries = 3 
       let done = false
+
       while (retries > 0 && done == false) {
          await axios.post(url, null, {timeout: 20*1000}).then( response => {
             this.jwt = response.data
@@ -73,7 +74,11 @@ export default class StartOverlay extends PIXI.Container {
             done = true
          }).catch( (e) => {
          if (e.message.includes("timeout")) {
-            this.msg.text = "Retry initialize..."
+            if (retries == 1) {
+               this.msg.text = "Finaly initialize attempt..."
+            } else {
+               this.msg.text = "Retry initialize..."
+            }
             retries--
             console.log("retry")
          } else {
