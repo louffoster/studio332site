@@ -24,7 +24,7 @@ const router = useRouter()
 var game = null
 
 onMounted(async () => {
-   game = new Mosaic(GAME_WIDTH, GAME_HEIGHT)
+   game = new Mosaic(GAME_WIDTH, GAME_HEIGHT, 0x44444a)
    game.initialize(replayHandler, backHandler)
 })
 

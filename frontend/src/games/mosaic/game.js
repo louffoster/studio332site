@@ -9,7 +9,6 @@ import Button from "@/games/common/button"
 import Clock from "@/games/common/clock"
 
 export default class Mosaic extends BaseGame {
-   gfx = null
    tileContainer = null
    tileFilter = null
    tiles = null
@@ -30,16 +29,8 @@ export default class Mosaic extends BaseGame {
    hue = 0.0
    hueDir = 1
    advanced = false
-   
-   constructor(gameW, gameH) {
-      super(gameW, gameH)
-   }
 
-   initialize(replayHandler, backHandler) {
-      this.gfx = new PIXI.Graphics() 
-      this.scene.addChild( this.gfx )
-   
-      // Update the shared group
+   initialize(replayHandler, backHandler) {   
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
       this.app.ticker.add( this.gameTick.bind(this) )
 

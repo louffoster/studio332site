@@ -6,16 +6,19 @@ export default class BaseGame {
    gameHeight = 0
    app = null 
    scene = null
+   gfx = null
 
-   constructor(gameW, gameH) {
+   constructor(gameW, gameH, backgroundColor) {
       this.gameWidth = gameW 
       this.gameHeight = gameH
+
+      console.log(backgroundColor)
 
       PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
       this.app = new PIXI.Application({
          autoDensity: true, // Handles high DPI screens
          antialias: true,
-         backgroundColor: 0x44444a,
+         backgroundColor: backgroundColor,
          width: this.gameWidth,
          height: this.gameHeight,
       })
@@ -32,6 +35,9 @@ export default class BaseGame {
          this.scene = new PIXI.Container()
          this.app.stage.addChild( this.scene )
       }
+
+      this.gfx = new PIXI.Graphics() 
+      this.scene.addChild(this.gfx)
    }
 
    resize() {
@@ -48,6 +54,10 @@ export default class BaseGame {
       }
 
       this.app.renderer.resize( window.innerWidth, window.innerHeight)
+   }
+
+   addChild( child ) {
+      this.scene.addChild(child)
    }
 
    shuffleArray( array ) {
