@@ -90,10 +90,6 @@ export default class Clock extends PIXI.Container {
       if ( mins > 0) {
          secs = timeSec - mins*60
       }
-
-      if (timeSec < 15 && this.countdown) { 
-         this.flashTimer()
-      }
       
       let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       return timeStr
