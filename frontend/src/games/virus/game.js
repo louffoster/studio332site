@@ -268,42 +268,25 @@ export default class Virus extends BaseGame {
          return
       } 
    
-      // go from bottom right to top left and clear one infected or lost tile
       // start with restoring lost tiles. when there are none, reset infected
       let done = false
       let pass = 0
       while ( done == false && pass < 2) {
-         if ( this.letterIndex % 2) {
-            for (let r = (Virus.ROWS-1); r >= 0; r--) {
-               for (let c = (Virus.COLS-1); c  >= 0; c--) {
-                  if ( (pass == 0 && this.grid[r][c].isLost()) || 
-                       (pass == 1 && this.grid[r][c].infected) )  {       
-                     this.grid[r][c].reset( this.pickNewLetter() )
-                     done = true
-                     this.startVirusExplode( r, c )
-                     break
-                  }
-               }
-               if (done) {
+         for (let r = (Virus.ROWS-1); r >= 0; r--) {
+            for (let c = (Virus.COLS-1); c  >= 0; c--) {
+               if ( (pass == 0 && this.grid[r][c].isLost()) || 
+                    (pass == 1 && this.grid[r][c].infected) )  {       
+                  this.grid[r][c].reset( this.pickNewLetter() )
+                  done = true
+                  this.startVirusExplode( r, c )
                   break
                }
             }
-         } else {
-            for (let r = 0; r < Virus.ROWS; r++) {
-               for (let c = 0; c  < Virus.COLS; c++) {
-                  if ( (pass == 0 && this.grid[r][c].isLost()) || 
-                       (pass == 1 && this.grid[r][c].infected) )  {       
-                     this.grid[r][c].reset( this.pickNewLetter() )
-                     done = true
-                     this.startVirusExplode( r, c )
-                     break
-                  }
-               }
-               if (done) {
-                  break
-               }
+            if (done) {
+               break
             }
          }
+      
          pass++
       }
    }
@@ -487,8 +470,6 @@ export default class Virus extends BaseGame {
    }
 
    wordDisinfectFinished() {
-      console.log("DISINFECTED "+this.lastWordSize)
-      if (this.lastWordSize == 0) return
       //  Increase the letter count this.gauges and word scoreboard
       let cntIdx = this.lastWordSize - 3 
       if ( this.gauges[cntIdx].isFull() == false ) {
