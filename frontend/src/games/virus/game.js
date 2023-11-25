@@ -223,19 +223,17 @@ export default class Virus extends BaseGame {
       }
    }
 
-   enterWord() {
-      console.log("ENTER CLICKED "+this.state.state)
-      if (this.state.isPlaying() == false) return 
-      
+   enterWord() {      
+      this.enterKey.disable()
+      this.deleteKey.disable()
       this.state.requestSubmit()
       this.setWordColor(0xaaddff)  
    }
 
-   doSubmission() {
+   async doSubmission() {
       let testWord = ""
       this.word.forEach( l => testWord += l.letter.text)
-      let url = `${API_SERVICE}/virus/check?w=${testWord}`
-      axios.post(url).then( () => {
+      return axios.post( `${API_SERVICE}/virus/check?w=${testWord}` ).then( () => {
          // letter index is the index of the next letter to add, so it is the word length
          this.lastWordSize = this.letterIndex 
          this.state.submitSuccess( this.lastWordSize )
@@ -489,6 +487,8 @@ export default class Virus extends BaseGame {
    }
 
    wordDisinfectFinished() {
+      console.log("DISINFECTED "+this.lastWordSize)
+      if (this.lastWordSize == 0) return
       //  Increase the letter count this.gauges and word scoreboard
       let cntIdx = this.lastWordSize - 3 
       if ( this.gauges[cntIdx].isFull() == false ) {
@@ -509,11 +509,10 @@ export default class Virus extends BaseGame {
       }
    }
 
-   gameStateChanged( oldState, newState, ) {
+   async gameStateChanged( oldState, newState, ) {
       console.log("NEW STATE FROM "+oldState+" TO "+newState)
       if (newState == GameState.SUBMIT) {
-         this.doSubmission()
-         console.log("AFTER SUBMIT")
+         await this.doSubmission()
       } else if (newState == GameState.PLAY) {
          this.setWordColor(0xcccccc)
          if ( oldState == GameState.FAIL) {
