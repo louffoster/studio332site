@@ -10,7 +10,6 @@ import GameState from "@/games/virus/gamestate"
 import Letter from "@/games/virus/letter"
 import StartOverlay from "@/games/virus/startoverlay"
 import EndOverlay from "@/games/virus/endoverlay"
-import WinOverlay from "@/games/virus/winoverlay"
 import Gauge from "@/games/virus/gauge"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
@@ -19,14 +18,16 @@ import Button from "@/games/common/button"
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 export default class Virus extends BaseGame {
+   static ROWS = 6
+   static COLS = 6
+   static MAX_INFECTIONS = 10
+
    virusExplode = null
    loseExplode = null
-
    grid = null
    pool = new LetterPool()
    initGameOverlay = null
-   gameOverOverlay = null
-   winOverlay = null
+   gameEndOverlay = null
    state = new GameState()
    checkCountdown = 0
    addCountdown = 1000
@@ -136,8 +137,7 @@ export default class Virus extends BaseGame {
       this.addChild(this.clock)
 
       this.initGameOverlay = new StartOverlay(API_SERVICE) 
-      this.gameOverOverlay = new EndOverlay(restartHandler, backHandler) 
-      this.winOverlay = new WinOverlay(restartHandler) 
+      this.gameEndOverlay = new EndOverlay(restartHandler, backHandler) 
       this.addChild(this.initGameOverlay)
       this.initGameOverlay.startGameInit( this.startGame.bind(this) )
    }
@@ -525,11 +525,13 @@ export default class Virus extends BaseGame {
          this.disinfectLetter( )
       } else if ( newState == GameState.GAME_OVER )  {
          if ( oldState == GameState.CLEAR_ALL ) {
-            this.winOverlay.updateStats( this.clock.timeSec, this.wordCounts)
-            this.addChild(this.winOverlay)
+            this.gameEndOverlay.setWin(true)
+            this.gameEndOverlay.updateStats( this.clock.timeSec, this.wordCounts)
+            this.addChild(this.gameEndOverlay)
          } else if (oldState == GameState.PLAYER_LOST ) {
-            this.gameOverOverlay.updateStats( this.clock.timeSec, this.wordCounts)
-            this.addChild(this.gameOverOverlay)
+            this.gameEndOverlay.setWin( false )
+            this.gameEndOverlay.updateStats( this.clock.timeSec, this.wordCounts)
+            this.addChild(this.gameEndOverlay)
          }
       }
    }
@@ -588,15 +590,8 @@ export default class Virus extends BaseGame {
       if (this.initGameOverlay) {
          this.initGameOverlay.destroy()
       }
-      if (this.gameOverOverlay) {
-         this.gameOverOverlay.destroy()
-      }
-      if (this.winOverlay) {
-         this.winOverlay.destroy()
+      if (this.gameEndOverlay) {
+         this.gameEndOverlay.destroy()
       }
    }
-
-   static ROWS = 6
-   static COLS = 6
-   static MAX_INFECTIONS = 10
 }

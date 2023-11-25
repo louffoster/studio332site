@@ -7,12 +7,9 @@ export default class EndOverlay extends PIXI.Container {
       this.x = 25
       this.y = 90
       this.panelW = 300
+      this.win = false
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(2, 0x55dd55, 1)
-      this.graphics.beginFill(0x333333)
-      this.graphics.drawRect(0,0, this.panelW,280)
-      this.graphics.cursor ="default"
       this.addChild(this.graphics)
 
       let style = new PIXI.TextStyle({
@@ -20,22 +17,28 @@ export default class EndOverlay extends PIXI.Container {
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 18,
       })
-      let msg = new PIXI.Text("System Failure", {
+
+      // failure message
+      this.lossMessage = new PIXI.Text("System Failure", {
          fill: "#ff5555",
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 28
       })
-      msg.anchor.set(0.5)
-      msg.x = this.panelW / 2.0
-      msg.y = 50
-      this.addChild(msg)
-      this.graphics.lineStyle(1, 0xff5555, 1)
-      this.graphics.moveTo(10, 25)
-      this.graphics.lineTo(this.panelW-10, 25)
-      this.graphics.moveTo(10,75)
-      this.graphics.lineTo(this.panelW-10, 75)
+      this.lossMessage.anchor.set(0.5)
+      this.lossMessage.x = this.panelW / 2.0
+      this.lossMessage.y = 50
 
-      let restartButton = new Button( this.panelW/2, 210, "Retry", 
+      // success message
+      this.winMessage = new PIXI.Text("Virus Removed", {
+         fill: "#55dd55",
+         fontFamily: "\"Courier New\", Courier, monospace",
+         fontSize: 28
+      })
+      this.winMessage.anchor.set(0.5)
+      this.winMessage.x = this.panelW / 2.0
+      this.winMessage.y = 50
+
+      let restartButton = new Button( this.panelW/2, 210, "Play Again", 
          restartCallback, 0x55dd55,0x114a11,0x55dd55)
       restartButton.noShadow()
       this.addChild(restartButton)
@@ -74,6 +77,34 @@ export default class EndOverlay extends PIXI.Container {
       backTxt.on('click', backCallback)
    }
 
+   setWin( flag ) {
+      this.win = flag
+      if ( this.win ) {
+         this.addChild( this.winMessage)
+      } else {
+         this.addChild( this.lossMessage)
+      }
+      this.drawPopup()
+   }
+
+   drawPopup() {
+      // draw the border and background
+      this.graphics.lineStyle(2, 0x55dd55, 1)
+      this.graphics.beginFill(0x333333)
+      this.graphics.drawRect(0,0, this.panelW,280)
+
+      // draw lines around message
+      let color = 0xff5555
+      if ( this.win  ) {
+         color = 0x55dd55
+      }
+      this.graphics.lineStyle(1, color, 1)
+      this.graphics.moveTo(10, 25)
+      this.graphics.lineTo(this.panelW-10, 25)
+      this.graphics.moveTo(10,75)
+      this.graphics.lineTo(this.panelW-10, 75)
+   }
+ 
    updateStats(gameTime, stats) {
       let secs = gameTime
       let mins = Math.floor(gameTime / 60)
@@ -93,5 +124,4 @@ export default class EndOverlay extends PIXI.Container {
          this.wordStats[i].text = `${wl} Letters: ${stats[i]}`
       }
    }
-
 }
