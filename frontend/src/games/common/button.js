@@ -21,13 +21,13 @@ export default class Button extends PIXI.Container {
          align: "center"
       })
 
-      let btnTxt = new PIXI.Text(txt, style)
-      this.btnWidth = btnTxt.width + 40
-      this.btnHeight = btnTxt.height + 20
+      this.btnTxt = new PIXI.Text(txt, style)
+      this.btnWidth = this.btnTxt.width + 40
+      this.btnHeight = this.btnTxt.height + 20
 
-      btnTxt.anchor.set(0.5, 0.5)
-      btnTxt.x = this.btnWidth / 2.0
-      btnTxt.y = this.btnHeight / 2.0
+      this.btnTxt.anchor.set(0.5, 0.5)
+      this.btnTxt.x = this.btnWidth / 2.0
+      this.btnTxt.y = this.btnHeight / 2.0
 
       this.x = x-this.btnWidth / 2.0
       this.y = y-this.btnHeight / 2.0
@@ -55,7 +55,20 @@ export default class Button extends PIXI.Container {
       this.drawButton()
 
       this.addChild(this.graphics)
-      this.graphics.addChild(btnTxt)
+      this.graphics.addChild(this.btnTxt)
+   }
+
+   small() {
+      this.btnTxt.style.fontSize = 14    
+      this.btnWidth = this.btnTxt.width + 25
+      this.btnHeight = this.btnTxt.height + 15
+      this.btnTxt.x = this.btnWidth / 2.0
+      this.btnTxt.y = this.btnHeight / 2.0
+   }
+
+   noShadow() {
+      this.btnTxt.style.fontWeight = "normal"
+      this.btnTxt.style.dropShadow = false
    }
 
    alignTopLeft() {
@@ -77,6 +90,11 @@ export default class Button extends PIXI.Container {
       }
       this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
       this.graphics.endFill()
+   }
+
+   setEnabled( flag) {
+      this.disabled = !flag 
+      this.drawButton()
    }
 
    disable() {

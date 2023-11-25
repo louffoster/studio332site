@@ -8,7 +8,7 @@ export default class StartOverlay extends PIXI.Container {
 
       this.x = 10 
       this.y = 100
-      this.panelW = 280
+      this.panelW = 330
 
       this.apiService = apiURL
 
@@ -25,55 +25,46 @@ export default class StartOverlay extends PIXI.Container {
       })
       this.msg = new PIXI.Text("Initializing...", style)
       this.msg.anchor.set(0.5)
-      this.msg.x = 145
-      this.msg.y = 50
+      this.msg.x = this.panelW / 2.0
+      this.msg.y = 40
 
       this.addChild(this.graphics)
       this.addChild(this.msg)
    }
 
    async startGameInit( callback ) {
-      this.clickCallback = callback
       let url = `${this.apiService}/start?game=virus`
       let retries = 3 
       let done = false
 
+      let startBtn = new Button( this.panelW/2, 100, "Start", 
+         ()=> {callback(this.jwt)},
+         0x55dd55,0x114a11,0x55dd55)
+
       while (retries > 0 && done == false) {
-         console.log("INIT "+url)
          await axios.post(url, null, {timeout: 20*1000}).then( response => {
             this.jwt = response.data
-            this.addStartButton()
+            this.addChild(startBtn)
             done = true
             this.msg.text = "System Initialized"
          }).catch( (e) => {
-         if (e.message.includes("timeout")) {
-            if (retries == 1) {
-               this.msg.text = "Finaly initialize attempt..."
+            if (e.message.includes("timeout")) {
+               if (retries == 1) {
+                  this.msg.text = "Finaly initialize attempt..."
+               } else {
+                  this.msg.text = "Retry initialize..."
+               }
+               retries--
+               console.log("retry")
             } else {
-               this.msg.text = "Retry initialize..."
+               this.msg.text = "Initialize failed: "+e.message
+               done = true
             }
-            retries--
-            console.log("retry")
-         } else {
-            this.msg.text = "Initialize failed: "+e.message
-            done = true
-         }
          })
       }
 
       if ( done == false ) {
          this.msg.text = "Unable to initialize... try again later"
       }
-   }
-
-   addStartButton() {
-      let advButton = new Button( this.panelW/2, 100, "Start", () => {
-         this.startCallback()
-      }, 0x55dd55,0x114a11,0x55dd55)
-      this.addChild(advButton)
-   }
-
-   clickHandler() {
-      this.clickCallback(this.jwt)
    }
 }

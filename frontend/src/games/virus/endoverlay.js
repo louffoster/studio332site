@@ -1,15 +1,17 @@
 import * as PIXI from "pixi.js"
+import Button from "@/games/common/button"
 
 export default class EndOverlay extends PIXI.Container {
    constructor( restartCallback, backCallback ) {
       super()
-      this.x = 10
-      this.y = 100
+      this.x = 25
+      this.y = 90
+      this.panelW = 300
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(2, 0x55dd55, 1)
       this.graphics.beginFill(0x333333)
-      this.graphics.drawRect(0,0, 280,280)
+      this.graphics.drawRect(0,0, this.panelW,280)
       this.graphics.cursor ="default"
       this.addChild(this.graphics)
 
@@ -24,32 +26,23 @@ export default class EndOverlay extends PIXI.Container {
          fontSize: 28
       })
       msg.anchor.set(0.5)
-      msg.x = 145
+      msg.x = this.panelW / 2.0
       msg.y = 50
       this.addChild(msg)
       this.graphics.lineStyle(1, 0xff5555, 1)
       this.graphics.moveTo(10, 25)
-      this.graphics.lineTo(270, 25)
+      this.graphics.lineTo(this.panelW-10, 25)
       this.graphics.moveTo(10,75)
-      this.graphics.lineTo(270, 75)
+      this.graphics.lineTo(this.panelW-10, 75)
 
-      this.graphics.lineStyle(1, 0x55dd55, 1)
-      this.graphics.beginFill(0x114a11)
-      this.graphics.drawRect(95,195, 100,35)
-
-      let btnTxt = new PIXI.Text("Retry", style)
-      btnTxt.anchor.set(0.5)
-      btnTxt.x = 145
-      btnTxt.y = 212
-      btnTxt.eventMode = 'static'
-      btnTxt.cursor ="pointer"
-      btnTxt.hitArea = new PIXI.Rectangle(-50,-20, 100,35)
-      this.addChild(btnTxt)
-      btnTxt.on('pointerup', restartCallback)
+      let restartButton = new Button( this.panelW/2, 210, "Retry", 
+         restartCallback, 0x55dd55,0x114a11,0x55dd55)
+      restartButton.noShadow()
+      this.addChild(restartButton)
 
       this.uptime = new PIXI.Text("Uptime: 00:00", style)
       this.uptime.anchor.set(0.5)
-      this.uptime.x = 140
+      this.uptime.x = this.panelW/2
       this.uptime.y = 100
       this.addChild(this.uptime)
 
@@ -65,7 +58,7 @@ export default class EndOverlay extends PIXI.Container {
       for ( let i=0; i<4; i++) { 
          let wl = 3+i
          let stats = new PIXI.Text(`${wl} Letters: 0`, small)
-         stats.x = xPos[i]
+         stats.x = xPos[i]+5
          stats.y = yPos[i]
          this.addChild(stats)
          this.wordStats.push(stats)
@@ -73,7 +66,7 @@ export default class EndOverlay extends PIXI.Container {
 
       let backTxt = new PIXI.Text("Back to Studio332 Site", style)
       backTxt.anchor.set(0.5)
-      backTxt.x = 145
+      backTxt.x = this.panelW/2
       backTxt.y = 260
       backTxt.eventMode = 'static'
       backTxt.cursor ="pointer"
@@ -91,7 +84,13 @@ export default class EndOverlay extends PIXI.Container {
       this.uptime.text = timeStr
 
       for ( let i=0; i<4; i++) { 
-         this.wordStats[i].text = `${i+3} Letters: ${stats[i]}`
+         let wl = `${i+3}`
+         if (i==3) {
+            wl+= "+"
+         } else {
+            wl += " "
+         }
+         this.wordStats[i].text = `${wl} Letters: ${stats[i]}`
       }
    }
 

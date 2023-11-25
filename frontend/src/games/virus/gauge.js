@@ -21,7 +21,7 @@ export default class Gauge extends PIXI.Container {
 
       this.gfx = new PIXI.Graphics() 
       this.addChild( this.gfx )
-      this.gaugeWidth = 255
+      this.gaugeWidth = 290
       this.drawGauge()
    }
 
@@ -41,24 +41,24 @@ export default class Gauge extends PIXI.Container {
 
    drawGauge() {
       this.gfx.clear()
-      this.gfx.lineStyle(1, 0x999999, 1)
-      this.gfx.drawRect(20,0, this.gaugeWidth, 20)
-
-      let sectionW = this.gaugeWidth / this.maxValue
-      let sectionX = 20+sectionW
-      for (let i=1; i< this.maxValue; i++) {
-         this.gfx.lineStyle(1, 0x777777, 1)
-         this.gfx.moveTo(sectionX, 0)
-         this.gfx.lineTo(sectionX, 20)
-         sectionX += sectionW
-      }
+      this.gfx.lineStyle(1, 0xaaaaaa, 1)
+      this.gfx.drawRect(30,0, this.gaugeWidth, 20)
 
       if (this.value > 0) {
          let percent = this.value / this.maxValue
-         let fillW = (this.gaugeWidth * percent)-2
-         this.gfx.lineStyle(1,0x000000)
-         this.gfx.beginFill(0x00aacc)
-         this.gfx.drawRect(21,1, fillW, 18)
+         let fillW = (this.gaugeWidth * percent)
+         this.gfx.lineStyle(0,0x000000)
+         this.gfx.beginFill(0x44aa55)
+         this.gfx.drawRect(30,0, fillW, 20)
+      }
+
+      let sectionW = this.gaugeWidth / this.maxValue
+      let sectionX = 30+sectionW
+      for (let i=1; i< this.maxValue; i++) {
+         this.gfx.lineStyle(1, 0xaaaaaa, 1)
+         this.gfx.moveTo(sectionX, 0)
+         this.gfx.lineTo(sectionX, 20)
+         sectionX += sectionW
       }
    }
 }

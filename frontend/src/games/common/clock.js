@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js"
 
 export default class Clock extends PIXI.Container {
-   constructor( x,y, label="",color=0x80D3E1) {
+   constructor( x,y, label="",color=0x80D3E1, fontFamily="Arial") {
       super()
       this.x = x
       this.y = y
@@ -9,7 +9,7 @@ export default class Clock extends PIXI.Container {
       this.clockColor = new PIXI.Color(color)
       let style = {
          fill: this.clockColor,
-         fontFamily: "Arial",
+         fontFamily: fontFamily,
          fontSize: 18,
       }
 
@@ -57,7 +57,7 @@ export default class Clock extends PIXI.Container {
       this.timeMS = startTimeMS 
       this.timeoutListener = timeoutListener
       this.warningListener = warningListener
-      let timeSec = this.gameTimeSec()
+      let timeSec = this.timeSec
       let secs = timeSec
       let mins = Math.floor(timeSec / 60)
       if ( mins > 0) {
@@ -77,14 +77,14 @@ export default class Clock extends PIXI.Container {
       this.warningListener( this.flash )
    }
 
-   gameTimeSec() {
+   get timeSec() {
       let timeSec = Math.round(this.timeMS / 1000.0)
       timeSec = Math.max(timeSec, 0)     
       return timeSec
    }
 
    gameTimeFormatted() {
-      let timeSec = this.gameTimeSec()
+      let timeSec = this.timeSec
       let secs = timeSec
       let mins = Math.floor(timeSec / 60)
       if ( mins > 0) {
@@ -96,7 +96,7 @@ export default class Clock extends PIXI.Container {
    }
 
    tick(deltaMS) {
-      let origTimeSec = this.gameTimeSec()
+      let origTimeSec = this.timeSec
 
       if ( this.countdown ) {
          if ( this.timeMS > 0) {
@@ -110,9 +110,8 @@ export default class Clock extends PIXI.Container {
          this.timeMS += deltaMS
       } 
 
-      let timeSec = this.gameTimeSec()
-      if ( timeSec != origTimeSec) {
-         if (timeSec < 15 && this.countdown) { 
+      if ( this.timeSec != origTimeSec) {
+         if (this.timeSec < 15 && this.countdown) { 
             this.flashTimer()
          }
          

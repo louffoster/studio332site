@@ -12,8 +12,6 @@ export default class BaseGame {
       this.gameWidth = gameW 
       this.gameHeight = gameH
 
-      console.log(backgroundColor)
-
       PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
       this.app = new PIXI.Application({
          autoDensity: true, // Handles high DPI screens
@@ -58,6 +56,9 @@ export default class BaseGame {
 
    addChild( child ) {
       this.scene.addChild(child)
+   }
+   removeChild( child ) {
+      this.scene.removeChild(child)
    }
 
    shuffleArray( array ) {
