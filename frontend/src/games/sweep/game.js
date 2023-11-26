@@ -4,6 +4,8 @@ import axios from 'axios'
 
 import stars from '@/assets/stars.json'
 import bad from '@/assets/bad_word.json'
+import confettiJson from '@/assets/confetti.json'
+
 import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"
 import Letter from "@/games/sweep/letter"
@@ -30,10 +32,12 @@ export default class Sweep extends BaseGame {
    endOverlay = null
    explode = null
    badWord = null
+   confetti = null
 
    initialize(replayHandler, backHandler) {
       this.explode = particles.upgradeConfig(stars, ['snow.png'])
       this.badWord = particles.upgradeConfig(bad, ['spark.png'])
+      this.confetti = particles.upgradeConfig(confettiJson, ['pink.png','green.png','yellow.png'])
 
       this.app.ticker.add( this.gameTick.bind(this) )
 
@@ -73,6 +77,7 @@ export default class Sweep extends BaseGame {
          this.clearSelections.bind(this), 0xCAF0F8,0x0077B6,0x48CAE4)
       this.clearButton.alignTopLeft()
       this.addChild(this.clearButton)
+      this.clearButton.disable()
       
       this.submitButton = new Button( 247, 425, "Submit", 
          this.submitWord.bind(this), 0xCAF0F8,0x0077B6,0x48CAE4)
@@ -128,6 +133,7 @@ export default class Sweep extends BaseGame {
       this.helpers.forEach( t => t.deselect())
       this.enableGrid( true )
       this.submitButton.disable()
+      this.clearButton.disable()
    }
    
    giveUpClicked() {
@@ -146,6 +152,8 @@ export default class Sweep extends BaseGame {
          this.explodeTiles()
          this.checkForWin()
          this.word.text = ""
+         this.submitButton.disable()
+         this.clearButton.disable()
       }).catch( _e => {
          this.submitFailed()
       })
@@ -167,9 +175,14 @@ export default class Sweep extends BaseGame {
       let cnt = this.countRemainingLetters()
       if ( cnt == 0) {
          this.gameState = "over"
-         this.endOverlay.setWin( this.clock.gameTimeFormatted() )
-         this.addChild( this.endOverlay )
-      }
+         var emitter = new particles.Emitter(this.scene, this.confetti )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(this.gameWidth/2,300)
+         emitter.playOnceAndDestroy(() => {
+            this.endOverlay.setWin( this.clock.gameTimeFormatted() )
+            this.addChild( this.endOverlay )
+         })
+      } 
    }
    
    submitFailed() {
@@ -181,6 +194,7 @@ export default class Sweep extends BaseGame {
          let coords = [centerX-wordW/2.0, centerX, centerX+wordW/2.0]
          for (let i = 0; i<3; i++) {
             var emitter = new particles.Emitter(this.scene, this.badWord )
+            emitter.updateOwnerPos(0,0)
             emitter.updateSpawnPos(coords[i], this.word.y - 10)
             emitter.playOnceAndDestroy()   
          }
@@ -197,6 +211,7 @@ export default class Sweep extends BaseGame {
             if ( this.grid[r][c].selected) {
                var tile = this.grid[r][c]
                var emitter = new particles.Emitter(this.scene, this.explode )
+               emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
                emitter.playOnceAndDestroy()
                tile.clear()
@@ -206,6 +221,7 @@ export default class Sweep extends BaseGame {
       this.helpers.forEach( tile => {
          if (tile.selected ) {
             var emitter = new particles.Emitter( this.scene, this.explode )
+            emitter.updateOwnerPos(0,0)
             emitter.updateSpawnPos(tile.x+Letter.WIDTH/2.0, tile.y+Letter.HEIGHT/2.0)
             emitter.playOnceAndDestroy()
             tile.clear()
@@ -235,6 +251,7 @@ export default class Sweep extends BaseGame {
       if (this.word.text.length > 3 ) {
          this.submitButton.enable()
       }
+      this.clearButton.enable()
    }
    
    gameTick() {

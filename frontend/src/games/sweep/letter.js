@@ -102,7 +102,7 @@ export default class Letter extends PIXI.Container {
    draw() {
       if ( this.cleared) {
          this.graphics.clear()
-         this.graphics.beginFill(0x005796)
+         this.graphics.beginFill(0x004080)
          this.graphics.lineStyle(1, 0x03045E, 1)
          this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
          this.graphics.endFill()

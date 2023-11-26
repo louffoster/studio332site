@@ -250,6 +250,7 @@ export default class Virus extends BaseGame {
       }) 
    }
 
+   // FIXME
    disinfectLetter() {
       // clear the letter from the word and deselect it from the this.grid
       let selR = this.word[this.letterIndex].fromRow
@@ -344,8 +345,6 @@ export default class Virus extends BaseGame {
 
    startVirusExplode(row, col) {
       var emitter = new particles.Emitter(this.scene, this.virusExplode )
-   
-      // start of this.grid is 40,40 each letter is 55x55
       let x = 40 + (col*55)
       let y = 40 + (row*55)
       emitter.updateOwnerPos(0,0)
@@ -472,6 +471,8 @@ export default class Virus extends BaseGame {
    wordDisinfectFinished() {
       //  Increase the letter count this.gauges and word scoreboard
       let cntIdx = this.lastWordSize - 3 
+      cntIdx = Math.max(0, cntIdx )
+      cntIdx = Math.min(4, cntIdx )
       if ( this.gauges[cntIdx].isFull() == false ) {
          this.gauges[cntIdx].increaseValue()
       }
