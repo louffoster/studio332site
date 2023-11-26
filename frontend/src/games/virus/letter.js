@@ -56,13 +56,17 @@ export default class Letter extends PIXI.Container {
       this.clickCallback = callback
    }
 
+   get text() {
+      return this.letter.text
+   }
+
    clickHandler() {
       if ( Letter.wordFull || this.selected  || this.isLost() ) { 
          return
       }
       this.selected = true
       this.draw()
-      this.clickCallback(this.row, this.col, this.letter.text)
+      this.clickCallback(this)
    }
 
    isInfected() {

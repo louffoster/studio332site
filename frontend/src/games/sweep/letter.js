@@ -1,6 +1,9 @@
 import * as PIXI from "pixi.js"
 
 export default class Letter extends PIXI.Container {
+   static WIDTH = 60 
+   static HEIGHT = 60 
+
    constructor(letter, x,y, clickHandler ) {
       super()
 
@@ -128,6 +131,3 @@ export default class Letter extends PIXI.Container {
       return ( vowel.includes(this.text()) )
    }
 }
-
-Letter.WIDTH = 60 
-Letter.HEIGHT = 60 

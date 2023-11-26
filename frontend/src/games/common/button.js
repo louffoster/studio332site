@@ -13,6 +13,7 @@ export default class Button extends PIXI.Container {
          fill: this.txtColor,
          fontFamily: "Arial",
          fontSize: 18,
+         lineHeight: 18,
          fontWeight: "bold",
          dropShadow: true,
          dropShadowColor: '#000000',
@@ -59,7 +60,9 @@ export default class Button extends PIXI.Container {
    }
 
    small() {
-      this.btnTxt.style.fontSize = 14    
+      this.btnTxt.style.lineHeight = 14    
+      this.btnTxt.style.fontSize = 14  
+      
       this.btnWidth = this.btnTxt.width + 25
       this.btnHeight = this.btnTxt.height + 15
       this.btnTxt.x = this.btnWidth / 2.0
