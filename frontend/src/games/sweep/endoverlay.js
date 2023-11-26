@@ -5,9 +5,9 @@ export default class EndOverlay extends PIXI.Container {
    constructor(replayHandler, backHandler) {
       super()
 
-      this.x = 35 
-      this.y = 80
-      this.popupW = 300
+      this.x = 10 
+      this.y = 10
+      this.popupW = 350
       this.popupH = 270
       this.replayHandler = replayHandler
       this.backHandler = backHandler
@@ -46,7 +46,7 @@ export default class EndOverlay extends PIXI.Container {
       this.heading = new PIXI.Text(`GAME OVER`, style)
       this.heading.anchor.set(0.5, 0.5)
       this.heading.x = this.popupW / 2
-      this.heading.y = 40
+      this.heading.y = 35
 
       this.msg = new PIXI.Text(`woof`, style)
       this.msg.anchor.set(0.5, 0.5)
@@ -63,18 +63,54 @@ export default class EndOverlay extends PIXI.Container {
       this.addChild(this.msg)
       this.addChild(this.totalMsg)
 
-      let againBtn = new Button( this.popupW / 2, 165, "Play Again", replayHandler, 
+      let lX = 30 
+      let lY = 135
+      this.wordCounts = []
+      for (let i=3; i<10; i++) {
+         let label = new PIXI.Text(`${i+1} letters:`, small)   
+         label.x = lX 
+         label.y = lY
+         this.addChild(label)
+
+         let cnt =  new PIXI.Text(`0`, small)  
+         cnt.x = lX + 73
+         if ( i == 9 ) { 
+            cnt.x+= 10
+         }
+         cnt.y = lY
+         this.addChild(cnt)
+         this.wordCounts.push( cnt )
+
+         if ( i == 8 ) {
+            lY += 22
+            lX = 124
+         } else if (i == 2 || i==5 ) {
+            lX = 30 
+            lY += 22
+         } else {
+            lX+= 100
+         }
+      }
+
+      let againBtn = new Button( 225, 225, "Play Again", replayHandler, 
          0xCAF0F8,0x0077B6,0x48CAE4)
+      againBtn.small()
+      againBtn.alignTopLeft()
       this.addChild(againBtn)
 
-      let backBtn = new Button( this.popupW / 2, 225, "Back to Studio332", backHandler, 
+      let backBtn = new Button( 65, 225, "Back to Studio332", backHandler, 
          0xCAF0F8,0x0077B6,0x48CAE4)
+      backBtn.small()
+      backBtn.alignTopLeft()
       this.addChild(backBtn)
    }
 
    createTotalWordsMessage(wordCounts) {
       let total  = 0 
-      wordCounts.forEach( cnt => total += cnt)
+      wordCounts.slice(4,11).forEach( (cnt,idx) => {
+         total += cnt
+         this.wordCounts[ idx ].text = ""+cnt
+      })
       this.totalMsg.text = "Total words created: "+total
    }
    

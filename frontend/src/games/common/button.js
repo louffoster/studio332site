@@ -67,6 +67,7 @@ export default class Button extends PIXI.Container {
       this.btnHeight = this.btnTxt.height + 15
       this.btnTxt.x = this.btnWidth / 2.0
       this.btnTxt.y = this.btnHeight / 2.0
+      this.drawButton()
    }
 
    noShadow() {

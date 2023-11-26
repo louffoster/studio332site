@@ -151,7 +151,6 @@ export default class Sweep extends BaseGame {
       let url = `${API_SERVICE}/sweep/check?w=${this.word.text}`
       axios.post(url).then( () => {
          this.wordsCreated[ this.word.text.length]++
-         console.log(this.wordsCreated)
          this.explodeTiles()
          this.checkForWin()
          this.word.text = ""
