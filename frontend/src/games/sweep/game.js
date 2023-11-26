@@ -33,7 +33,8 @@ export default class Sweep extends BaseGame {
    explode = null
    badWord = null
    confetti = null
-
+   wordsCreated = [0,0,0,0,0,0,0,0,0,0,0]
+   
    initialize(replayHandler, backHandler) {
       this.explode = particles.upgradeConfig(stars, ['snow.png'])
       this.badWord = particles.upgradeConfig(bad, ['spark.png'])
@@ -138,7 +139,7 @@ export default class Sweep extends BaseGame {
    
    giveUpClicked() {
       this.gameState = "over"
-      this.endOverlay.setLoss( this.countRemainingLetters() )
+      this.endOverlay.setLoss( this.countRemainingLetters(), this.wordsCreated )
       this.addChild( this.endOverlay )
       this.enableGrid(false) 
       this.submitButton.disable()
@@ -149,6 +150,8 @@ export default class Sweep extends BaseGame {
    submitWord() {
       let url = `${API_SERVICE}/sweep/check?w=${this.word.text}`
       axios.post(url).then( () => {
+         this.wordsCreated[ this.word.text.length]++
+         console.log(this.wordsCreated)
          this.explodeTiles()
          this.checkForWin()
          this.word.text = ""
@@ -179,7 +182,7 @@ export default class Sweep extends BaseGame {
          emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(this.gameWidth/2,300)
          emitter.playOnceAndDestroy(() => {
-            this.endOverlay.setWin( this.clock.gameTimeFormatted() )
+            this.endOverlay.setWin( this.clock.gameTimeFormatted(), this.wordsCreated )
             this.addChild( this.endOverlay )
          })
       } 
