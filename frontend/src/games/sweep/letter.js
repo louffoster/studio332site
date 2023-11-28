@@ -21,12 +21,26 @@ export default class Letter extends PIXI.Container {
          stroke: '#03045E',
          strokeThickness: 4,
       })
+      this.smallStyle = new PIXI.TextStyle({
+         fill: "#CAF0F8",
+         fontFamily: "Arial",
+         fontSize: 18,
+         stroke: '#03045E',
+         strokeThickness: 3,
+      })
 
       this.graphics = new PIXI.Graphics()
       this.letter = new PIXI.Text(letter, this.style)
       this.letter.anchor.set(0.5)
       this.letter.x = Letter.WIDTH / 2.0 
       this.letter.y = Letter.HEIGHT / 2.0
+      if ( letter == "Q") {
+         this.extra = new PIXI.Text("U", this.smallStyle)
+         this.extra.anchor.set(0.5)
+         this.extra.x = Letter.WIDTH / 2.0 + 14
+         this.extra.y = Letter.HEIGHT / 2.0 + 12    
+         this.letter.x-=8
+      }
 
       this.draw()
 
@@ -40,25 +54,32 @@ export default class Letter extends PIXI.Container {
          }
          if ( this.selected && this.toggle ) {
             this.selected = false 
-            clickHandler( this.letter )
+            clickHandler( this.text() )
             this.draw()
             return
          }
          if ( this.selected == false ) {
             this.selected = true 
-            clickHandler( this.letter )
+            clickHandler( this.text())
             this.draw()
          }
       })
 
       this.addChild(this.graphics)
       this.addChild(this.letter)
+      if (this.extra ) {
+         this.addChild(this.extra)
+      }
    }
 
    text() {
-      return this.letter.text
+      let txt = this.letter.text
+      if ( this.extra) {
+         txt += this.extra.text 
+      }
+      return txt
    }
-
+      
    set( letter ) {
       this.letter.text = letter
    }
@@ -89,6 +110,9 @@ export default class Letter extends PIXI.Container {
       this.cleared = true
       this.selected = false
       this.letter.text = ""
+      if ( this.extra ) {
+         this.extra.text = ""
+      }
       this.eventMode = 'none'
       this.cursor ="default"
       this.draw()

@@ -61,16 +61,17 @@ export default class PickOverlay extends PIXI.Container {
    }
 
    letterClicked( letter ) {
-      let idx = this.picks.findIndex( p => p == letter.text )
+      console.log("PICKED "+letter)
+      let idx = this.picks.findIndex( p => p == letter )
       if ( idx > -1 ) {
          this.picks.splice(idx,1)
       } else {
          if ( this.picks.length < 3) {
-            this.picks.push( letter.text )
+            this.picks.push( letter )
          }
       }
       if ( this.picks.length == 3) {
-         setTimeout( () => this.pickHandler( this.picks ), 1000)
+         setTimeout( () => this.pickHandler( this.picks ), 700)
       }
    }
 

@@ -156,6 +156,7 @@ export default class Sweep extends BaseGame {
          this.word.text = ""
          this.submitButton.disable()
          this.clearButton.disable()
+         this.enableGrid(true)
       }).catch( _e => {
          this.submitFailed()
       })
@@ -245,7 +246,7 @@ export default class Sweep extends BaseGame {
    
    letterClicked(letter) {
       if (this.word.text.length < 10) {
-         this.word.text += letter.text
+         this.word.text += letter
       }
       if (this.word.text.length == 10) {
          this.enableGrid(false)
