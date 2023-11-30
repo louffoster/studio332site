@@ -43,7 +43,7 @@ export default class StartOverlay extends PIXI.Container {
 
       while (retries > 0 && done == false) {
          await axios.post(url, null, {timeout: 20*1000}).then( response => {
-            this.jwt = response.data
+            axios.defaults.headers.common['Authorization'] = `Bearer ${response.data}` 
             this.addChild(startBtn)
             done = true
             this.msg.text = "System Initialized"
@@ -55,7 +55,6 @@ export default class StartOverlay extends PIXI.Container {
                   this.msg.text = "Retry initialize..."
                }
                retries--
-               console.log("retry")
             } else {
                this.msg.text = "Initialize failed: "+e.message
                done = true

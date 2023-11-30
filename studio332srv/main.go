@@ -47,11 +47,11 @@ func main() {
 	}
 	virus := router.Group("/virus")
 	{
-		virus.POST("/check", svc.virusWordCheck)
+		virus.POST("/check", svc.authMiddleware, svc.virusWordCheck)
 	}
 	sweep := router.Group("/sweep")
 	{
-		sweep.POST("/check", svc.sweepWordCheck)
+		sweep.POST("/check", svc.authMiddleware, svc.sweepWordCheck)
 	}
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)

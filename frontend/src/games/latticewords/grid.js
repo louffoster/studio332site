@@ -147,7 +147,6 @@ export default class Grid  {
 
       coords = [...new Set(coords)]
       let url = `${API_SERVICE}/latticewords/score`
-      console.log("SERVICE: "+url)
       axios.post(url, {words: words.join(",")})
       .then( (response) => {
          this.handleResults(response.data, coords, scoreHandler )

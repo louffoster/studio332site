@@ -142,12 +142,10 @@ pool = new LetterPool()
       this.initGameOverlay.startGameInit( this.startGame.bind(this) )
    }
 
-   startGame( jwt ) {
-      this.gameplayToken = jwt
-      console.log("TOKEN: " + this.gameplayToken)
+   startGame( ) {
       this.removeChild(this.initGameOverlay)
    
-this.pool.refill()
+      this.pool.refill()
       this.wordCounts = [0,0,0,0] // one for each letter count; 3,4,5,6
 
       for (let r = 0; r < Virus.ROWS; r++) {
