@@ -173,8 +173,8 @@ export default class Mosaic extends BaseGame {
          ]
       } else { 
          colors = [
-            0,0,0,0,0,0,0,0,0,0,0,0,0,
-            1,1,1,1,1,1,1,1,1,1,1,1
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,1,1,1,1,1,1
          ]   
       }
       colors = this.shuffleArray(colors)
