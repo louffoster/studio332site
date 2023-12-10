@@ -3,14 +3,14 @@ import { ref } from 'vue'
 import Button from 'primevue/button'
 import OverlayPanel from 'primevue/overlaypanel'
 
-// const lwhelp = ref()
+const dwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
 const sweephelp = ref()
 
-// const toggleLWHelp = ((event) => {
-//    lwhelp.value.toggle(event)
-// })
+const toggleDWHelp = ((event) => {
+   wdhelp.value.toggle(event)
+})
 
 const toggleVirusHelp = ((event) => {
    vhelp.value.toggle(event)
@@ -29,20 +29,18 @@ const toggleMosiacHelp = ((event) => {
    <div class="content">
       <h2>Games</h2>
       <ul>
-         <!-- <li>
+         <li>
             <div class="game-info">
-               <router-link to="/latticewords">LatticeWords</router-link>
-               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleLWHelp" />
+               <router-link to="/letterdrop">Letter Drop</router-link>
+               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleDWHelp" />
             </div>
             <OverlayPanel ref="lwhelp">
                <div class="rules">
-                  <h3>LatticeWords</h3>
-                  <p>Slide the rows and columns of the letter lattice to form words.</p>
-                  <p>Longer words (up to 6 letters) score more points. Forming multiple words adds bonuses.</p>
-                  <p>Score as many points as possible before time runs out!</p>
+                  <h3>Letter Drop</h3>
+                  <p>Drop letters onto the board and form words. Game ends when board is full.</p>
                </div>
             </OverlayPanel>
-         </li> -->
+         </li>
          <li>
             <div class="game-info">
                <router-link to="/mosaic">Mosaic</router-link>

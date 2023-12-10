@@ -5,6 +5,7 @@ export default class Button extends PIXI.Container {
       super()
 
       this.disabled = false
+      this.round = false
       this.btnColor = new PIXI.Color(btnColor)
       this.highlight = new PIXI.Color(highlight)
       this.txtColor = new PIXI.Color(txtColor)
@@ -59,6 +60,11 @@ export default class Button extends PIXI.Container {
       this.graphics.addChild(this.btnTxt)
    }
 
+   roundButton() {
+      this.round = true 
+      this.drawButton()
+   }
+
    small() {
       this.btnTxt.style.lineHeight = 14    
       this.btnTxt.style.fontSize = 14  
@@ -92,7 +98,11 @@ export default class Button extends PIXI.Container {
       } else {
          this.graphics.beginFill( this.btnColor.toHex(), alpha )
       }
-      this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
+      if ( this.round ) {
+         this.graphics.drawCircle(0,0, this.btnWidth/2)
+      } else {
+         this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
+      }
       this.graphics.endFill()
    }
 

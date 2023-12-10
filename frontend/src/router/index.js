@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import LatticeWords from '../views/LatticeWords.vue'
 import Virus from '../views/Virus.vue'
 import Mosaic from '../views/Mosaic.vue'
 import Sweep from '../views/Sweep.vue'
+import LetterDrop from '../views/LetterDrop.vue'
 
 const router = createRouter({
    history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,9 +29,9 @@ const router = createRouter({
          component: Sweep
       },
       {
-         path: '/latticewords',
-         name: 'latticewords',
-         component: LatticeWords
+         path: '/letterdrop',
+         name: 'letterdrop',
+         component: LetterDrop
       },
    ]
 })

@@ -61,7 +61,6 @@ export default class PickOverlay extends PIXI.Container {
    }
 
    letterClicked( letter ) {
-      console.log("PICKED "+letter)
       let idx = this.picks.findIndex( p => p == letter )
       if ( idx > -1 ) {
          this.picks.splice(idx,1)
