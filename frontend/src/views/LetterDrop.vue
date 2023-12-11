@@ -8,7 +8,7 @@ import { onMounted, onBeforeUnmount } from "vue"
 import Sweep from "@/games/letterdrop/game"
 import { useRouter } from 'vue-router'
 
-const GAME_WIDTH = 370
+const GAME_WIDTH = 380
 const GAME_HEIGHT = 560
 
 const router = useRouter()

@@ -99,7 +99,8 @@ export default class Button extends PIXI.Container {
          this.graphics.beginFill( this.btnColor.toHex(), alpha )
       }
       if ( this.round ) {
-         this.graphics.drawCircle(0,0, this.btnWidth/2)
+         // this.graphics.drawRoundedRect(0,0, this.btnWidth, this.btnHeight, this.btnWidth)
+         this.graphics.drawCircle(this.btnWidth/2,this.btnHeight/2, this.btnWidth/2)
       } else {
          this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
       }
