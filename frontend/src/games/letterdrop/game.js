@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js"
+import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
 import axios from 'axios'
 import BaseGame from "@/games/common/basegame"
@@ -12,6 +13,9 @@ const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 export default class LetterDrop extends BaseGame {
    pool = new LetterPool()
    clock = null
+   gridTop = 80 
+   gridLeft = 10
+   columns = []
    columnButtons = []
    choices = []
 
@@ -35,6 +39,7 @@ export default class LetterDrop extends BaseGame {
       
       // start the eicker last so everything is created / initialized
       this.app.ticker.add( this.gameTick.bind(this) )
+      this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
 
    fillChoices() {
@@ -46,19 +51,33 @@ export default class LetterDrop extends BaseGame {
                this.pool.refill()
             }
             let letter = this.pool.pop()
-            let tile = new Letter(  letter, x,y, () => {
-               console.log("FOO")
+            let tile = new Letter(  letter, x,y-80, () => {
+               this.newTileClicked( tile )
             })
             this.addChild(tile)
-            this.choices[c] == tile
+            this.choices[c] = tile
+            new TWEEDLE.Tween(tile).to({ y: y}, 250).start()
          }
          x+= LetterDrop.TILE_W
       }
    }
 
+   newTileClicked( tile ) {
+      if ( tile.selected ) {
+         this.choices.forEach( t => {
+            if ( t != tile ) {
+               t.deselect()
+            }
+         })
+         this.columnButtons.forEach( b => b.setEnabled(true) )
+      } else {
+         this.columnButtons.forEach( b => b.setEnabled(false) )   
+      }
+   }
+
    drawBoard() {
-      let y = 80
-      let x = 10 
+      let y = this.gridTop
+      let x = this.gridLeft
 
       this.gfx.clear()
       this.gfx.beginFill(0xA4B8C4)
@@ -89,14 +108,31 @@ export default class LetterDrop extends BaseGame {
          },0x2E4347,0xbcf4de,0x9af4be)
          btn.roundButton()
          btn.noShadow()
+         btn.setEnabled(false)
          this.addChild(btn)
+         this.columnButtons.push(btn)
+         this.columns.push( [] )
          x+= LetterDrop.TILE_W
       }
       this.gfx.endFill(0x6E8894)
    }
 
    columnPicked( colNum ) {
-      console.log("CLICKED "+(colNum+1))
+      // get the tile from the choices list, remove it and set it 
+      // at the top of the selected column
+      let tgtTile = this.choices[colNum]
+      this.choices[colNum] = null
+      let colX = this.gridLeft + colNum*LetterDrop.TILE_W
+      tgtTile.setPosition(colX, this.gridTop)
+
+      // check the top tile in the tgt column and drop the target to 
+      // just above that position
+      let tgtY = this.gridTop+(LetterDrop.MAX_HEIGHT-1)*LetterDrop.TILE_H
+      let tgtCol = this.columns[ colNum ]
+      if (tgtCol.length == 0) {
+         /// bpp
+      } 
+      new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 250).start()
    } 
 
    gameTick()  {

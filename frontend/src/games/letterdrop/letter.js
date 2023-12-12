@@ -27,7 +27,7 @@ export default class Letter extends PIXI.Container {
       this.letter.anchor.set(0.5)
       this.letter.x = Letter.WIDTH / 2.0 
       this.letter.y = Letter.HEIGHT / 2.0
-      
+
       if ( letter == "Q") {
          this.extra = new PIXI.Text("U", this.smallStyle)
          this.extra.anchor.set(0.5)
@@ -44,7 +44,6 @@ export default class Letter extends PIXI.Container {
       this.pointerDown = false
       this.on('pointerdown', () => {
          this.selected = !this.selected
-         this.selected = false 
          clickHandler( this.text() )
          this.draw()
       })
@@ -56,6 +55,11 @@ export default class Letter extends PIXI.Container {
       }
    }
 
+   setPosition(x,y) {
+      this.x = x 
+      this.y = y
+   }
+
    text() {
       let txt = this.letter.text
       if ( this.extra) {
@@ -65,7 +69,7 @@ export default class Letter extends PIXI.Container {
    }
 
    deselect() {
-      if (this.selected && !this.cleared) {
+      if (this.selected ) {
          this.selected = false 
          this.draw(0)
       }
@@ -74,11 +78,11 @@ export default class Letter extends PIXI.Container {
    draw() {
       this.graphics.clear()
  
-      this.graphics.beginFill(0xFCFAFA)
+      this.graphics.beginFill(0xFAFAFF)
       this.graphics.lineStyle(1, 0x03045E, 1)
 
       if (this.selected) {
-         this.graphics.beginFill(0x00B4D8)
+         this.graphics.beginFill(0x6bbce8)
       } 
       this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
       this.graphics.endFill()
