@@ -56,7 +56,7 @@ export default class LetterDrop extends BaseGame {
             })
             this.addChild(tile)
             this.choices[c] = tile
-            new TWEEDLE.Tween(tile).to({ y: y}, 250).start()
+            new TWEEDLE.Tween(tile).to({ y: y}, 250).start().easing(TWEEDLE.Easing.Linear.None)
          }
          x+= LetterDrop.TILE_W
       }
@@ -65,13 +65,19 @@ export default class LetterDrop extends BaseGame {
    newTileClicked( tile ) {
       if ( tile.selected ) {
          this.choices.forEach( t => {
-            if ( t != tile ) {
-               t.deselect()
+            if ( t != null ) {
+               if ( t != tile ) {
+                  t.deselect()
+               }
             }
          })
-         this.columnButtons.forEach( b => b.setEnabled(true) )
+         this.columnButtons.forEach( b => {
+            if (b) b.setEnabled(true) 
+         })
       } else {
-         this.columnButtons.forEach( b => b.setEnabled(false) )   
+         this.columnButtons.forEach( b => {
+            if (b) b.setEnabled(true) 
+         })  
       }
    }
 
@@ -120,10 +126,19 @@ export default class LetterDrop extends BaseGame {
    columnPicked( colNum ) {
       // get the tile from the choices list, remove it and set it 
       // at the top of the selected column
-      let tgtTile = this.choices[colNum]
-      this.choices[colNum] = null
+      let choiceNum = this.choices.findIndex( t => {
+         if ( t != null ) {
+            return t.selected
+         } else {
+            return false
+         }
+      })
+      let tgtTile = this.choices[choiceNum]
+      this.choices[choiceNum] = null
       let colX = this.gridLeft + colNum*LetterDrop.TILE_W
+      tgtTile.deselect()
       tgtTile.setPosition(colX, this.gridTop)
+
 
       // check the top tile in the tgt column and drop the target to 
       // just above that position
@@ -132,7 +147,7 @@ export default class LetterDrop extends BaseGame {
       if (tgtCol.length == 0) {
          /// bpp
       } 
-      new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 250).start()
+      new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
    } 
 
    gameTick()  {
