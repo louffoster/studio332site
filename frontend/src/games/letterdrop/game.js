@@ -17,6 +17,7 @@ export default class LetterDrop extends BaseGame {
    gridLeft = 10
    columns = []
    columnButtons = []
+   trashBtn = null
    choices = []
 
    static COLUMNS = 5 
@@ -74,10 +75,12 @@ export default class LetterDrop extends BaseGame {
          this.columnButtons.forEach( b => {
             if (b) b.setEnabled(true) 
          })
+      this.trashBtn.setEnabled( true )
       } else {
          this.columnButtons.forEach( b => {
-            if (b) b.setEnabled(true) 
+            if (b) b.setEnabled(false) 
          })  
+         this.trashBtn.setEnabled( false )
       }
    }
 
@@ -121,18 +124,35 @@ export default class LetterDrop extends BaseGame {
          x+= LetterDrop.TILE_W
       }
       this.gfx.endFill(0x6E8894)
+
+      x += 5
+      this.trashBtn = new Button( x,y, `X`, () => {
+         this.trashSelectedTile()  
+      },0x2E4347,0xbcf4de,0x9af4be)
+      this.trashBtn.roundButton()
+      this.trashBtn.noShadow()
+      this.trashBtn.setEnabled(false)
+      this.addChild( this.trashBtn)
+   }
+
+   trashSelectedTile() {
+      // TODO track drash count. add animation
+      let choiceNum = this.choices.findIndex( t => t.selected)
+      let tgtTile = this.choices[choiceNum]
+      this.choices[choiceNum] = null
+      this.removeChild( tgtTile )
+      tgtTile.destroy()
+      this.fillChoices()
+      this.columnButtons.forEach( b => {
+         if (b) b.setEnabled(false) 
+      })  
+      this.trashBtn.setEnabled( false )
    }
 
    columnPicked( colNum ) {
       // get the tile from the choices list, remove it and set it 
       // at the top of the selected column
-      let choiceNum = this.choices.findIndex( t => {
-         if ( t != null ) {
-            return t.selected
-         } else {
-            return false
-         }
-      })
+      let choiceNum = this.choices.findIndex( t => t.selected)
       let tgtTile = this.choices[choiceNum]
       this.choices[choiceNum] = null
       let colX = this.gridLeft + colNum*LetterDrop.TILE_W
@@ -142,12 +162,14 @@ export default class LetterDrop extends BaseGame {
 
       // check the top tile in the tgt column and drop the target to 
       // just above that position
-      let tgtY = this.gridTop+(LetterDrop.MAX_HEIGHT-1)*LetterDrop.TILE_H
+      let tgtY = this.gridTop+((LetterDrop.MAX_HEIGHT-1)*LetterDrop.TILE_H)
       let tgtCol = this.columns[ colNum ]
-      if (tgtCol.length == 0) {
-         /// bpp
-      } 
-      new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
+      tgtY -= ( LetterDrop.TILE_H * tgtCol.length)
+      setTimeout( () => {
+         tgtCol.push(tgtTile)
+         this.fillChoices()
+         new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
+      }, 250)
    } 
 
    gameTick()  {
