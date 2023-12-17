@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
 import axios from 'axios'
+import StartOverlay from "@/games/letterdrop/startoverlay"
 import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
@@ -10,7 +11,6 @@ import Letter from "@/games/letterdrop/letter"
 import TrashMeter from "@/games/letterdrop/trashmeter"
 
 import trashJson from '@/assets/trash.json'
-
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
@@ -25,6 +25,8 @@ export default class LetterDrop extends BaseGame {
    trashMeter = null
    choices = []
    trashAnim = null
+   startOverlay = null 
+   gameState = "init"
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 6 
@@ -45,14 +47,22 @@ export default class LetterDrop extends BaseGame {
       for (let c = 0; c < LetterDrop.COLUMNS; c++) {
          this.choices.push(null)
       }
-      this.fillChoices()
 
       this.clock = new Clock(280, 515, "", 0xFCFAFA)
       this.addChild(this.clock)
+
+      this.startOverlay = new StartOverlay( API_SERVICE, this.startHandler.bind(this)) 
+      this.scene.addChild( this.startOverlay)
       
       // start the eicker last so everything is created / initialized
       this.app.ticker.add( this.gameTick.bind(this) )
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
+   }
+
+   startHandler() {
+      this.scene.removeChild( this.startOverlay)
+      this.gameState = "playing"
+      this.fillChoices()
    }
 
    fillChoices() {
@@ -64,9 +74,8 @@ export default class LetterDrop extends BaseGame {
                this.pool.refill()
             }
             let letter = this.pool.pop()
-            let tile = new Letter(  letter, x,y-80, () => {
-               this.newTileClicked( tile )
-            })
+            let tile = new Letter(  letter, x,y-80)
+            tile.setClickHandler( this.newTileClicked.bind(this) )
             this.addChild(tile)
             this.choices[c] = tile
             new TWEEDLE.Tween(tile).to({ y: y}, 250).start().easing(TWEEDLE.Easing.Linear.None)
@@ -169,7 +178,7 @@ export default class LetterDrop extends BaseGame {
 
       setTimeout( () => {
          this.removeChild( tgtTile )
-      tgtTile.destroy()
+         tgtTile.destroy()
          this.fillChoices()
       }, 450)
    }
@@ -202,10 +211,16 @@ export default class LetterDrop extends BaseGame {
          this.fillChoices()
          new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
          this.toggleTileButtons( false )
+         tgtTile.setClickHandler( this.gridTileClicked.bind(this) )
       }, 250)
    } 
 
+   gridTileClicked( tile ) {
+      console.log(tile)  
+   }
+
    gameTick()  {
+      if ( this.gameState != "playing") return
       this.clock.tick(this.app.ticker.deltaMS)
    }
 }

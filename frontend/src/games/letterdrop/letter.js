@@ -4,7 +4,7 @@ export default class Letter extends PIXI.Container {
    static WIDTH = 60 
    static HEIGHT = 60 
 
-   constructor(letter, x,y, clickHandler ) {
+   constructor(letter, x,y ) {
       super()
 
       this.x = x
@@ -44,7 +44,9 @@ export default class Letter extends PIXI.Container {
       this.pointerDown = false
       this.on('pointerdown', () => {
          this.selected = !this.selected
-         clickHandler( this.text() )
+         if ( this.clickHandler ) {
+            this.clickHandler( this )
+         }
          this.draw()
       })
 
@@ -53,6 +55,10 @@ export default class Letter extends PIXI.Container {
       if (this.extra ) {
          this.addChild(this.extra)
       }
+   }
+
+   setClickHandler( clickHandler ) {
+      this.clickHandler = clickHandler  
    }
 
    setPosition(x,y) {

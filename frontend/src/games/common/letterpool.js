@@ -12,6 +12,23 @@ export default class LetterPool {
       return this.pool.pop()
    }
 
+   value( letter ) {
+      let values = [
+         ["A", "E", "I", "N", "O", "R", "S", "T", "U"],  // 1 pt
+         ["G", "H", "L", "M", "P", "Y"],                 // 2 pt
+         ["B", "C", "D", "F", "K"],                      // 3 pt
+         ["J", "V", "W"],                                // 4 pt
+         ["Q", "X", "Z"],                                // 5 pt
+      ]
+      let value = 0
+      values.forEach( (letters,idx) => {
+         if ( letters.includes(letter)) {
+            value = idx+1
+         }
+      })
+      return value
+   }
+
    refill() {
       // fill pool with letters based on distribution rules...
       this.pool = []
