@@ -7,6 +7,8 @@ import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
 import Letter from "@/games/letterdrop/letter"
+import TrashMeter from "@/games/letterdrop/trashmeter"
+
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
@@ -18,6 +20,7 @@ export default class LetterDrop extends BaseGame {
    columns = []
    columnButtons = []
    trashBtn = null
+   trashMeter = null
    choices = []
 
    static COLUMNS = 5 
@@ -25,10 +28,16 @@ export default class LetterDrop extends BaseGame {
    static TILE_W = 60 
    static TILE_H = 60
 
-   initialize(replayHandler, backHandler) {
+   initialize(replayHandler, backHandler) { 
    
 
       this.drawBoard()
+
+      let meterTop = this.gridTop+LetterDrop.TILE_H/4
+      this.trashMeter = new TrashMeter(
+         this.gridLeft+LetterDrop.TILE_W*5+LetterDrop.TILE_W/4, meterTop,
+         LetterDrop.TILE_W/2, LetterDrop.TILE_H*5+LetterDrop.TILE_H/2)
+      this.addChild(this.trashMeter)
 
       for (let c = 0; c < LetterDrop.COLUMNS; c++) {
          this.choices.push(null)
@@ -72,15 +81,9 @@ export default class LetterDrop extends BaseGame {
                }
             }
          })
-         this.columnButtons.forEach( b => {
-            if (b) b.setEnabled(true) 
-         })
-      this.trashBtn.setEnabled( true )
+         this.toggleTileButtons(true)
       } else {
-         this.columnButtons.forEach( b => {
-            if (b) b.setEnabled(false) 
-         })  
-         this.trashBtn.setEnabled( false )
+         this.toggleTileButtons(false)
       }
    }
 
@@ -88,6 +91,7 @@ export default class LetterDrop extends BaseGame {
       let y = this.gridTop
       let x = this.gridLeft
 
+      // main squares of the game grid
       this.gfx.clear()
       this.gfx.beginFill(0xA4B8C4)
       this.gfx.lineStyle(1, 0x2E4347, 1)
@@ -105,16 +109,17 @@ export default class LetterDrop extends BaseGame {
       let panelX = x 
       let panelY = y
 
+      // boxes around column buttons
       x += LetterDrop.TILE_W / 2 
       y += (LetterDrop.TILE_H / 2 )
-      this.gfx.beginFill(0xC8D3D5)
+      this.gfx.beginFill(0x90a3a3)
       for ( let b=0; b < LetterDrop.COLUMNS; b++) {
          this.gfx.drawRect(panelX,panelY, LetterDrop.TILE_W, LetterDrop.TILE_H)
          panelX += LetterDrop.TILE_W
 
          let btn = new Button( x,y, `${b+1}`, () => {
             this.columnPicked(b)   
-         },0x2E4347,0xbcf4de,0x9af4be)
+         },0x2E4347,0xbcc4de,0xcce4fe)
          btn.roundButton()
          btn.noShadow()
          btn.setEnabled(false)
@@ -123,12 +128,21 @@ export default class LetterDrop extends BaseGame {
          this.columns.push( [] )
          x+= LetterDrop.TILE_W
       }
-      this.gfx.endFill(0x6E8894)
+      this.gfx.endFill()
 
-      x += 5
+      // backhgrounnd for trash meter
+      this.gfx.beginFill(0x90a3a3)
+      this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*5,this.gridTop, LetterDrop.TILE_W, LetterDrop.TILE_H*6)
+      this.gfx.endFill()
+
+      // background for trash button
+      this.gfx.beginFill(0xa09a9a)
+      this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*5,this.gridTop+LetterDrop.TILE_H*6, LetterDrop.TILE_W, LetterDrop.TILE_H)
+      this.gfx.endFill()
+
       this.trashBtn = new Button( x,y, `X`, () => {
          this.trashSelectedTile()  
-      },0x2E4347,0xbcf4de,0x9af4be)
+      },0x2E4347,0xc8a3a3,0xe8a3a3)
       this.trashBtn.roundButton()
       this.trashBtn.noShadow()
       this.trashBtn.setEnabled(false)
@@ -143,10 +157,15 @@ export default class LetterDrop extends BaseGame {
       this.removeChild( tgtTile )
       tgtTile.destroy()
       this.fillChoices()
+      this.toggleTileButtons( false )
+      this.trashMeter.increaseValue()
+   }
+
+   toggleTileButtons( enabled ) {
       this.columnButtons.forEach( b => {
-         if (b) b.setEnabled(false) 
+         if (b) b.setEnabled( enabled ) 
       })  
-      this.trashBtn.setEnabled( false )
+      this.trashBtn.setEnabled( enabled )
    }
 
    columnPicked( colNum ) {
@@ -169,6 +188,7 @@ export default class LetterDrop extends BaseGame {
          tgtCol.push(tgtTile)
          this.fillChoices()
          new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
+         this.toggleTileButtons( false )
       }, 250)
    } 
 
