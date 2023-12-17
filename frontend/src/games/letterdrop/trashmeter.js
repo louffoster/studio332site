@@ -36,7 +36,6 @@ export default class TrashMeter extends PIXI.Container {
       this.gfx.drawRect(0,0, this.meterW, this.meterH)
       this.gfx.endFill()
 
-      console.log("METER VALUE "+this.value)
       if (this.value > 0) {
          let percent = this.value / this.maxValue
          let fillH = (this.meterH * percent)

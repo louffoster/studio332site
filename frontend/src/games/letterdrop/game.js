@@ -9,6 +9,8 @@ import Button from "@/games/common/button"
 import Letter from "@/games/letterdrop/letter"
 import TrashMeter from "@/games/letterdrop/trashmeter"
 
+import trashJson from '@/assets/trash.json'
+
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
@@ -22,6 +24,7 @@ export default class LetterDrop extends BaseGame {
    trashBtn = null
    trashMeter = null
    choices = []
+   trashAnim = null
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 6 
@@ -29,7 +32,7 @@ export default class LetterDrop extends BaseGame {
    static TILE_H = 60
 
    initialize(replayHandler, backHandler) { 
-   
+      this.trashAnim = particles.upgradeConfig(trashJson, ['smoke.png'])
 
       this.drawBoard()
 
@@ -154,11 +157,21 @@ export default class LetterDrop extends BaseGame {
       let choiceNum = this.choices.findIndex( t => t.selected)
       let tgtTile = this.choices[choiceNum]
       this.choices[choiceNum] = null
-      this.removeChild( tgtTile )
-      tgtTile.destroy()
-      this.fillChoices()
+
+      var emitter = new particles.Emitter(this.scene, this.trashAnim )
+      emitter.updateOwnerPos(0,0)
+      emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
+      emitter.playOnceAndDestroy()   
+
+      
       this.toggleTileButtons( false )
       this.trashMeter.increaseValue()
+
+      setTimeout( () => {
+         this.removeChild( tgtTile )
+      tgtTile.destroy()
+         this.fillChoices()
+      }, 450)
    }
 
    toggleTileButtons( enabled ) {
