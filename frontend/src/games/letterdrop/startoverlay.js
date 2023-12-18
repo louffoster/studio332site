@@ -27,7 +27,8 @@ export default class StartOverlay extends PIXI.Container {
       let style = new PIXI.TextStyle({
          fill: "#FCFAFA",
          fontFamily: "Arial",
-         fontSize: 20,
+         fontSize: 18,
+         lineHeight: 18,
          wordWrap: true,
          fontWeight: 'bold',
          wordWrapWidth: this.panelW - 20,
