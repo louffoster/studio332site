@@ -9,6 +9,7 @@ import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
 import Tile from "@/games/letterdrop/tile"
 import TrashMeter from "@/games/letterdrop/trashmeter"
+import DropButton from "@/games/letterdrop/dropbutton"
 
 import trashJson from '@/assets/trash.json'
 
@@ -17,7 +18,7 @@ const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 export default class LetterDrop extends BaseGame {
    pool = new LetterPool()
    clock = null
-   gridTop = 80 
+   gridTop = 130 
    gridLeft = 10
    columns = []
    columnButtons = []
@@ -59,16 +60,16 @@ export default class LetterDrop extends BaseGame {
       let wordStyle = new PIXI.TextStyle({
          fill: "#FCFAFA",
          fontFamily: "Arial",
-         fontSize: 18,
-         lineHeight: 18
+         fontSize: 20,
+         lineHeight: 20
       })
       this.word = new PIXI.Text("", wordStyle)
-      this.word.x = 10 
+      this.word.x = 15 
       this.word.y = 510
       this.addChild(this.word)
 
       // control buttons
-      this.submitBtn = new Button( 300, 520, "Submit", () => {
+      this.submitBtn = new Button( 308, 510, "Submit", () => {
          this.submitWord()
       }, 0xFCFAFA,0x2f6690,0x5482bc)
       this.submitBtn.small()
@@ -76,7 +77,7 @@ export default class LetterDrop extends BaseGame {
       this.submitBtn.noShadow()
       this.addChild(this.submitBtn )
 
-      this.clearBtn = new Button( 220, 520, "Clear", () => {
+      this.clearBtn = new Button( 230, 510, "Clear", () => {
          this.clearWord()
       }, 0xFCFAFA,0x9c5060,0x5482bc)
       this.clearBtn.small()
@@ -136,10 +137,29 @@ export default class LetterDrop extends BaseGame {
    }
 
    drawBoard() {
-      let y = this.gridTop
+      // draw column drop buttons
+      let y = this.gridTop - 45
       let x = this.gridLeft
+      for ( let b=0; b < LetterDrop.COLUMNS; b++) {
+         let btn = new DropButton(x, y, () => {
+            this.columnPicked(b) 
+         })
+         btn.setEnabled(false)
+         this.addChild(btn)
+         this.columnButtons.push(btn)
+         this.columns.push( [] )
+         x+=LetterDrop.TILE_W
+      }
+
+      // trash drop button
+      this.trashBtn = new DropButton(x, y, this.trashSelectedTile.bind(this) )
+      this.trashBtn.useTrashIcon() 
+      this.trashBtn.setEnabled( false )
+      this.addChild( this.trashBtn )
 
       // main squares of the game grid
+      y = this.gridTop
+      x = this.gridLeft
       this.gfx.clear()
       this.gfx.beginFill(0xA4B8C4)
       this.gfx.lineStyle(1, 0x2E4347, 1)
@@ -154,47 +174,10 @@ export default class LetterDrop extends BaseGame {
       }
       this.gfx.endFill()
 
-      let panelX = x 
-      let panelY = y
-
-      // boxes around column buttons
-      x += LetterDrop.TILE_W / 2 
-      y += (LetterDrop.TILE_H / 2 )
-      this.gfx.beginFill(0x90a3a3)
-      for ( let b=0; b < LetterDrop.COLUMNS; b++) {
-         this.gfx.drawRect(panelX,panelY, LetterDrop.TILE_W, LetterDrop.TILE_H)
-         panelX += LetterDrop.TILE_W
-
-         let btn = new Button( x,y, `${b+1}`, () => {
-            this.columnPicked(b)   
-         },0x2E4347,0xbcc4de,0xcce4fe)
-         btn.roundButton()
-         btn.noShadow()
-         btn.setEnabled(false)
-         this.addChild(btn)
-         this.columnButtons.push(btn)
-         this.columns.push( [] )
-         x+= LetterDrop.TILE_W
-      }
-      this.gfx.endFill()
-
       // backhgrounnd for trash meter
       this.gfx.beginFill(0x90a3a3)
       this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*5,this.gridTop, LetterDrop.TILE_W, LetterDrop.TILE_H*6)
       this.gfx.endFill()
-
-      // background for trash button
-      this.gfx.beginFill(0xa09a9a)
-      this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*5,this.gridTop+LetterDrop.TILE_H*6, LetterDrop.TILE_W, LetterDrop.TILE_H)
-      this.gfx.endFill()
-
-      this.trashBtn = new Button( x,y, `X`, () => {
-         this.trashSelectedTile()  
-      },0x2E4347,0xc8a3a3,0xe8a3a3)
-      this.trashBtn.roundButton()
-      this.trashBtn.noShadow()
-      this.trashBtn.setEnabled(false)
-      this.addChild( this.trashBtn)
    }
 
    trashSelectedTile() {
@@ -306,7 +289,25 @@ export default class LetterDrop extends BaseGame {
    clearWord() {
       this.setTilesEnabled(true, true)
       this.word.text = ""
+      this.currWordTile.setActive(false)
       this.currWordTile = null
+   }
+
+   submitWord() {
+      let url = `${API_SERVICE}/letterdrop/check?w=${this.word.text}`
+      axios.post(url).then( () => {
+         this.submitSuccess()
+      }).catch( _e => {
+         this.submitFailed()
+      })
+   }
+
+   submitSuccess() {
+      console.log("YAY")
+   }
+
+   submitFailed() {
+      console.log("BAD")
    }
 
    setTilesEnabled( enabled, deselectAll = false ) {

@@ -94,9 +94,9 @@ export default class Button extends PIXI.Container {
       }
       this.graphics.lineStyle(1, this.txtColor, alpha)
       if ( this.pointerDown) {
-         this.graphics.beginFill( this.highlight.toHex())
+         this.graphics.beginFill( this.highlight)
       } else {
-         this.graphics.beginFill( this.btnColor.toHex(), alpha )
+         this.graphics.beginFill( this.btnColor, alpha )
       }
       if ( this.round ) {
          // this.graphics.drawRoundedRect(0,0, this.btnWidth, this.btnHeight, this.btnWidth)

@@ -53,6 +53,10 @@ func main() {
 	{
 		sweep.POST("/check", svc.authMiddleware, svc.sweepWordCheck)
 	}
+	letterDrop := router.Group("/letterdrop")
+	{
+		letterDrop.POST("/check", svc.authMiddleware, svc.letterDropWordCheck)
+	}
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)

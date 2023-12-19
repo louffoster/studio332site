@@ -58,9 +58,9 @@ export default class StartOverlay extends PIXI.Container {
       this.addChild(note3)
 
       this.msg = new PIXI.Text(`Initializing...`, style)
-      this.msg .anchor.set(0.5, 0)
-      this.msg .x = this.panelW/2
-      this.msg .y = 150
+      this.msg.anchor.set(0.5, 0)
+      this.msg.x = this.panelW/2
+      this.msg.y = 240
       this.addChild(this.msg)
 
       this.startGameInit() 
