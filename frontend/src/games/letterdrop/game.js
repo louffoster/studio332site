@@ -7,7 +7,7 @@ import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
-import Letter from "@/games/letterdrop/letter"
+import Tile from "@/games/letterdrop/tile"
 import TrashMeter from "@/games/letterdrop/trashmeter"
 
 import trashJson from '@/assets/trash.json'
@@ -74,7 +74,7 @@ export default class LetterDrop extends BaseGame {
                this.pool.refill()
             }
             let letter = this.pool.pop()
-            let tile = new Letter(  letter, x,y-80)
+            let tile = new Tile( letter, x,y-80 )
             tile.setClickHandler( this.newTileClicked.bind(this) )
             this.addChild(tile)
             this.choices[c] = tile
@@ -162,7 +162,7 @@ export default class LetterDrop extends BaseGame {
    }
 
    trashSelectedTile() {
-      // TODO track drash count. add animation
+      // TODO limit trash or end game if overvlow
       let choiceNum = this.choices.findIndex( t => t.selected)
       let tgtTile = this.choices[choiceNum]
       this.choices[choiceNum] = null
@@ -216,7 +216,46 @@ export default class LetterDrop extends BaseGame {
    } 
 
    gridTileClicked( tile ) {
-      console.log(tile)  
+      if ( tile.selected == false) {
+         this.setTilesEnabled(true)
+         return
+      }
+      let selectedCol = -1
+      let selectedRow = -1
+      this.columns.forEach( (c,colIdx) => {
+         let rowIdx = c.findIndex( t => t == tile)
+         if (rowIdx > -1 ) {
+            selectedCol = colIdx 
+            selectedRow = rowIdx
+         }
+      })  
+      this.setTilesEnabled( false )
+      tile.setEnabled(true)
+      console.log("selected C:"+selectedCol+" R: "+selectedRow)
+      if ( selectedRow > 0) {
+         console.log("below")
+         this.columns[selectedCol][selectedRow-1].setEnabled(true)
+      }
+      if ( selectedRow < (this.columns[selectedCol].length - 1) ) {
+         console.log("above")
+         this.columns[selectedCol][selectedRow+1].setEnabled(true)
+      }
+      if ( selectedCol > 0 && this.columns[selectedCol-1][selectedRow] != null) {
+         console.log("left")
+         this.columns[selectedCol-1][selectedRow].setEnabled(true)   
+      }
+      if ( selectedCol < LetterDrop.COLUMNS-1 && this.columns[selectedCol+1][selectedRow] != null) {
+         console.log("right")
+         this.columns[selectedCol+1][selectedRow].setEnabled(true)   
+      }
+   }
+
+   setTilesEnabled( enabled ) {
+      this.columns.forEach( col => {
+         col.forEach( t => {
+            t.setEnabled( enabled )
+         })
+      })   
    }
 
    gameTick()  {

@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 
-export default class Letter extends PIXI.Container {
+export default class Tile extends PIXI.Container {
    static WIDTH = 60 
    static HEIGHT = 60 
 
@@ -10,6 +10,7 @@ export default class Letter extends PIXI.Container {
       this.x = x
       this.y = y
       this.selected = false
+      this.enabled = true
 
       this.style = new PIXI.TextStyle({
          fill: "#4E6367",
@@ -25,21 +26,21 @@ export default class Letter extends PIXI.Container {
       this.graphics = new PIXI.Graphics()
       this.letter = new PIXI.Text(letter, this.style)
       this.letter.anchor.set(0.5)
-      this.letter.x = Letter.WIDTH / 2.0 
-      this.letter.y = Letter.HEIGHT / 2.0
+      this.letter.x = Tile.WIDTH / 2.0 
+      this.letter.y = Tile.HEIGHT / 2.0
 
       if ( letter == "Q") {
          this.extra = new PIXI.Text("U", this.smallStyle)
          this.extra.anchor.set(0.5)
-         this.extra.x = Letter.WIDTH / 2.0 + 14
-         this.extra.y = Letter.HEIGHT / 2.0 + 12    
+         this.extra.x = Tile.WIDTH / 2.0 + 14
+         this.extra.y = Tile.HEIGHT / 2.0 + 12    
          this.letter.x-=8
       }
 
       this.draw()
 
       this.eventMode = 'static'
-      this.hitArea =  new PIXI.Rectangle(0,0,Letter.WIDTH,Letter.HEIGHT)
+      this.hitArea =  new PIXI.Rectangle(0,0,Tile.WIDTH,Tile.HEIGHT)
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', () => {
@@ -81,16 +82,31 @@ export default class Letter extends PIXI.Container {
       }
    }
 
+   setEnabled( enabled ) {
+      this.enabled = enabled 
+      if (this.enabled == false) {
+         this.eventMode = 'none'
+         this.cursor ="default"
+      } else {
+         this.eventMode = 'static'
+         this.cursor ="pointer"
+      }
+      this.draw()
+   }
+
    draw() {
       this.graphics.clear()
  
       this.graphics.beginFill(0xFAFAFF)
       this.graphics.lineStyle(1, 0x03045E, 1)
 
+      if ( this.enabled == false ) {
+         this.graphics.beginFill(0xdAdAdF)    
+      }
       if (this.selected) {
          this.graphics.beginFill(0x6bbce8)
       } 
-      this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
+      this.graphics.drawRect(0,0, Tile.WIDTH, Tile.HEIGHT)
       this.graphics.endFill()
    }
 }
