@@ -11,6 +11,7 @@ export default class Tile extends PIXI.Container {
       this.y = y
       this.selected = false
       this.enabled = true
+      this.toggle = true
 
       this.style = new PIXI.TextStyle({
          fill: "#4E6367",
@@ -44,6 +45,9 @@ export default class Tile extends PIXI.Container {
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', () => {
+         if ( this.toggle == false && this.selected ) {
+            return
+         }
          this.selected = !this.selected
          if ( this.clickHandler ) {
             this.clickHandler( this )
@@ -55,6 +59,24 @@ export default class Tile extends PIXI.Container {
       this.addChild(this.letter)
       if (this.extra ) {
          this.addChild(this.extra)
+      }
+   }
+
+   setToggle( flag ) {
+      this.toggle = flag
+   }
+
+   setActive( flag ) {
+      if (flag) {
+         this.letter.style.fill = 0xfadf63
+         if ( this.extra ) {
+            this.extra.style.fill = 0xfadf63
+         }
+      } else {
+         this.letter.style.fill = 0x4E6367
+         if ( this.extra ) {
+            this.extra.style.fill = 0x4E6367
+         }
       }
    }
 
@@ -73,6 +95,13 @@ export default class Tile extends PIXI.Container {
          txt += this.extra.text 
       }
       return txt
+   }
+
+   select() {
+      if ( this.selected == false ) {
+         this.selected = true 
+         this.draw()
+      }
    }
 
    deselect() {

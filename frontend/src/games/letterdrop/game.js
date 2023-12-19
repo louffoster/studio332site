@@ -23,10 +23,14 @@ export default class LetterDrop extends BaseGame {
    columnButtons = []
    trashBtn = null
    trashMeter = null
+   clearBtn = null 
+   submitBtn = null
    choices = []
    trashAnim = null
    startOverlay = null 
    gameState = "init"
+   word = null
+   currWordTile = null
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 6 
@@ -36,19 +40,51 @@ export default class LetterDrop extends BaseGame {
    initialize(replayHandler, backHandler) { 
       this.trashAnim = particles.upgradeConfig(trashJson, ['smoke.png'])
 
+      // draw backgrounnd an column buttons
       this.drawBoard()
 
+      // trash meter
       let meterTop = this.gridTop+LetterDrop.TILE_H/4
       this.trashMeter = new TrashMeter(
          this.gridLeft+LetterDrop.TILE_W*5+LetterDrop.TILE_W/4, meterTop,
          LetterDrop.TILE_W/2, LetterDrop.TILE_H*5+LetterDrop.TILE_H/2)
       this.addChild(this.trashMeter)
 
+      // datastructure for tiles on board
       for (let c = 0; c < LetterDrop.COLUMNS; c++) {
          this.choices.push(null)
       }
 
-      this.clock = new Clock(280, 515, "", 0xFCFAFA)
+      // entered word
+      let wordStyle = new PIXI.TextStyle({
+         fill: "#FCFAFA",
+         fontFamily: "Arial",
+         fontSize: 18,
+         lineHeight: 18
+      })
+      this.word = new PIXI.Text("", wordStyle)
+      this.word.x = 10 
+      this.word.y = 510
+      this.addChild(this.word)
+
+      // control buttons
+      this.submitBtn = new Button( 300, 520, "Submit", () => {
+         this.submitWord()
+      }, 0xFCFAFA,0x2f6690,0x5482bc)
+      this.submitBtn.small()
+      this.submitBtn.alignTopLeft()
+      this.submitBtn.noShadow()
+      this.addChild(this.submitBtn )
+
+      this.clearBtn = new Button( 220, 520, "Clear", () => {
+         this.clearWord()
+      }, 0xFCFAFA,0x9c5060,0x5482bc)
+      this.clearBtn.small()
+      this.clearBtn.alignTopLeft()
+      this.clearBtn.noShadow()
+      this.addChild(this.clearBtn )
+
+      this.clock = new Clock(350, 565, "", 0xFCFAFA)
       this.addChild(this.clock)
 
       this.startOverlay = new StartOverlay( API_SERVICE, this.startHandler.bind(this)) 
@@ -116,7 +152,7 @@ export default class LetterDrop extends BaseGame {
          y+= LetterDrop.TILE_H 
          x = 10
       }
-      this.gfx.endFill(0x6E8894)
+      this.gfx.endFill()
 
       let panelX = x 
       let panelY = y
@@ -208,11 +244,20 @@ export default class LetterDrop extends BaseGame {
       tgtY -= ( LetterDrop.TILE_H * tgtCol.length)
       setTimeout( () => {
          tgtCol.push(tgtTile)
+         tgtTile.setToggle( false )
          this.fillChoices()
          new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
          this.toggleTileButtons( false )
          tgtTile.setClickHandler( this.gridTileClicked.bind(this) )
-      }, 250)
+         if ( this.word.text != "") {
+            tgtTile.setEnabled( false )
+            this.getAdjacentTiles( tgtTile ).forEach( t => {
+               if ( t == this.currWordTile) {
+                  tgtTile.setEnabled( true )
+               }
+            })
+         }
+      }, 150)
    } 
 
    gridTileClicked( tile ) {
@@ -220,6 +265,19 @@ export default class LetterDrop extends BaseGame {
          this.setTilesEnabled(true)
          return
       }
+      this.setTilesEnabled( false )
+      tile.setEnabled(true)
+      this.word.text += tile.text()
+      if ( this.currWordTile != null) {
+         this.currWordTile.setActive(false)   
+      }
+      this.currWordTile = tile
+      this.currWordTile.setActive(true)
+
+      this.getAdjacentTiles(tile).forEach( t => t.setEnabled(true) )
+   }
+
+   getAdjacentTiles( tile ) {
       let selectedCol = -1
       let selectedRow = -1
       this.columns.forEach( (c,colIdx) => {
@@ -229,31 +287,35 @@ export default class LetterDrop extends BaseGame {
             selectedRow = rowIdx
          }
       })  
-      this.setTilesEnabled( false )
-      tile.setEnabled(true)
-      console.log("selected C:"+selectedCol+" R: "+selectedRow)
+      let adjacent = []
       if ( selectedRow > 0) {
-         console.log("below")
-         this.columns[selectedCol][selectedRow-1].setEnabled(true)
+         adjacent.push(this.columns[selectedCol][selectedRow-1])
       }
       if ( selectedRow < (this.columns[selectedCol].length - 1) ) {
-         console.log("above")
-         this.columns[selectedCol][selectedRow+1].setEnabled(true)
+         adjacent.push(this.columns[selectedCol][selectedRow+1])
       }
       if ( selectedCol > 0 && this.columns[selectedCol-1][selectedRow] != null) {
-         console.log("left")
-         this.columns[selectedCol-1][selectedRow].setEnabled(true)   
+         adjacent.push(this.columns[selectedCol-1][selectedRow])   
       }
       if ( selectedCol < LetterDrop.COLUMNS-1 && this.columns[selectedCol+1][selectedRow] != null) {
-         console.log("right")
-         this.columns[selectedCol+1][selectedRow].setEnabled(true)   
+         adjacent.push(this.columns[selectedCol+1][selectedRow])   
       }
+      return adjacent
    }
 
-   setTilesEnabled( enabled ) {
+   clearWord() {
+      this.setTilesEnabled(true, true)
+      this.word.text = ""
+      this.currWordTile = null
+   }
+
+   setTilesEnabled( enabled, deselectAll = false ) {
       this.columns.forEach( col => {
          col.forEach( t => {
             t.setEnabled( enabled )
+            if ( deselectAll) {
+               t.deselect()
+            }
          })
       })   
    }

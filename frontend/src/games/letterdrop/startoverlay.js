@@ -14,11 +14,11 @@ export default class StartOverlay extends PIXI.Container {
       this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(5, 0xA4B8C4, 1)
+      this.graphics.lineStyle(5, 0xFCFAFA, 1)
       this.graphics.beginFill(0x4E6367)
       this.graphics.drawRect(0,0, this.panelW, this.panelH)
       this.graphics.endFill()
-      this.graphics.lineStyle(1, 0x2E4347, 1)
+      this.graphics.lineStyle(3,0xA4B8C4, 1)
       this.graphics.drawRect(0,0, this.panelW, this.panelH)
       
 
