@@ -26,7 +26,7 @@ export default class DropButton extends PIXI.Container {
          }
       })
       this.on('pointerup', () => {
-         if (this.disabled == false) {
+         if (this.disabled == false && this.pointerDown == true) {
             this.pointerDown = false 
             this.drawButton()   
             listener()

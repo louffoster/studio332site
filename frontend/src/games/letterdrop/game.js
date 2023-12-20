@@ -12,6 +12,7 @@ import TrashMeter from "@/games/letterdrop/trashmeter"
 import DropButton from "@/games/letterdrop/dropbutton"
 
 import trashJson from '@/assets/trash.json'
+import explodeJson from '@/assets/explode3.json'
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
@@ -31,6 +32,7 @@ export default class LetterDrop extends BaseGame {
    startOverlay = null 
    gameState = "init"
    word = null
+   explodeAnim = null
    currWordTile = null
 
    static COLUMNS = 5 
@@ -40,6 +42,7 @@ export default class LetterDrop extends BaseGame {
 
    initialize(replayHandler, backHandler) { 
       this.trashAnim = particles.upgradeConfig(trashJson, ['smoke.png'])
+      this.explodeAnim = particles.upgradeConfig(explodeJson, ['spark.png','particle.png'])
 
       // draw backgrounnd an column buttons
       this.drawBoard()
@@ -303,19 +306,63 @@ export default class LetterDrop extends BaseGame {
    }
 
    submitSuccess() {
-      console.log("YAY")
+      let tileCnt = this.word.text.length
+      this.columns.forEach( (c) => {
+         c.forEach( (t) => {
+            if ( t.selected ) {
+               var emitter = new particles.Emitter(this.scene, this.trashAnim )
+               emitter.updateOwnerPos(0,0)
+               emitter.updateSpawnPos(t.x+LetterDrop.TILE_W/2, t.y+LetterDrop.TILE_H/2)
+               emitter.playOnceAndDestroy()
+
+               // add a slight delay so explosion covers the tile when it is removed from the board
+               setTimeout( () => {
+                  this.removeChild(t)
+
+                  //  lookup the index of the destroyed tile as a previous clear may have shifted the array position
+                  let tgtIdx = c.findIndex( testT => testT == t)
+                  if (tgtIdx > -1) {
+                     t.destroy()
+                     c.splice(tgtIdx,1)
+                  }
+                  tileCnt-- 
+
+                  // only when all word tiles are gone, shift other tiles to fill in the gaps
+                  if (tileCnt == 0 ){
+                     this.columns.forEach( (shifC) => {
+                        shifC.forEach( (shiftT,shiftRowIdx) => {
+                           // the first position in a column is at the BOTTOM of the board. need 
+                           // to reverse column array postion in to board position 
+                           console.log(shiftT)
+                           let tilePos = (LetterDrop.MAX_HEIGHT - shiftRowIdx)-1
+                           let tgtY = this.gridTop + tilePos * LetterDrop.TILE_H
+                           if ( shiftT.y != tgtY) {
+                              new TWEEDLE.Tween(shiftT).to({ y: tgtY}, 250).start().easing(TWEEDLE.Easing.Linear.None)
+                           }
+                        })
+                     })    
+                  }
+               }, 300)
+            }
+         })
+      })
+      // TODO scoring
+      this.clearWord()
    }
 
    submitFailed() {
+      // TODO something bas happens when invalid word requested. at least some indication it was bad
       console.log("BAD")
    }
 
    setTilesEnabled( enabled, deselectAll = false ) {
       this.columns.forEach( col => {
          col.forEach( t => {
-            t.setEnabled( enabled )
-            if ( deselectAll) {
-               t.deselect()
+            if ( t != null ) {
+               t.setEnabled( enabled )
+               if ( deselectAll) {
+                  t.deselect()
+               }
             }
          })
       })   
