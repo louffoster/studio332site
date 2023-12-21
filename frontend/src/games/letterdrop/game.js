@@ -34,6 +34,8 @@ export default class LetterDrop extends BaseGame {
    word = null
    explodeAnim = null
    currWordTile = null
+   score = 0
+   scoreDisplay = null
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 6 
@@ -88,8 +90,18 @@ export default class LetterDrop extends BaseGame {
       this.clearBtn.noShadow()
       this.addChild(this.clearBtn )
 
-      this.clock = new Clock(350, 565, "", 0xFCFAFA)
+      this.clock = new Clock(345, 560, "", 0xFCFAFA)
       this.addChild(this.clock)
+
+      this.scoreDisplay = new PIXI.Text("00000", {
+         fill:0xFCFAFA,
+         fontFamily: "Arial",
+         fontSize: 20,
+      })
+      this.scoreDisplay.anchor.set(0,1)
+      this.scoreDisplay.x = 10 
+      this.scoreDisplay.y = 565
+      this.scene.addChild( this.scoreDisplay)
 
       this.startOverlay = new StartOverlay( API_SERVICE, this.startHandler.bind(this)) 
       this.scene.addChild( this.startOverlay)
@@ -113,8 +125,8 @@ export default class LetterDrop extends BaseGame {
             if (this.pool.hasTilesLeft() == false ) {
                this.pool.refill()
             }
-            let letter = this.pool.pop()
-            let tile = new Tile( letter, x,y-80 )
+            let scoredLetter = this.pool.popScoringLetter()
+            let tile = new Tile( scoredLetter, x,y-80 )
             tile.setClickHandler( this.newTileClicked.bind(this) )
             this.addChild(tile)
             this.choices[c] = tile
@@ -307,9 +319,12 @@ export default class LetterDrop extends BaseGame {
 
    submitSuccess() {
       let tileCnt = this.word.text.length
+      let totalTileValue = 0
       this.columns.forEach( (c) => {
          c.forEach( (t) => {
             if ( t.selected ) {
+               totalTileValue += t.score 
+
                var emitter = new particles.Emitter(this.scene, this.trashAnim )
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(t.x+LetterDrop.TILE_W/2, t.y+LetterDrop.TILE_H/2)
@@ -345,7 +360,10 @@ export default class LetterDrop extends BaseGame {
             }
          })
       })
-      // TODO scoring
+      
+      this.score += (totalTileValue * tileCnt) 
+      this.scoreDisplay.text = `${this.score}`.padStart(5,"0")
+
       this.clearWord()
    }
 

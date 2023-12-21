@@ -4,9 +4,10 @@ export default class Tile extends PIXI.Container {
    static WIDTH = 60 
    static HEIGHT = 60 
 
-   constructor(letter, x,y ) {
+   constructor(scoredLetter, x,y ) {
       super()
-
+      
+      this.tileValue = scoredLetter.value
       this.x = x
       this.y = y
       this.selected = false
@@ -14,30 +15,40 @@ export default class Tile extends PIXI.Container {
       this.toggle = true
       this.error = false
 
-      this.style = new PIXI.TextStyle({
+      let style = new PIXI.TextStyle({
          fill: "#4E6367",
          fontFamily: "Arial",
          fontSize: 36,
       })
-      this.smallStyle = new PIXI.TextStyle({
+      let smallStyle = new PIXI.TextStyle({
          fill: "#4E6367",
          fontFamily: "Arial",
          fontSize: 18,
       })
+      let scoreStyle = new PIXI.TextStyle({
+         fill: "#4E6367",
+         fontFamily: "Arial",
+         fontSize: 14,
+      })
 
       this.graphics = new PIXI.Graphics()
-      this.letter = new PIXI.Text(letter, this.style)
+      this.letter = new PIXI.Text(scoredLetter.text, style)
       this.letter.anchor.set(0.5)
       this.letter.x = Tile.WIDTH / 2.0 
       this.letter.y = Tile.HEIGHT / 2.0
 
-      if ( letter == "Q") {
-         this.extra = new PIXI.Text("U", this.smallStyle)
+      if ( scoredLetter.text == "Q") {
+         this.extra = new PIXI.Text("U", smallStyle)
          this.extra.anchor.set(0.5)
          this.extra.x = Tile.WIDTH / 2.0 + 14
          this.extra.y = Tile.HEIGHT / 2.0 + 12    
          this.letter.x-=8
       }
+
+      this.value = new PIXI.Text(`${this.tileValue}`, scoreStyle)
+      this.value.anchor.set(0,1)
+      this.value.x = 4
+      this.value.y = Tile.HEIGHT - 3  
 
       this.draw()
 
@@ -58,9 +69,14 @@ export default class Tile extends PIXI.Container {
 
       this.addChild(this.graphics)
       this.addChild(this.letter)
+      this.addChild(this.value)
       if (this.extra ) {
          this.addChild(this.extra)
       }
+   }
+
+   get score() {
+      return this.tileValue
    }
 
    setError( delay ) {

@@ -1,4 +1,6 @@
 
+import Letter from "@/games/common/letter"
+
 export default class LetterPool {
    constructor ()   {
       this.pool = []
@@ -10,6 +12,11 @@ export default class LetterPool {
 
    pop() {
       return this.pool.pop()
+   }
+
+   popScoringLetter() {
+      let txt = this.pop() 
+      return new Letter(txt, this.value(txt))
    }
 
    value( letter ) {
