@@ -11,6 +11,7 @@ export default class Clock extends PIXI.Container {
          fill: this.clockColor,
          fontFamily: fontFamily,
          fontSize: 18,
+         lineHeight: 18,
       }
 
       let labelWidth = 0

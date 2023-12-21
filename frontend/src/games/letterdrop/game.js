@@ -3,6 +3,7 @@ import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
 import axios from 'axios'
 import StartOverlay from "@/games/letterdrop/startoverlay"
+import EndOverlay from "@/games/letterdrop/endoverlay"
 import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
@@ -36,6 +37,7 @@ export default class LetterDrop extends BaseGame {
    currWordTile = null
    score = 0
    scoreDisplay = null
+   endOverlay = null
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 5
@@ -102,6 +104,7 @@ export default class LetterDrop extends BaseGame {
          fill:0xFCFAFA,
          fontFamily: "Arial",
          fontSize: 20,
+         lineHeight: 20,
       })
       this.scoreDisplay.anchor.set(0,1)
       this.scoreDisplay.x = 10 
@@ -109,7 +112,8 @@ export default class LetterDrop extends BaseGame {
       this.scene.addChild( this.scoreDisplay)
 
       this.startOverlay = new StartOverlay( API_SERVICE, this.startHandler.bind(this)) 
-      this.scene.addChild( this.startOverlay)
+      this.endOverlay = new EndOverlay( replayHandler, backHandler) 
+      this.scene.addChild( this.startOverlay )
       
       // start the eicker last so everything is created / initialized
       this.app.ticker.add( this.gameTick.bind(this) )
@@ -123,6 +127,8 @@ export default class LetterDrop extends BaseGame {
    }
 
    fillChoices() {
+      if ( this.gameState == "over") return
+
       let x = 10
       let y = 10
       for (let c = 0; c < LetterDrop.COLUMNS; c++) {
@@ -252,8 +258,14 @@ export default class LetterDrop extends BaseGame {
 
    dropNow( tgtTile, colNum ) {
       if ( this.columns[colNum].length == LetterDrop.MAX_HEIGHT) {
-         // TODO show animation; end game; show game over popup
-         console.log("OVERFLOW COL "+colNum+" END GAME")
+         var emitter = new particles.Emitter(this.scene, this.trashAnim )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
+         emitter.playOnceAndDestroy( () => { 
+            this.removeChild( tgtTile )
+            tgtTile.destroy
+            this.gameOver()
+         })
          return
       }
       let colX = this.gridLeft + colNum*LetterDrop.TILE_W
@@ -279,9 +291,22 @@ export default class LetterDrop extends BaseGame {
       }
 
       if ( this.isBoardFull() ) {
-         // GAME OVER
-         // TODO show animation; end game; show game over popup
+         this.gameOver()
       }
+   }
+
+   gameOver() {
+      this.setTilesEnabled(false, true)
+      this.choices.forEach( t => {
+         if ( t != null ) {
+            this.removeChild(t)
+            t.destroy()
+         }
+      })
+      this.gameState = "over"
+      this.endOverlay.setStats(this.score, this.clock.gameTimeFormatted() )
+      this.scene.addChild( this.endOverlay )
+         // TODO animations?
    }
 
    gridTileClicked( tile ) {
@@ -432,7 +457,9 @@ export default class LetterDrop extends BaseGame {
          this.clearWord()
          this.choices.forEach(  (t,colIdx) => {
             this.choices[colIdx] = null
-            this.dropNow( t, colIdx )
+            if ( this.gameState == "playing") {
+               this.dropNow( t, colIdx )
+            }
          })
          this.fillChoices()
       }, 500)  
