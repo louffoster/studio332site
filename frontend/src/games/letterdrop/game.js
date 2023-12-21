@@ -226,8 +226,12 @@ export default class LetterDrop extends BaseGame {
    }
 
    toggleTileButtons( enabled ) {
-      this.columnButtons.forEach( b => {
-         if (b) b.setEnabled( enabled ) 
+      this.columnButtons.forEach( (b,idx) => {
+         if ( this.columns[idx].length == LetterDrop.MAX_HEIGHT) {
+            b.setEnabled( false )   
+         } else {
+            b.setEnabled( enabled ) 
+         }
       })  
       if ( this.trashMeter.isFull() ) {
          this.trashBtn.setEnabled( false )
@@ -247,6 +251,11 @@ export default class LetterDrop extends BaseGame {
    } 
 
    dropNow( tgtTile, colNum ) {
+      if ( this.columns[colNum].length == LetterDrop.MAX_HEIGHT) {
+         // TODO show animation; end game; show game over popup
+         console.log("OVERFLOW COL "+colNum+" END GAME")
+         return
+      }
       let colX = this.gridLeft + colNum*LetterDrop.TILE_W
 
       // check the top tile in the tgt column and drop the target to 
@@ -267,6 +276,11 @@ export default class LetterDrop extends BaseGame {
                tgtTile.setEnabled( true )
             }
          })
+      }
+
+      if ( this.isBoardFull() ) {
+         // GAME OVER
+         // TODO show animation; end game; show game over popup
       }
    }
 
@@ -326,6 +340,16 @@ export default class LetterDrop extends BaseGame {
          adjacent.push(this.columns[selectedCol+1][selectedRow])   
       }
       return adjacent
+   }
+
+   isBoardFull() {
+      let full = true
+      this.columns.forEach( c => {
+         if ( c.length < LetterDrop.MAX_HEIGHT) {
+            full = false
+         }
+      })    
+      return full
    }
 
    clearWord() {
