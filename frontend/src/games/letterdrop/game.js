@@ -38,7 +38,7 @@ export default class LetterDrop extends BaseGame {
    scoreDisplay = null
 
    static COLUMNS = 5 
-   static MAX_HEIGHT = 6 
+   static MAX_HEIGHT = 5
    static TILE_W = 60 
    static TILE_H = 60
 
@@ -48,12 +48,15 @@ export default class LetterDrop extends BaseGame {
 
       // draw backgrounnd an column buttons
       this.drawBoard()
+      let boardBottom = this.gridTop+LetterDrop.TILE_H*LetterDrop.MAX_HEIGHT
 
       // trash meter
       let meterTop = this.gridTop+LetterDrop.TILE_H/4
       this.trashMeter = new TrashMeter(
-         this.gridLeft+LetterDrop.TILE_W*5+LetterDrop.TILE_W/4, meterTop,
-         LetterDrop.TILE_W/2, LetterDrop.TILE_H*5+LetterDrop.TILE_H/2)
+         this.gridLeft+LetterDrop.TILE_W*LetterDrop.COLUMNS+LetterDrop.TILE_W/4, 
+         meterTop,
+         LetterDrop.TILE_W/2, 
+         LetterDrop.TILE_H*(LetterDrop.MAX_HEIGHT-1)+LetterDrop.TILE_H/2)
       this.addChild(this.trashMeter)
 
       // datastructure for tiles on board
@@ -70,11 +73,11 @@ export default class LetterDrop extends BaseGame {
       })
       this.word = new PIXI.Text("", wordStyle)
       this.word.x = 15 
-      this.word.y = 510
+      this.word.y = boardBottom+18
       this.addChild(this.word)
 
       // control buttons
-      this.submitBtn = new Button( 308, 510, "Submit", () => {
+      this.submitBtn = new Button( 308, boardBottom+18, "Submit", () => {
          this.submitWord()
       }, 0xFCFAFA,0x2f6690,0x5482bc)
       this.submitBtn.small()
@@ -83,7 +86,7 @@ export default class LetterDrop extends BaseGame {
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn )
 
-      this.clearBtn = new Button( 230, 510, "Clear", () => {
+      this.clearBtn = new Button( 230, boardBottom+18, "Clear", () => {
          this.clearWord()
       }, 0xFCFAFA,0x9c5060,0x5482bc)
       this.clearBtn.small()
@@ -92,7 +95,7 @@ export default class LetterDrop extends BaseGame {
       this.clearBtn.setEnabled( false )
       this.addChild(this.clearBtn )
 
-      this.clock = new Clock(345, 560, "", 0xFCFAFA)
+      this.clock = new Clock(345, this.gameHeight-15, "", 0xFCFAFA)
       this.addChild(this.clock)
 
       this.scoreDisplay = new PIXI.Text("00000", {
@@ -102,7 +105,7 @@ export default class LetterDrop extends BaseGame {
       })
       this.scoreDisplay.anchor.set(0,1)
       this.scoreDisplay.x = 10 
-      this.scoreDisplay.y = 565
+      this.scoreDisplay.y = this.gameHeight-10
       this.scene.addChild( this.scoreDisplay)
 
       this.startOverlay = new StartOverlay( API_SERVICE, this.startHandler.bind(this)) 
@@ -193,7 +196,8 @@ export default class LetterDrop extends BaseGame {
 
       // backhgrounnd for trash meter
       this.gfx.beginFill(0x90a3a3)
-      this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*5,this.gridTop, LetterDrop.TILE_W, LetterDrop.TILE_H*6)
+      this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*LetterDrop.COLUMNS,
+         this.gridTop, LetterDrop.TILE_W, LetterDrop.TILE_H*LetterDrop.MAX_HEIGHT)
       this.gfx.endFill()
    }
 
@@ -285,6 +289,16 @@ export default class LetterDrop extends BaseGame {
       this.clearBtn.setEnabled(true)
       if ( this.word.text.length > 3) {
          this.submitBtn.setEnabled(true)
+      }
+      if ( this.word.text.length == 10) {
+         this.columns.forEach( c => {
+            c.forEach( t => {
+               if ( !t.selected ) {
+                  t.setEnabled( false )
+               }
+            })
+         })
+
       }
    }
 

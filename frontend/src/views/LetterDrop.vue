@@ -9,7 +9,7 @@ import Sweep from "@/games/letterdrop/game"
 import { useRouter } from 'vue-router'
 
 const GAME_WIDTH = 380
-const GAME_HEIGHT = 580
+const GAME_HEIGHT = 515
 
 const router = useRouter()
 
