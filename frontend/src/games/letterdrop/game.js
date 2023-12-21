@@ -80,6 +80,7 @@ export default class LetterDrop extends BaseGame {
       this.submitBtn.small()
       this.submitBtn.alignTopLeft()
       this.submitBtn.noShadow()
+      this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn )
 
       this.clearBtn = new Button( 230, 510, "Clear", () => {
@@ -88,6 +89,7 @@ export default class LetterDrop extends BaseGame {
       this.clearBtn.small()
       this.clearBtn.alignTopLeft()
       this.clearBtn.noShadow()
+      this.clearBtn.setEnabled( false )
       this.addChild(this.clearBtn )
 
       this.clock = new Clock(345, 560, "", 0xFCFAFA)
@@ -196,7 +198,6 @@ export default class LetterDrop extends BaseGame {
    }
 
    trashSelectedTile() {
-      // TODO limit trash or end game if overvlow
       let choiceNum = this.choices.findIndex( t => t.selected)
       let tgtTile = this.choices[choiceNum]
       this.choices[choiceNum] = null
@@ -209,6 +210,9 @@ export default class LetterDrop extends BaseGame {
       
       this.toggleTileButtons( false )
       this.trashMeter.increaseValue()
+      if ( this.trashMeter.isFull() ) {
+         this.trashBtn.setEnabled(false)
+      }
 
       setTimeout( () => {
          this.removeChild( tgtTile )
@@ -221,7 +225,11 @@ export default class LetterDrop extends BaseGame {
       this.columnButtons.forEach( b => {
          if (b) b.setEnabled( enabled ) 
       })  
-      this.trashBtn.setEnabled( enabled )
+      if ( this.trashMeter.isFull() ) {
+         this.trashBtn.setEnabled( false )
+      } else {
+         this.trashBtn.setEnabled( enabled )
+      }
    }
 
    columnPicked( colNum ) {
@@ -273,6 +281,11 @@ export default class LetterDrop extends BaseGame {
       this.currWordTile.setActive(true)
 
       this.getAdjacentTiles(tile).forEach( t => t.setEnabled(true) )
+
+      this.clearBtn.setEnabled(true)
+      if ( this.word.text.length > 3) {
+         this.submitBtn.setEnabled(true)
+      }
    }
 
    getAdjacentTiles( tile ) {
@@ -306,6 +319,8 @@ export default class LetterDrop extends BaseGame {
       this.word.text = ""
       this.currWordTile.setActive(false)
       this.currWordTile = null
+      this.submitBtn.setEnabled(false)
+      this.clearBtn.setEnabled(false)
    }
 
    submitWord() {

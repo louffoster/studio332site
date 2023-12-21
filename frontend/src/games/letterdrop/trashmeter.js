@@ -8,7 +8,7 @@ export default class TrashMeter extends PIXI.Container {
       this.meterW = w 
       this.meterH = h
       this.value = 0
-      this.maxValue = 8
+      this.maxValue = 5
 
       this.gfx = new PIXI.Graphics() 
       this.addChild( this.gfx )
