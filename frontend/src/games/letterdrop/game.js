@@ -218,33 +218,33 @@ export default class LetterDrop extends BaseGame {
       let choiceNum = this.choices.findIndex( t => t.selected)
       let tgtTile = this.choices[choiceNum]
       this.choices[choiceNum] = null
-      let colX = this.gridLeft + colNum*LetterDrop.TILE_W
       tgtTile.deselect()
-      tgtTile.setPosition(colX, this.gridTop)
+      this.dropNow(tgtTile, colNum)
+   } 
 
+   dropNow( tgtTile, colNum ) {
+      let colX = this.gridLeft + colNum*LetterDrop.TILE_W
 
       // check the top tile in the tgt column and drop the target to 
       // just above that position
       let tgtY = this.gridTop+((LetterDrop.MAX_HEIGHT-1)*LetterDrop.TILE_H)
       let tgtCol = this.columns[ colNum ]
       tgtY -= ( LetterDrop.TILE_H * tgtCol.length)
-      setTimeout( () => {
-         tgtCol.push(tgtTile)
-         tgtTile.setToggle( false )
-         this.fillChoices()
-         new TWEEDLE.Tween(tgtTile).to({ y: tgtY}, 300).start().easing(TWEEDLE.Easing.Quadratic.Out)
-         this.toggleTileButtons( false )
-         tgtTile.setClickHandler( this.gridTileClicked.bind(this) )
-         if ( this.word.text != "") {
-            tgtTile.setEnabled( false )
-            this.getAdjacentTiles( tgtTile ).forEach( t => {
-               if ( t == this.currWordTile) {
-                  tgtTile.setEnabled( true )
-               }
-            })
-         }
-      }, 150)
-   } 
+      tgtCol.push(tgtTile)
+      tgtTile.setToggle( false )
+      this.fillChoices()
+      new TWEEDLE.Tween(tgtTile).to({ x: colX, y: tgtY}, 300).start().easing(TWEEDLE.Easing.Linear.None)
+      this.toggleTileButtons( false )
+      tgtTile.setClickHandler( this.gridTileClicked.bind(this) )
+      if ( this.word.text != "") {
+         tgtTile.setEnabled( false )
+         this.getAdjacentTiles( tgtTile ).forEach( t => {
+            if ( t == this.currWordTile) {
+               tgtTile.setEnabled( true )
+            }
+         })
+      }
+   }
 
    gridTileClicked( tile ) {
       if ( tile.selected == false) {
@@ -333,7 +333,6 @@ export default class LetterDrop extends BaseGame {
                         shifC.forEach( (shiftT,shiftRowIdx) => {
                            // the first position in a column is at the BOTTOM of the board. need 
                            // to reverse column array postion in to board position 
-                           console.log(shiftT)
                            let tilePos = (LetterDrop.MAX_HEIGHT - shiftRowIdx)-1
                            let tgtY = this.gridTop + tilePos * LetterDrop.TILE_H
                            if ( shiftT.y != tgtY) {
@@ -351,18 +350,29 @@ export default class LetterDrop extends BaseGame {
    }
 
    submitFailed() {
-      // TODO something bas happens when invalid word requested. at least some indication it was bad
-      console.log("BAD")
+      this.columns.forEach( col => {
+         col.forEach( t => {
+            if ( t.selected ) {
+               t.setError(500) // 500 is the error display time
+            }
+         })
+      }) 
+      setTimeout( () => {
+         this.clearWord()
+         this.choices.forEach(  (t,colIdx) => {
+            this.choices[colIdx] = null
+            this.dropNow( t, colIdx )
+         })
+         this.fillChoices()
+      }, 500)  
    }
 
    setTilesEnabled( enabled, deselectAll = false ) {
       this.columns.forEach( col => {
          col.forEach( t => {
-            if ( t != null ) {
-               t.setEnabled( enabled )
-               if ( deselectAll) {
-                  t.deselect()
-               }
+            t.setEnabled( enabled )
+            if ( deselectAll) {
+               t.deselect()
             }
          })
       })   

@@ -12,6 +12,7 @@ export default class Tile extends PIXI.Container {
       this.selected = false
       this.enabled = true
       this.toggle = true
+      this.error = false
 
       this.style = new PIXI.TextStyle({
          fill: "#4E6367",
@@ -60,6 +61,16 @@ export default class Tile extends PIXI.Container {
       if (this.extra ) {
          this.addChild(this.extra)
       }
+   }
+
+   setError( delay ) {
+      this.error = true 
+      this.selected = false
+      this.draw()
+      setTimeout( () => {
+         this.error = false 
+         this.draw()
+      }, delay)
    }
 
    setToggle( flag ) {
@@ -129,12 +140,16 @@ export default class Tile extends PIXI.Container {
       this.graphics.beginFill(0xFAFAFF)
       this.graphics.lineStyle(1, 0x03045E, 1)
 
-      if ( this.enabled == false ) {
-         this.graphics.beginFill(0xdAdAdF)    
+      if ( this.error ) {
+         this.graphics.beginFill(0xd36582) 
+      } else {
+         if ( this.enabled == false ) {
+            this.graphics.beginFill(0xdAdAdF)    
+         }
+         if (this.selected) {
+            this.graphics.beginFill(0x6bbce8)
+         } 
       }
-      if (this.selected) {
-         this.graphics.beginFill(0x6bbce8)
-      } 
       this.graphics.drawRect(0,0, Tile.WIDTH, Tile.HEIGHT)
       this.graphics.endFill()
    }
