@@ -11,9 +11,9 @@ import Button from "@/games/common/button"
 import Tile from "@/games/letterdrop/tile"
 import TrashMeter from "@/games/letterdrop/trashmeter"
 import DropButton from "@/games/letterdrop/dropbutton"
+import Timer from "@/games/letterdrop/timer"
 
 import trashJson from '@/assets/trash.json'
-import explodeJson from '@/assets/explode3.json'
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
@@ -29,11 +29,11 @@ export default class LetterDrop extends BaseGame {
    clearBtn = null 
    submitBtn = null
    choices = []
+   timer = null
    trashAnim = null
    startOverlay = null 
    gameState = "init"
    word = null
-   explodeAnim = null
    currWordTile = null
    score = 0
    scoreDisplay = null
@@ -46,11 +46,19 @@ export default class LetterDrop extends BaseGame {
 
    initialize(replayHandler, backHandler) { 
       this.trashAnim = particles.upgradeConfig(trashJson, ['smoke.png'])
-      this.explodeAnim = particles.upgradeConfig(explodeJson, ['spark.png','particle.png'])
 
       // draw backgrounnd an column buttons
       this.drawBoard()
       let boardBottom = this.gridTop+LetterDrop.TILE_H*LetterDrop.MAX_HEIGHT
+
+      // drop timer
+      this.timer = new Timer(
+         this.gridLeft+LetterDrop.TILE_W*LetterDrop.COLUMNS+LetterDrop.TILE_W/4+7, 
+         15, 
+         LetterDrop.TILE_W/3,
+         LetterDrop.TILE_H-10)
+      this.timer.setTimeoutHandler( this.timerExpired.bind(this))
+      this.addChild( this.timer )
 
       // trash meter
       let meterTop = this.gridTop+LetterDrop.TILE_H/4
@@ -254,6 +262,7 @@ export default class LetterDrop extends BaseGame {
       this.choices[choiceNum] = null
       tgtTile.deselect()
       this.dropNow(tgtTile, colNum)
+      this.timer.reset()
    } 
 
    dropNow( tgtTile, colNum ) {
@@ -288,10 +297,6 @@ export default class LetterDrop extends BaseGame {
                tgtTile.setEnabled( true )
             }
          })
-      }
-
-      if ( this.isBoardFull() ) {
-         this.gameOver()
       }
    }
 
@@ -367,16 +372,6 @@ export default class LetterDrop extends BaseGame {
       return adjacent
    }
 
-   isBoardFull() {
-      let full = true
-      this.columns.forEach( c => {
-         if ( c.length < LetterDrop.MAX_HEIGHT) {
-            full = false
-         }
-      })    
-      return full
-   }
-
    clearWord() {
       this.setTilesEnabled(true, true)
       this.word.text = ""
@@ -387,6 +382,7 @@ export default class LetterDrop extends BaseGame {
    }
 
    submitWord() {
+      this.timer.reset()
       let url = `${API_SERVICE}/letterdrop/check?w=${this.word.text}`
       axios.post(url).then( () => {
          this.submitSuccess()
@@ -445,6 +441,17 @@ export default class LetterDrop extends BaseGame {
       this.clearWord()
    }
 
+   timerExpired() {
+      this.choices.forEach(  (t,colIdx) => {
+         this.choices[colIdx] = null
+         if ( this.gameState == "playing") {
+            this.dropNow( t, colIdx )
+         }
+      })
+      this.fillChoices()   
+      this.timer.reset()
+   }
+
    submitFailed() {
       this.columns.forEach( col => {
          col.forEach( t => {
@@ -479,5 +486,6 @@ export default class LetterDrop extends BaseGame {
    gameTick()  {
       if ( this.gameState != "playing") return
       this.clock.tick(this.app.ticker.deltaMS)
+      this.timer.tick(this.app.ticker.deltaMS)
    }
 }
