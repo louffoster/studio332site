@@ -30,31 +30,30 @@ export default class StartOverlay extends PIXI.Container {
          fontSize: 18,
          lineHeight: 18,
          wordWrap: true,
-         fontWeight: 'bold',
-         wordWrapWidth: this.panelW - 20,
-         dropShadow: true,
-         dropShadowColor: '#000000',
-         dropShadowBlur: 2,
-         dropShadowDistance: 1,
-         align: "center"
+         wordWrapWidth: this.panelW - 40,
       })
 
-      let note1 = new PIXI.Text(`Drop tiles into columns of the board and use them to create words.`, style)
+      let msg = `Drop tiles into columns of the board and use them to create words. `
+      msg += "If you take too long to pick a tile, the whole row will be droppedd automatically."
+      let note1 = new PIXI.Text(msg, style)
       note1.anchor.set(0.5,0)
       note1.x = this.panelW/2
-      note1.y = 10
+      note1.y = 15
       this.addChild(note1)
 
-      let note2 = new PIXI.Text(`Words are created by selecting strings of adjacent tiles. Valid words remove tiles from the board.`, style)
+      msg = "Words are created by selecting strings of adjacent tiles. "
+      msg += "Valid words are 4-10 letters long and remove those tiles from the board."
+      let note2 = new PIXI.Text(msg, style)
       note2.anchor.set(0.5,0)
       note2.x = this.panelW/2
-      note2.y = 70
+      note2.y = 100
       this.addChild(note2)
 
-      let note3 = new PIXI.Text(`The game is over when the board is completely full.`, style)
+      msg = `The game is over when a tile is dropped on a column that is full.`
+      let note3 = new PIXI.Text(msg, style)
       note3.anchor.set(0.5,0)
       note3.x = this.panelW/2
-      note3.y = 160
+      note3.y = 180
       this.addChild(note3)
 
       this.msg = new PIXI.Text(`Initializing...`, style)

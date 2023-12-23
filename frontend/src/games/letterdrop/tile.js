@@ -4,16 +4,21 @@ export default class Tile extends PIXI.Container {
    static WIDTH = 60 
    static HEIGHT = 60 
 
+   selected = false
+   enabled = true
+   toggle = true
+   error = false
+   graphics  = null 
+   letter = null
+   extra = null 
+   value = null
+
    constructor(scoredLetter, x,y ) {
       super()
       
       this.tileValue = scoredLetter.value
       this.x = x
       this.y = y
-      this.selected = false
-      this.enabled = true
-      this.toggle = true
-      this.error = false
 
       let style = new PIXI.TextStyle({
          fill: "#4E6367",
@@ -79,21 +84,17 @@ export default class Tile extends PIXI.Container {
       return this.tileValue
    }
 
-   setError( delay ) {
-      this.error = true 
+   setError( flag ) {
+      this.error = flag 
       this.selected = false
       this.draw()
-      setTimeout( () => {
-         this.error = false 
-         this.draw()
-      }, delay)
    }
 
    setToggle( flag ) {
       this.toggle = flag
    }
 
-   setActive( flag ) {
+   setActive( flag ) { 
       if (flag) {
          this.letter.style.fill = 0xfadf63
          if ( this.extra ) {
@@ -109,11 +110,6 @@ export default class Tile extends PIXI.Container {
 
    setClickHandler( clickHandler ) {
       this.clickHandler = clickHandler  
-   }
-
-   setPosition(x,y) {
-      this.x = x 
-      this.y = y
    }
 
    text() {
@@ -153,14 +149,14 @@ export default class Tile extends PIXI.Container {
    draw() {
       this.graphics.clear()
  
-      this.graphics.beginFill(0xFAFAFF)
+      this.graphics.beginFill(0xFAFAFF, 1.0)
       this.graphics.lineStyle(1, 0x03045E, 1)
 
       if ( this.error ) {
          this.graphics.beginFill(0xd36582) 
       } else {
          if ( this.enabled == false ) {
-            this.graphics.beginFill(0xdAdAdF)    
+            this.graphics.beginFill(0xFAFAFF, 0.3) 
          }
          if (this.selected) {
             this.graphics.beginFill(0x6bbce8)

@@ -267,6 +267,10 @@ export default class LetterDrop extends BaseGame {
 
    dropNow( tgtTile, colNum ) {
       if ( this.columns[colNum].length == LetterDrop.MAX_HEIGHT) {
+         this.gameState = "over"
+         this.setTilesEnabled( false, true )
+         this.columns[colNum].forEach( t => t.setError(true) )
+   
          var emitter = new particles.Emitter(this.scene, this.trashAnim )
          emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
@@ -277,10 +281,11 @@ export default class LetterDrop extends BaseGame {
          })
          return
       }
-      let colX = this.gridLeft + colNum*LetterDrop.TILE_W
+
 
       // check the top tile in the tgt column and drop the target to 
       // just above that position
+      let colX = this.gridLeft + colNum*LetterDrop.TILE_W
       let tgtY = this.gridTop+((LetterDrop.MAX_HEIGHT-1)*LetterDrop.TILE_H)
       let tgtCol = this.columns[ colNum ]
       tgtY -= ( LetterDrop.TILE_H * tgtCol.length)
@@ -301,6 +306,7 @@ export default class LetterDrop extends BaseGame {
    }
 
    gameOver() {
+      this.gameState = "over"
       this.setTilesEnabled(false, true)
       this.choices.forEach( t => {
          if ( t != null ) {
@@ -308,10 +314,9 @@ export default class LetterDrop extends BaseGame {
             t.destroy()
          }
       })
-      this.gameState = "over"
       this.endOverlay.setStats(this.score, this.clock.gameTimeFormatted() )
-      this.scene.addChild( this.endOverlay )
-         // TODO animations?
+
+      setTimeout( () => this.scene.addChild( this.endOverlay ), 1500)
    }
 
    gridTileClicked( tile ) {
@@ -453,23 +458,32 @@ export default class LetterDrop extends BaseGame {
    }
 
    submitFailed() {
-      this.columns.forEach( col => {
-         col.forEach( t => {
-            if ( t.selected ) {
-               t.setError(500) // 500 is the error display time
-            }
-         })
-      }) 
+      this.setErrorTiles(true)
       setTimeout( () => {
          this.clearWord()
+         this.setErrorTiles(false)
          this.choices.forEach(  (t,colIdx) => {
             this.choices[colIdx] = null
-            if ( this.gameState == "playing") {
-               this.dropNow( t, colIdx )
-            }
+            this.dropNow( t, colIdx )
          })
          this.fillChoices()
       }, 500)  
+   }
+
+   setErrorTiles( flag ) {
+      this.columns.forEach( col => {
+         col.forEach( t => {
+            if ( flag ) {
+               if ( t.selected ) {
+                  t.setError(true)
+               }
+            } else {
+               if ( t.error ) {
+                  t.setError(false)
+               }
+            }
+         })
+      }) 
    }
 
    setTilesEnabled( enabled, deselectAll = false ) {

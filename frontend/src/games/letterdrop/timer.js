@@ -8,8 +8,7 @@ export default class Timer extends PIXI.Container {
       this.meterW = w 
       this.meterH = h
       this.percent = 100
-      this.percentPerSec = 3.33 // 30 secs to empty
-      console.log(`${x}, ${y}, ${w}, ${h}`)
+      this.percentPerSec = 5 // 20 secs to empty
 
       this.gfx = new PIXI.Graphics() 
       this.addChild( this.gfx )
