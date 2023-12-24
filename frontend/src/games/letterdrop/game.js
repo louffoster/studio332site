@@ -186,7 +186,7 @@ export default class LetterDrop extends BaseGame {
       }
 
       // trash drop button
-      this.trashBtn = new DropButton(x, y, this.trashSelectedTile.bind(this) )
+      this.trashBtn = new DropButton(x, y, this.trashSelectedTiles.bind(this) )
       this.trashBtn.useTrashIcon() 
       this.trashBtn.setEnabled( false )
       this.addChild( this.trashBtn )
@@ -215,27 +215,51 @@ export default class LetterDrop extends BaseGame {
       this.gfx.endFill()
    }
 
-   trashSelectedTile() {
+   trashSelectedTiles() {
       let choiceNum = this.choices.findIndex( t => t.selected)
-      let tgtTile = this.choices[choiceNum]
-      this.choices[choiceNum] = null
+      if ( choiceNum > -1) {
+         let tgtTile = this.choices[choiceNum]
+         this.choices[choiceNum] = null
+         this.trashTile( tgtTile, () => {
+            this.fillChoices()  
+         })
+         this.toggleTileButtons( false )
+      }
 
+      let gridTileTrashed = false
+      this.columns.forEach( c => {
+         c.forEach( t => {
+            if ( t.selected ) {
+               gridTileTrashed = true
+               this.trashTile( t, () => {
+                  let tgtIdx = c.findIndex( testT => testT == t)
+                  if (tgtIdx > -1) {
+                     t.destroy()
+                     c.splice(tgtIdx,1)
+                  }
+               })
+            }
+         })
+      })
+
+      if ( gridTileTrashed ) {
+         this.clearWord()
+         this.dropGridTiles()
+         this.trashBtn.setEnabled( false )
+         this.setTilesEnabled(true, true)
+      }
+   }
+
+   trashTile( tgtTile, trashedCallback ) {
       var emitter = new particles.Emitter(this.scene, this.trashAnim )
       emitter.updateOwnerPos(0,0)
       emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
-      emitter.playOnceAndDestroy()   
-
-      
-      this.toggleTileButtons( false )
+      emitter.playOnceAndDestroy() 
       this.trashMeter.increaseValue()
-      if ( this.trashMeter.isFull() ) {
-         this.trashBtn.setEnabled(false)
-      }
-
       setTimeout( () => {
          this.removeChild( tgtTile )
          tgtTile.destroy()
-         this.fillChoices()
+         trashedCallback()
       }, 450)
    }
 
@@ -250,7 +274,7 @@ export default class LetterDrop extends BaseGame {
       if ( this.trashMeter.isFull() ) {
          this.trashBtn.setEnabled( false )
       } else {
-         this.trashBtn.setEnabled( enabled )
+         this.updateTrashButtonState()
       }
    }
 
@@ -303,6 +327,7 @@ export default class LetterDrop extends BaseGame {
             }
          })
       }
+      this.updateTrashButtonState()
    }
 
    gameOver() {
@@ -319,11 +344,30 @@ export default class LetterDrop extends BaseGame {
       setTimeout( () => this.scene.addChild( this.endOverlay ), 1500)
    }
 
-   gridTileClicked( tile ) {
-      if ( tile.selected == false) {
-         this.setTilesEnabled(true)
-         return
+   updateTrashButtonState() {
+      let selectCnt = 0 
+      this.choices.forEach( c => {
+         if (c.selected) {
+            selectCnt++
+         }
+      })
+      this.columns.forEach( c => {
+         c.forEach( t => {
+            if ( t.selected) {
+               selectCnt++
+            }
+         })
+      })
+      let enabled = false
+      if ( selectCnt > 0) {
+         if ( this.trashMeter.canTrash(selectCnt) ) {
+            enabled = true
+         }
       }
+      this.trashBtn.setEnabled( enabled )
+   }
+
+   gridTileClicked( tile ) {
       this.setTilesEnabled( false )
       tile.setEnabled(true)
       this.word.text += tile.text()
@@ -334,6 +378,7 @@ export default class LetterDrop extends BaseGame {
       this.currWordTile.setActive(true)
 
       this.getAdjacentTiles(tile).forEach( t => t.setEnabled(true) )
+      this.updateTrashButtonState()
 
       this.clearBtn.setEnabled(true)
       if ( this.word.text.length > 3) {
@@ -423,17 +468,7 @@ export default class LetterDrop extends BaseGame {
 
                   // only when all word tiles are gone, shift other tiles to fill in the gaps
                   if (tileCnt == 0 ){
-                     this.columns.forEach( (shifC) => {
-                        shifC.forEach( (shiftT,shiftRowIdx) => {
-                           // the first position in a column is at the BOTTOM of the board. need 
-                           // to reverse column array postion in to board position 
-                           let tilePos = (LetterDrop.MAX_HEIGHT - shiftRowIdx)-1
-                           let tgtY = this.gridTop + tilePos * LetterDrop.TILE_H
-                           if ( shiftT.y != tgtY) {
-                              new TWEEDLE.Tween(shiftT).to({ y: tgtY}, 250).start().easing(TWEEDLE.Easing.Linear.None)
-                           }
-                        })
-                     })    
+                     this.dropGridTiles()      
                   }
                }, 300)
             }
@@ -446,12 +481,27 @@ export default class LetterDrop extends BaseGame {
       this.clearWord()
    }
 
+   dropGridTiles() {
+      setTimeout( () => {
+         this.columns.forEach( (shifC) => {
+            shifC.forEach( (shiftT,shiftRowIdx) => {
+               // the first position in a column is at the BOTTOM of the board. need 
+               // to reverse column array postion in to board position 
+               let tilePos = (LetterDrop.MAX_HEIGHT - shiftRowIdx)-1
+               let tgtY = this.gridTop + tilePos * LetterDrop.TILE_H
+               if ( shiftT.y != tgtY) {
+                  new TWEEDLE.Tween(shiftT).to({ y: tgtY}, 250).start().easing(TWEEDLE.Easing.Linear.None)
+               }
+            })
+         })
+      }, 500)
+   }
+
    timerExpired() {
       this.choices.forEach(  (t,colIdx) => {
+         t.deselect()
          this.choices[colIdx] = null
-         if ( this.gameState == "playing") {
-            this.dropNow( t, colIdx )
-         }
+         this.dropNow( t, colIdx )
       })
       this.fillChoices()   
       this.timer.reset()

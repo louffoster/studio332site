@@ -34,7 +34,7 @@ export default class StartOverlay extends PIXI.Container {
       })
 
       let msg = `Drop tiles into columns of the board and use them to create words. `
-      msg += "If you take too long to pick a tile, the whole row will be droppedd automatically."
+      msg += "If you take too long to pick a tile, the whole row will be dropped automatically."
       let note1 = new PIXI.Text(msg, style)
       note1.anchor.set(0.5,0)
       note1.x = this.panelW/2

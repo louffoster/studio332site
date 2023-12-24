@@ -8,7 +8,7 @@ export default class TrashMeter extends PIXI.Container {
       this.meterW = w 
       this.meterH = h
       this.value = 0
-      this.maxValue = 5
+      this.maxValue = 10
 
       this.gfx = new PIXI.Graphics() 
       this.addChild( this.gfx )
@@ -27,6 +27,10 @@ export default class TrashMeter extends PIXI.Container {
       this.value++
       this.value = Math.min(this.value, this.maxValue)
       this.drawGauge()
+   }
+
+   canTrash( letterCount ) {
+      return (this.value + letterCount < this.maxValue)
    }
 
    drawGauge() {
