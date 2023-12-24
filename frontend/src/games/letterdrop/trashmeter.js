@@ -30,7 +30,7 @@ export default class TrashMeter extends PIXI.Container {
    }
 
    canTrash( letterCount ) {
-      return (this.value + letterCount < this.maxValue)
+      return (this.value + letterCount <= this.maxValue)
    }
 
    drawGauge() {
