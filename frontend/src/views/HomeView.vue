@@ -116,6 +116,9 @@ const toggleMosiacHelp = ((event) => {
          </li>
       </ul>
    </div>
+   <div class="content tests">
+      <router-link to="/physics">Physics Test</router-link>
+   </div>
 </template>
 
 <style lang="scss" scoped>
@@ -185,10 +188,11 @@ a, .game-start {
       text-decoration: underline;
    }
 }
-p.list {
-   margin: 0 40px;
-   font-size: 0.8em;
-   font-style: italic;
+div.tests {
+   font-size: 0.85em;
+   border-top: 1px solid #999;
+   margin-top: 20px;
+   padding-top: 20px;
 }
 
 </style>

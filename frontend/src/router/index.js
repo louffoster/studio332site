@@ -4,6 +4,7 @@ import Virus from '../views/Virus.vue'
 import Mosaic from '../views/Mosaic.vue'
 import Sweep from '../views/Sweep.vue'
 import LetterDrop from '../views/LetterDrop.vue'
+import Physics from '../views/Physics.vue'
 
 const router = createRouter({
    history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
          path: '/letterdrop',
          name: 'letterdrop',
          component: LetterDrop
+      },
+      {
+         path: '/physics',
+         name: 'physics',
+         component: Physics
       },
    ]
 })
