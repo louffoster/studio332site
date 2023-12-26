@@ -124,7 +124,6 @@ export default class LetterDrop extends BaseGame {
       this.scene.addChild( this.startOverlay )
       
       // start the eicker last so everything is created / initialized
-      this.app.ticker.add( this.gameTick.bind(this) )
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
 
@@ -547,7 +546,7 @@ export default class LetterDrop extends BaseGame {
       })   
    }
 
-   gameTick()  {
+   update()  {
       if ( this.gameState != "playing") return
       this.clock.tick(this.app.ticker.deltaMS)
       this.timer.tick(this.app.ticker.deltaMS)

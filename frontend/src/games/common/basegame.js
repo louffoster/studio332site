@@ -36,6 +36,8 @@ export default class BaseGame {
 
       this.gfx = new PIXI.Graphics() 
       this.scene.addChild(this.gfx)
+
+      this.app.ticker.add( this.update.bind(this) )
    }
 
    resize() {
@@ -76,6 +78,10 @@ export default class BaseGame {
       }
 
       return array;
+   }
+
+   update() {
+      // base game does nothing
    }
 
    destroy() {
