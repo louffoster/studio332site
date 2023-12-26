@@ -1,8 +1,8 @@
 import * as PIXI from "pixi.js"
 
 export default class Timer extends PIXI.Container {
-   static SPEEDUP_DELAY_MS = 15 * 1000 // increate rate every 15 seconds
-   static RATE_INCREASE = 0.15         // timer rate increases by this much
+   static SPEEDUP_DELAY_MS = 20 * 1000 // ow often to get faster
+   static RATE_INCREASE = 0.10         // timer rate increases by this much
    static MAX_RATE = 20.0              // 5 second countdown is the fastest
 
    constructor(x, y, w, h ) {
@@ -12,7 +12,7 @@ export default class Timer extends PIXI.Container {
       this.meterW = w 
       this.meterH = h
       this.percent = 100
-      this.percentPerSec = 6.75 // 15ish secs to empty
+      this.percentPerSec = 6.5 // 15ish secs to empty
       this.speedUpDelayMS = Timer.SPEEDUP_DELAY_MS
       this.maxRateHit = false
 
