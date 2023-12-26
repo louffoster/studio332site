@@ -9,7 +9,7 @@ const mosaichelp = ref()
 const sweephelp = ref()
 
 const toggleDWHelp = ((event) => {
-   wdhelp.value.toggle(event)
+   dwhelp.value.toggle(event)
 })
 
 const toggleVirusHelp = ((event) => {
@@ -34,10 +34,18 @@ const toggleMosiacHelp = ((event) => {
                <router-link to="/letterdrop">Letter Drop</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleDWHelp" />
             </div>
-            <OverlayPanel ref="lwhelp">
+            <OverlayPanel ref="dwhelp">
                <div class="rules">
                   <h3>Letter Drop</h3>
-                  <p>Drop letters onto the board and form words. Game ends when board is full.</p>
+                  <p>Drop letters onto the board then join adjacent letters to form words.</p>
+                  <ul>
+                     <li>Select a letter from the row above the board, then tap an arrow button to drop it onto the board in that column.</li>
+                     <li>If you wait too long to drop a letter, the entire row will drop.</li>
+                     <li>Select adjacent letters on the board to create 4-10 letter words.</li>
+                     <li>Any selected letters can also be trashed by tapping the red X button.</li>
+                     <li>Successful words remove those letters from the board.</li>
+                     <li>Invalid words will cause the entire row of letter options to drop on the board.</li>
+                  </ul>
                </div>
             </OverlayPanel>
          </li>
@@ -120,6 +128,10 @@ div.rules {
    }
    p {
       margin: 5px 0;
+      font-size: 0.9em;
+   }
+   li {
+      font-size: 0.85em;
    }
 }
 div.content {
