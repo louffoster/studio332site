@@ -46,20 +46,26 @@ export default class EndOverlay extends PIXI.Container {
       this.heading = new PIXI.Text(`GAME OVER`, style)
       this.heading.anchor.set(0.5, 0.5)
       this.heading.x = this.popupW / 2
-      this.heading.y = 35
+      this.heading.y = 25
+
+      this.score = new PIXI.Text(`00000`, style)
+      this.score.anchor.set(0.5, 0.5)
+      this.score.x = this.popupW / 2
+      this.score.y = 55
 
       this.msg = new PIXI.Text(`woof`, style)
       this.msg.anchor.set(0.5, 0.5)
       this.msg.x = this.popupW / 2
-      this.msg.y = 75
+      this.msg.y = 85
 
       this.totalMsg = new PIXI.Text(`xx`, small)
       this.totalMsg.anchor.set(0.5, 0.5)
       this.totalMsg.x = this.popupW / 2
-      this.totalMsg.y = 110
+      this.totalMsg.y = 115
 
       this.addChild(this.graphics)
       this.addChild(this.heading)
+      this.addChild(this.score)
       this.addChild(this.msg)
       this.addChild(this.totalMsg)
 
@@ -114,12 +120,16 @@ export default class EndOverlay extends PIXI.Container {
       this.totalMsg.text = "Total words created: "+total
    }
    
-   setWin( timeStr, wordCounts ) {
+   setWin( score, timeStr, wordCounts ) {
+      let txt = `${score}`.padStart(5,"0")
+      this.score.text = "Score: "+txt
       this.heading.text = "Congratulations!"
       this.msg.text = `Board cleared in ${timeStr}`
       this.createTotalWordsMessage(wordCounts)
    }
-   setLoss( tilesLeft, wordCounts ) {
+   setLoss( score, tilesLeft, wordCounts ) {
+      let txt = `${score}`.padStart(5,"0")
+      this.score.text = "Score: "+txt
       this.heading.text = "GAME OVER"
       this.msg.text = `${tilesLeft} letters remain`
       this.createTotalWordsMessage(wordCounts)

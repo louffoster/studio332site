@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js"
-import Letter from "@/games/sweep/letter"
+import Tile from "@/games/sweep/tile"
+import Letter from "@/games/common/letter"
 
 export default class PickOverlay extends PIXI.Container {
    constructor(pickHandler) {
@@ -47,15 +48,16 @@ export default class PickOverlay extends PIXI.Container {
       let y=40
       this.letters = []
       choices.forEach( (helpLtr,idx) => {
-         let l = new Letter(helpLtr, x,y, this.letterClicked.bind(this))
-         l.setToggle()
-         this.addChild(l)
-         x += Letter.WIDTH
+         let letter = new Letter(helpLtr, 1)
+         let t = new Tile(letter, x,y, this.letterClicked.bind(this))
+         t.setToggle()
+         this.addChild(t)
+         x += Tile.WIDTH
          if (idx == 4) {
-            y += Letter.HEIGHT
+            y += Tile.HEIGHT
             x = 30
          }
-         this.letters.push(l)
+         this.letters.push(t)
          
       })
    }

@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js"
 
-export default class Letter extends PIXI.Container {
+export default class Tile extends PIXI.Container {
    static WIDTH = 60 
    static HEIGHT = 60 
 
-   constructor(letter, x,y, clickHandler ) {
+   constructor(scoredLetter, x,y, clickHandler ) {
       super()
 
       this.x = x
@@ -13,39 +13,51 @@ export default class Letter extends PIXI.Container {
       this.cleared = false
       this.disabled = false
       this.toggle = false
+      this.tileValue = scoredLetter.value
 
-      this.style = new PIXI.TextStyle({
+      let style = new PIXI.TextStyle({
          fill: "#CAF0F8",
          fontFamily: "Arial",
          fontSize: 36,
          stroke: '#03045E',
-         strokeThickness: 4,
+         strokeThickness: 1,
       })
-      this.smallStyle = new PIXI.TextStyle({
+      let smallStyle = new PIXI.TextStyle({
          fill: "#CAF0F8",
          fontFamily: "Arial",
          fontSize: 18,
          stroke: '#03045E',
-         strokeThickness: 3,
+         strokeThickness: 1,
+      })
+      let scoreStyle = new PIXI.TextStyle({
+         fill: "#CAF0F8",
+         fontFamily: "Arial",
+         fontSize: 12,
       })
 
       this.graphics = new PIXI.Graphics()
-      this.letter = new PIXI.Text(letter, this.style)
+      this.letter = new PIXI.Text(scoredLetter.text, style)
       this.letter.anchor.set(0.5)
-      this.letter.x = Letter.WIDTH / 2.0 
-      this.letter.y = Letter.HEIGHT / 2.0
-      if ( letter == "Q") {
-         this.extra = new PIXI.Text("U", this.smallStyle)
+      this.letter.x = Tile.WIDTH / 2.0 
+      this.letter.y = Tile.HEIGHT / 2.0
+      if ( scoredLetter.text == "Q") {
+         this.extra = new PIXI.Text("U", smallStyle)
          this.extra.anchor.set(0.5)
-         this.extra.x = Letter.WIDTH / 2.0 + 14
-         this.extra.y = Letter.HEIGHT / 2.0 + 12    
+         this.extra.x = Tile.WIDTH / 2.0 + 14
+         this.extra.y = Tile.HEIGHT / 2.0 + 12    
          this.letter.x-=8
       }
+
+      let scoreTxt = `${this.tileValue}`
+      this.value = new PIXI.Text(scoreTxt, scoreStyle)
+      this.value.anchor.set(0,1)
+      this.value.x = 4
+      this.value.y = Tile.HEIGHT - 3  
 
       this.draw()
 
       this.eventMode = 'static'
-      this.hitArea =  new PIXI.Rectangle(0,0,Letter.WIDTH,Letter.HEIGHT)
+      this.hitArea =  new PIXI.Rectangle(0,0,Tile.WIDTH,Tile.HEIGHT)
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', () => {
@@ -54,34 +66,34 @@ export default class Letter extends PIXI.Container {
          }
          if ( this.selected && this.toggle ) {
             this.selected = false 
-            clickHandler( this.text() )
+            clickHandler( this )
             this.draw()
             return
          }
          if ( this.selected == false ) {
             this.selected = true 
-            clickHandler( this.text())
+            clickHandler( this )
             this.draw()
          }
       })
 
       this.addChild(this.graphics)
       this.addChild(this.letter)
+      this.addChild(this.value)
       if (this.extra ) {
          this.addChild(this.extra)
       }
    }
 
-   text() {
+   get text() {
       let txt = this.letter.text
       if ( this.extra) {
          txt += this.extra.text 
       }
       return txt
    }
-      
-   set( letter ) {
-      this.letter.text = letter
+   get score() {
+      return this.tileValue
    }
 
    setToggle() {
@@ -113,17 +125,16 @@ export default class Letter extends PIXI.Container {
       if ( this.extra ) {
          this.extra.text = ""
       }
+      this.value.text = ""
       this.eventMode = 'none'
       this.cursor ="default"
       this.draw()
    }
 
-   reset( letter ) {
-      this.letter.text = letter 
-      this.cleared = false  
-      this.eventMode = 'static'
-      this.cursor ="pointer"
-      this.draw()
+   set( letterTile ) {
+      this.letter.text = letterTile.text 
+      this.tileValue = letterTile.score
+      this.value.text = `${letterTile.score}`
    }
 
    draw() {
@@ -131,7 +142,7 @@ export default class Letter extends PIXI.Container {
          this.graphics.clear()
          this.graphics.beginFill(0x004080)
          this.graphics.lineStyle(1, 0x03045E, 1)
-         this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
+         this.graphics.drawRect(0,0, Tile.WIDTH, Tile.HEIGHT)
          this.graphics.endFill()
          return
       }
@@ -146,12 +157,12 @@ export default class Letter extends PIXI.Container {
       if (this.selected) {
          this.graphics.beginFill(0x00B4D8)
       } 
-      this.graphics.drawRect(0,0, Letter.WIDTH, Letter.HEIGHT)
+      this.graphics.drawRect(0,0, Tile.WIDTH, Tile.HEIGHT)
       this.graphics.endFill()
    }
 
    isVowel() {
       let vowel = ["A","E","I","O","U","Y"]
-      return ( vowel.includes(this.text()) )
+      return ( vowel.includes( this.text ) )
    }
 }
