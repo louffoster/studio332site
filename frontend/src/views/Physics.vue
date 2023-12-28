@@ -9,7 +9,7 @@ import PhysicsGame from "@/games/physics"
 import { useRouter } from 'vue-router'
 
 const GAME_WIDTH = 400
-const GAME_HEIGHT = 500
+const GAME_HEIGHT = 800
 
 var game = null
 

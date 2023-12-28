@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js"
 
 export default class Timer extends PIXI.Container {
    static SPEEDUP_DELAY_MS = 20 * 1000 // ow often to get faster
-   static RATE_INCREASE = 0.10         // timer rate increases by this much
+   static RATE_INCREASE = 0.09         // timer rate increases by this much
    static MAX_RATE = 20.0              // 5 second countdown is the fastest
 
    constructor(x, y, w, h ) {
