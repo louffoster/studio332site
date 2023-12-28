@@ -1,5 +1,5 @@
 <template>
-   <div class="header">
+   <div class="header" id="header">
       <router-link :to="{ name: 'home'}">
          <img class="s332" src="@/assets/s332logotype.png" />
       </router-link>

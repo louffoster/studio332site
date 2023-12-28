@@ -12,6 +12,10 @@ export default class BaseGame {
       this.gameWidth = gameW 
       this.gameHeight = gameH
 
+      let hdr = document.getElementById("header")
+      let hdrH = hdr.getBoundingClientRect().height
+      let windowH = window.innerHeight-hdrH
+
       PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
       this.app = new PIXI.Application({
          autoDensity: true, // Handles high DPI screens
@@ -21,7 +25,8 @@ export default class BaseGame {
          height: this.gameHeight,
       })
 
-      if (window.innerWidth <= this.gameWidth || window.innerHeight <= this.gameHeight   ) {
+      if (window.innerWidth <= this.gameWidth || windowH <= this.gameHeight   ) {
+         // hdr.style.display = "none"
          this.gameElement = document.body
          this.gameElement.appendChild( this.app.view )
          this.scene = new PIXI.Container()
@@ -42,18 +47,28 @@ export default class BaseGame {
 
    resize() {
       // Determine which screen dimension is most constrained
-      let ratioW = window.innerWidth / this.gameWidth
-      let ratioH = window.innerHeight / this.gameHeight
-      if ( window.innerWidth <  this.gameWidth ) {
-         this.scene.scale.x = this.scene.scale.y = ratioW 
-      } else {
-         if ( window.innerHeight <  this.gameHeight ) {
-            this.scene.scale.x = this.scene.scale.y = ratioH
-         }
-         this.scene.position.x = ((window.innerWidth - this.gameWidth) / 2.0) / ratioW
-      }
 
-      this.app.renderer.resize( window.innerWidth, window.innerHeight)
+      let hdr = document.getElementById("header")
+      let hdrH = hdr.getBoundingClientRect().height
+      let windowH = window.innerHeight-hdrH
+
+      let ratioW = window.innerWidth / this.gameWidth
+      let ratioH = windowH / this.gameHeight
+      let delW = window.innerWidth - this.gameWidth 
+      let delH = windowH - this.gameHeight
+      if (delW < 0 || delH < 0 ) {
+         if ( delW < delH ) {
+            this.scene.scale.x = this.scene.scale.y = ratioW 
+         } else {
+            this.scene.scale.x = this.scene.scale.y = ratioH  
+            if ( delW < 0) {
+               this.scene.position.x = ((window.innerWidth - this.gameWidth*ratioH) / 2.0) 
+            } else {
+               this.scene.position.x = ((window.innerWidth - this.gameWidth) / 2.0) / ratioW 
+            }
+         }
+      } 
+      this.app.renderer.resize( window.innerWidth, windowH)
    }
 
    addChild( child ) {
