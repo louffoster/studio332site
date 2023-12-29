@@ -51,7 +51,7 @@ export default class PhysicsGame extends BaseGame {
 
    addBall(x,y) {
       this.ballCnt++
-      var box3 = Shape.createCircle(this, `${this.ballCnt}`, x,y, 20, 0x660000, 0xFE5F55)
+      var box3 = Shape.createCircle(this, `${this.ballCnt}`, x,y, 30, 0x660000, 0xFE5F55)
       box3.setTouchListener( this.dragStart.bind(this))
       this.items.push( box3 )
 
