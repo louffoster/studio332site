@@ -14,7 +14,7 @@ const GAME_HEIGHT = 800
 var game = null
 
 onMounted(async () => {
-   game = new PhysicsGame(GAME_WIDTH, GAME_HEIGHT, 0x000000 )
+   game = new PhysicsGame(GAME_WIDTH, GAME_HEIGHT, 0x495867 )
    game.initialize()
 })
 
