@@ -31,10 +31,10 @@ export default class PhysicsGame extends BaseGame {
       var right = Shape.createBox(this, "right", this.gameWidth+90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
       this.items.push( right )
 
-      this.addBall(100,150)
-      this.addBall(140,150)
-      this.addBall(220,150)
-      this.addBall(300,150)
+      this.addBall(100,this.gameHeight/2)
+      this.addBall(140,this.gameHeight/2)
+      this.addBall(220,this.gameHeight/2)
+      this.addBall(300,this.gameHeight/2)
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
@@ -51,7 +51,7 @@ export default class PhysicsGame extends BaseGame {
 
    addBall(x,y) {
       this.ballCnt++
-      var box3 = Shape.createCircle(this, `${this.ballCnt}`, x,y, 30, 0x660000, 0xFE5F55)
+      var box3 = Shape.createCircle(this, `${this.ballCnt}`, x,y, 25, 0x660000, 0xFE5F55)
       box3.setTouchListener( this.dragStart.bind(this))
       this.items.push( box3 )
 
@@ -121,7 +121,7 @@ class Hole extends  PIXI.Container {
             shape.stop()
             return true
          } else if ( dist <= this.radius ) {
-            Matter.Body.applyForce( shape.physBody, shape.physBody.position, {x:dX/10000, y:dY/10000})
+            Matter.Body.applyForce( shape.physBody, shape.physBody.position, {x:dX/9000, y:dY/9000})
          }
       }
       return false
@@ -186,7 +186,7 @@ class Shape extends PIXI.Container {
          this.h = params.radius*2
          this.radius = params.radius
          this.pivot.set(0,0)
-         this.physBody = Matter.Bodies.circle(x, y, params.radius, {restitution: 1, friction: 0.3, isStatic: this.isStatic, id: id, frictionAir: 0.03})
+         this.physBody = Matter.Bodies.circle(x, y, params.radius, {restitution: 1,isStatic: this.isStatic, id: id, frictionAir: 0.02})
          this.hitArea = new PIXI.Circle(0,0, params.radius)
       } else {
          this.w = params.w 
