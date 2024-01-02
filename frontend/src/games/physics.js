@@ -15,23 +15,32 @@ export default class PhysicsGame extends BasePhysicsGame {
    initialize() {
       this.physics.gravity.scale = 0
 
-      this.holes.push(new Hole(this, this.gameWidth/2, this.gameHeight-90, 30))
-      this.holes.push(new Hole(this, this.gameWidth/2, 90, 30))
+      let h1 = new Hole(this.gameWidth/2, this.gameHeight-90, 30)
+      this.holes.push(h1)
+      this.addChild(h1)
+
+      let h2 = new Hole(this.gameWidth/2, 90, 30)
+      this.holes.push(h2)
+      this.addChild(h2)
 
       // note: make walls thick so ou cany move someting so fast it skips thru the wall
-      var ground = Shape.createBox(this, "bottom", this.gameWidth/2, this.gameHeight+90, this.gameWidth, 200, 0xF7F7FF, 0x577399, true)
+      var ground = Shape.createBox(this.gameWidth/2, this.gameHeight+90, this.gameWidth, 200, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(ground)
-      var top = Shape.createBox(this, "top", this.gameWidth/2, -90, this.gameWidth, 200, 0xF7F7FF, 0x577399, true)
+      var top = Shape.createBox( this.gameWidth/2, -90, this.gameWidth, 200, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(top)
-      var left = Shape.createBox(this, "left", -90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
+      var left = Shape.createBox( -90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(left)
-      var right = Shape.createBox(this, "right", this.gameWidth+90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
+      var right = Shape.createBox(this.gameWidth+90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(right)
 
       this.addBall(80,this.gameHeight/2)
       this.addBall(140,this.gameHeight/2)
       this.addBall(220,this.gameHeight/2)
       this.addBall(300,this.gameHeight/2)
+
+      let striker = new Striker(this.gameWidth/2, 150, 0x000066, 0x5E5FF5)
+      striker.setTouchListener( this.dragStart.bind(this))
+      this.addPhysicsItem(striker)
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
@@ -41,9 +50,9 @@ export default class PhysicsGame extends BasePhysicsGame {
 
    addBall(x,y) {
       this.ballCnt++
-      var ball = Shape.createCircle(this, `${this.ballCnt}`, x,y, 25, 0x660000, 0xFE5F55)
+      var ball = Shape.createCircle( x,y, 20, 0x660000, 0xFE5F55)
+      ball.setLabel(`${this.ballCnt}`)
       this.addPhysicsItem( ball )
-      ball.setTouchListener( this.dragStart.bind(this))
    }
 
    dragStart( clickPos, tgt ) {
@@ -88,7 +97,7 @@ export default class PhysicsGame extends BasePhysicsGame {
 
 class Hole extends  PIXI.Container {
    gfx = null
-   constructor( game, x,y, radius) {
+   constructor( x,y, radius) {
       super() 
       this.x = x 
       this.y = y 
@@ -96,7 +105,6 @@ class Hole extends  PIXI.Container {
       this.pivot.set(0,0)
       this.gfx = new PIXI.Graphics()
       this.addChild(this.gfx)
-      game.addChild( this )
       this.draw()
    }
 
@@ -125,26 +133,67 @@ class Hole extends  PIXI.Container {
 
 }
 
-
-class Shape extends BasePhysicsItem {
+class Striker extends BasePhysicsItem {
    lineColor = null 
    fillColor = null
    dragging = false 
    shape = "box"
    touchListener = null
+   radius = 0
+
+   constructor( x,y, lineColor=0xffffff, fillColor=0x666666) {
+      super(x,y)
+     
+      this.lineColor = new PIXI.Color( lineColor )
+      this.fillColor = new PIXI.Color( fillColor )
+      this.radius = 25
+      this.pivot.set(0,0)
+      this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02})
+      this.hitArea = new PIXI.Circle(0,0, this.radius)
+      
+      this.update()
+
+      this.draw() 
+
+      this.cursor ="pointer"
+      this.eventMode = 'static'
+      this.on('pointerdown', (event) => {
+         this.dragging = true
+         this.touchListener( event.global, this )
+      })
+   }
+
+   setTouchListener( l ) {
+      this.touchListener = l
+   }
+
+   draw() {
+      this.gfx.clear() 
+      this.gfx.lineStyle(1, this.lineColor, 1)
+      this.gfx.beginFill( this.fillColor )
+      this.gfx.drawCircle(0,0,this.radius-1)
+      this.gfx.endFill()
+   }
+}
+
+
+class Shape extends BasePhysicsItem {
+   lineColor = null 
+   fillColor = null
+   shape = "box"
    isStatic = false
 
-   static createCircle(game, id, x,y,radius, lineColor, fillColor) {
+   static createCircle(x,y, radius, lineColor, fillColor) {
       let params = {type: "circle", radius: radius, lineColor: lineColor, fillColor: fillColor }
-      return new Shape(game, id, x,y, params)
+      return new Shape(x,y, params)
    }
 
-   static createBox(game, id, x,y, w,h, lineColor, fillColor, isStatic = false) {
+   static createBox(x,y, w,h, lineColor, fillColor, isStatic = false) {
       let params = {type: "box", w: w, h: h, lineColor: lineColor, fillColor: fillColor, isStatic: isStatic }
-      return new Shape(game, id, x,y, params)    
+      return new Shape(x,y, params)    
    }
 
-   constructor( game, id, x,y, params = {type: "box", w: 40, h:40, lineColor: 0xffffff, fillColor: 0x666666}) {
+   constructor( x,y, params = {type: "box", w: 40, h:40, lineColor: 0xffffff, fillColor: 0x666666}) {
       super(x,y)
      
       this.shape = params.type
@@ -164,40 +213,25 @@ class Shape extends BasePhysicsItem {
          this.h = params.radius*2
          this.radius = params.radius
          this.pivot.set(0,0)
-         this.body = Matter.Bodies.circle(x, y, params.radius, {restitution: 1,isStatic: this.isStatic, id: id, frictionAir: 0.02})
+         this.body = Matter.Bodies.circle(x, y, params.radius, {restitution: 1, isStatic: this.isStatic, frictionAir: 0.02})
          this.hitArea = new PIXI.Circle(0,0, params.radius)
       } else {
          this.w = params.w 
          this.h = params.h
          this.pivot.set(this.w/2, this.h/2)   
-         this.body = Matter.Bodies.rectangle(x, y, this.w, this.h, { isStatic: this.isStatic, id: id })
+         this.body = Matter.Bodies.rectangle(x, y, this.w, this.h, { restitution: 1, isStatic: this.isStatic})
          this.hitArea = new PIXI.Rectangle(0,0, this.w, this.h)
       }
 
       this.update()
 
-      let label = new PIXI.Text(id, {fontSize: 12, fill: 0x550000, fontWeight: "bold"})
+      this.draw() 
+   }
+
+   setLabel( val ) {
+      let label = new PIXI.Text(val, {fontSize: 12, fill: 0x550000, fontWeight: "bold"})
       label.anchor.set(0.5,0.5)
       this.addChild(label)
-
-      this.draw() 
-
-      this.cursor ="pointer"
-      this.eventMode = 'static'
-      this.on('pointerdown', (event) => {
-         if ( this.isStatic || !this.touchListener ) return
-
-         this.dragging = true
-         this.touchListener( event.global, this )
-      })
-   }
-
-   get id() {
-      return this.body.id
-   }
-
-   setTouchListener( l ) {
-      this.touchListener = l
    }
 
    draw() {
@@ -209,7 +243,7 @@ class Shape extends BasePhysicsItem {
       this.gfx.lineStyle(line, this.lineColor, 1)
       this.gfx.beginFill( this.fillColor )
       if (this.shape == "circle") {
-         this.gfx.drawCircle(0,0,this.radius)
+         this.gfx.drawCircle(0,0,this.radius-1)
       } else {
          this.gfx.drawRect(0,0,this.w, this.h)
       }
