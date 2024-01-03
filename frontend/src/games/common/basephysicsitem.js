@@ -13,7 +13,12 @@ export default class BasePhysicsItem  extends  PIXI.Container {
       this.addChild(this.gfx)
    }
 
+   get tag() {
+      return this.body.label
+   }
+
    applyForce(fX, fY) {
+      console.log(`apply ${fX}, ${fY}`)
       Matter.Body.applyForce( this.body, this.body.position, {x:fX, y:fY})
    }
 

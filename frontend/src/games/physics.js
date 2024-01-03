@@ -38,14 +38,18 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.addBall(220,this.gameHeight/2)
       this.addBall(300,this.gameHeight/2)
 
-      let striker = new Striker(this.gameWidth/2, 150, 0x000066, 0x5E5FF5)
-      striker.setTouchListener( this.dragStart.bind(this))
-      this.addPhysicsItem(striker)
+      this.addStriker()
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+   }
+
+   addStriker() {
+      let striker = new Striker(this.gameWidth/2, 180, 0x000066, 0x5E5FF5)
+      striker.setTouchListener( this.dragStart.bind(this))
+      this.addPhysicsItem(striker)
    }
 
    addBall(x,y) {
@@ -69,9 +73,20 @@ export default class PhysicsGame extends BasePhysicsGame {
          let dY = e.global.y - this.dragStartY
 
          let dist = Math.sqrt( dX*dX + dY*dY) 
+         console.log(dist)
          let ratePxMerMs = dist / elapsedMS
-         let fX = Math.min(dX * (ratePxMerMs / 1000), 0.05)
-         let fY = Math.min(dY * (ratePxMerMs / 1000), 0.05)
+         let fX = dX * (ratePxMerMs / 250)
+         if ( fX > 0.2) {
+            fX = 0.2
+         } else if ( fX < -0.2) {
+            fX = -0.2
+         }
+         let fY = dY * (ratePxMerMs / 250)
+         if (fY > 0.2) {
+            fY = 0.2
+         } else if ( fY < -0.2) {
+            fY = -0.2
+         }
 
          this.targetObject.applyForce(fX,fY)
          this.targetObject = null 
@@ -87,8 +102,13 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.items.forEach( i => {
          this.holes.forEach( h => {
             if ( h.checkForSink( i ) ) {
+               console.log("SUNK "+i.label)
                this.removePhysicsItem( i )
-               this.addBall(this.gameWidth/2, this.gameHeight/2)
+               if ( i.tag == "striker") {
+                  this.addStriker()
+               } else {
+                  this.addBall(this.gameWidth/2, this.gameHeight/2)
+               }
             }
          })
       })
@@ -146,9 +166,9 @@ class Striker extends BasePhysicsItem {
      
       this.lineColor = new PIXI.Color( lineColor )
       this.fillColor = new PIXI.Color( fillColor )
-      this.radius = 25
+      this.radius = 30
       this.pivot.set(0,0)
-      this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02})
+      this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02, frictiion: 0, label: "striker"})
       this.hitArea = new PIXI.Circle(0,0, this.radius)
       
       this.update()
