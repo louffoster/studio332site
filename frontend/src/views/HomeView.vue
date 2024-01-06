@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import Button from 'primevue/button'
 import OverlayPanel from 'primevue/overlaypanel'
 
+const charromhelp = ref()
 const dwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
@@ -23,12 +24,27 @@ const toggleSweepHelp = ((event) => {
 const toggleMosiacHelp = ((event) => {
    mosaichelp.value.toggle(event)
 })
+const toggleCharromHelp = ((event) => {
+   charromhelp.value.toggle(event)
+})
 </script>
 
 <template>
    <div class="content">
       <h2>Games</h2>
       <ul>
+         <li>
+            <div class="game-info">
+               <router-link to="/charrom">Charrom</router-link>
+               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleCharromHelp" />
+            </div>
+            <OverlayPanel ref="charromhelp">
+               <div class="rules">
+                  <h3>Charrom</h3>
+                  <p>Charrom is a cross between Carrom and a word game.</p>
+               </div>
+            </OverlayPanel>
+         </li>
          <li>
             <div class="game-info">
                <router-link to="/letterdrop">Letter Drop</router-link>
@@ -115,9 +131,6 @@ const toggleMosiacHelp = ((event) => {
             </OverlayPanel>
          </li>
       </ul>
-   </div>
-   <div class="content tests">
-      <router-link to="/physics">Physics Test</router-link>
    </div>
 </template>
 

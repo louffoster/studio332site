@@ -5,7 +5,7 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount } from "vue"
-import PhysicsGame from "@/games/physics"
+import Charrom from "@/games/charrom/game.js"
 
 const GAME_WIDTH = 600
 const GAME_HEIGHT = 800
@@ -13,7 +13,7 @@ const GAME_HEIGHT = 800
 var game = null
 
 onMounted(async () => {
-   game = new PhysicsGame(GAME_WIDTH, GAME_HEIGHT, 0x495867 )
+   game = new Charrom(GAME_WIDTH, GAME_HEIGHT, 0x495867 )
    game.initialize()
 })
 

@@ -3,7 +3,7 @@ import BasePhysicsItem from "@/games/common/basephysicsitem"
 import Matter from 'matter-js'
 import * as PIXI from "pixi.js"
 
-export default class PhysicsGame extends BasePhysicsGame {
+export default class Charrom extends BasePhysicsGame {
    targetObject = null
    dragStartTime = -1
    dragStartX = 0 
