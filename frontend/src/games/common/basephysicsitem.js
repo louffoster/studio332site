@@ -17,8 +17,14 @@ export default class BasePhysicsItem  extends  PIXI.Container {
       return this.body.label
    }
 
+   setDensity( d ) {
+      Matter.Body.setDensity(this.body, d)
+   }
+   setMass( m ) {
+      Matter.Body.setMass(this.body, m)
+   }
+
    applyForce(fX, fY) {
-      console.log(`apply ${fX}, ${fY}`)
       Matter.Body.applyForce( this.body, this.body.position, {x:fX, y:fY})
    }
 

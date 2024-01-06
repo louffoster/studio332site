@@ -8,7 +8,7 @@ import { onMounted, onBeforeUnmount } from "vue"
 import PhysicsGame from "@/games/physics"
 import { useRouter } from 'vue-router'
 
-const GAME_WIDTH = 400
+const GAME_WIDTH = 500
 const GAME_HEIGHT = 800
 
 var game = null

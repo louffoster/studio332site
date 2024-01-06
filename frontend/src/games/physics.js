@@ -11,9 +11,12 @@ export default class PhysicsGame extends BasePhysicsGame {
    gameTimeMs = 0
    holes = []
    ballCnt = 0
+   dragGfx = null
 
    initialize() {
       this.physics.gravity.scale = 0
+
+     
 
       let h1 = new Hole(this.gameWidth/2, this.gameHeight-90, 30)
       this.holes.push(h1)
@@ -44,6 +47,9 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.app.stage.hitArea = this.app.screen
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+
+      this.dragGfx = new  PIXI.Graphics()
+      this.addChild(this.dragGfx)
    }
 
    addStriker() {
@@ -59,34 +65,47 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.addPhysicsItem( ball )
    }
 
-   dragStart( clickPos, tgt ) {
+   dragMove(e) {
+      if ( this.targetObject ) {
+         this.dragGfx.clear()
+         this.dragGfx.lineStyle(2, 0xBDD5EA, 1)
+         this.dragGfx.moveTo(this.dragStartX, this.dragStartY)
+         this.dragGfx.lineTo(e.global.x, e.global.y)
+      }
+   }
+
+   dragStart( tgt ) {
       this.targetObject = tgt 
       this.dragStartTime = this.gameTimeMs
-      this.dragStartX = clickPos.x
-      this.dragStartY = clickPos.y
+      this.dragStartX = tgt.x
+      this.dragStartY = tgt.y
+      this.app.stage.on('pointermove', this.dragMove.bind(this))
    }
 
    dragEnd(e) {
+      this.app.stage.off('pointermove', this.dragMove)
       if ( this.targetObject ) {
+         this.dragGfx.clear()
          let elapsedMS = this.gameTimeMs - this.dragStartTime 
          let dX = e.global.x - this.dragStartX
          let dY = e.global.y - this.dragStartY
 
          let dist = Math.sqrt( dX*dX + dY*dY) 
-         console.log(dist)
          let ratePxMerMs = dist / elapsedMS
-         let fX = dX * (ratePxMerMs / 250)
-         if ( fX > 0.2) {
-            fX = 0.2
-         } else if ( fX < -0.2) {
-            fX = -0.2
-         }
-         let fY = dY * (ratePxMerMs / 250)
-         if (fY > 0.2) {
-            fY = 0.2
-         } else if ( fY < -0.2) {
-            fY = -0.2
-         }
+         ratePxMerMs = Math.min(ratePxMerMs, 0.15)
+         console.log("PX PER SEC "+ratePxMerMs)
+         let fX = dX * (ratePxMerMs / 100)
+         // if ( fX > 0.1) {
+         //    fX = 0.1
+         // } else if ( fX < -0.1) {
+         //    fX = -0.1
+         // }
+         let fY = dY * (ratePxMerMs / 100)
+         // if (fY > 0.1) {
+         //    fY = 0.1
+         // } else if ( fY < -0.1) {
+         //    fY = -0.1
+         // }
 
          this.targetObject.applyForce(fX,fY)
          this.targetObject = null 
@@ -170,6 +189,8 @@ class Striker extends BasePhysicsItem {
       this.pivot.set(0,0)
       this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02, frictiion: 0, label: "striker"})
       this.hitArea = new PIXI.Circle(0,0, this.radius)
+      console.log("orig mass "+this.body.mass)
+      this.setMass(5.0)
       
       this.update()
 
@@ -177,9 +198,9 @@ class Striker extends BasePhysicsItem {
 
       this.cursor ="pointer"
       this.eventMode = 'static'
-      this.on('pointerdown', (event) => {
+      this.on('pointerdown', () => {
          this.dragging = true
-         this.touchListener( event.global, this )
+         this.touchListener( this )
       })
    }
 
@@ -191,7 +212,7 @@ class Striker extends BasePhysicsItem {
       this.gfx.clear() 
       this.gfx.lineStyle(1, this.lineColor, 1)
       this.gfx.beginFill( this.fillColor )
-      this.gfx.drawCircle(0,0,this.radius-1)
+      this.gfx.drawCircle(0,0,this.radius)
       this.gfx.endFill()
    }
 }
@@ -235,6 +256,7 @@ class Shape extends BasePhysicsItem {
          this.pivot.set(0,0)
          this.body = Matter.Bodies.circle(x, y, params.radius, {restitution: 1, isStatic: this.isStatic, frictionAir: 0.02})
          this.hitArea = new PIXI.Circle(0,0, params.radius)
+         this.setMass(4.75)
       } else {
          this.w = params.w 
          this.h = params.h
@@ -263,7 +285,7 @@ class Shape extends BasePhysicsItem {
       this.gfx.lineStyle(line, this.lineColor, 1)
       this.gfx.beginFill( this.fillColor )
       if (this.shape == "circle") {
-         this.gfx.drawCircle(0,0,this.radius-1)
+         this.gfx.drawCircle(0,0,this.radius)
       } else {
          this.gfx.drawRect(0,0,this.w, this.h)
       }
