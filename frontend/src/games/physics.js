@@ -16,8 +16,6 @@ export default class PhysicsGame extends BasePhysicsGame {
    initialize() {
       this.physics.gravity.scale = 0
 
-     
-
       let h1 = new Hole(this.gameWidth/2, this.gameHeight-90, 30)
       this.holes.push(h1)
       this.addChild(h1)
@@ -65,21 +63,12 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.addPhysicsItem( ball )
    }
 
-   dragMove(e) {
-      if ( this.targetObject ) {
-         this.dragGfx.clear()
-         this.dragGfx.lineStyle(2, 0xBDD5EA, 1)
-         this.dragGfx.moveTo(this.dragStartX, this.dragStartY)
-         this.dragGfx.lineTo(e.global.x, e.global.y)
-      }
-   }
-
-   dragStart( tgt ) {
+   dragStart( x,y,tgt ) {  
       this.targetObject = tgt 
       this.dragStartTime = this.gameTimeMs
-      this.dragStartX = tgt.x
-      this.dragStartY = tgt.y
-      this.app.stage.on('pointermove', this.dragMove.bind(this))
+      this.dragStartX = x
+      this.dragStartY = y
+      
    }
 
    dragEnd(e) {
@@ -93,19 +82,8 @@ export default class PhysicsGame extends BasePhysicsGame {
          let dist = Math.sqrt( dX*dX + dY*dY) 
          let ratePxMerMs = dist / elapsedMS
          ratePxMerMs = Math.min(ratePxMerMs, 0.15)
-         console.log("PX PER SEC "+ratePxMerMs)
          let fX = dX * (ratePxMerMs / 100)
-         // if ( fX > 0.1) {
-         //    fX = 0.1
-         // } else if ( fX < -0.1) {
-         //    fX = -0.1
-         // }
          let fY = dY * (ratePxMerMs / 100)
-         // if (fY > 0.1) {
-         //    fY = 0.1
-         // } else if ( fY < -0.1) {
-         //    fY = -0.1
-         // }
 
          this.targetObject.applyForce(fX,fY)
          this.targetObject = null 
@@ -121,7 +99,6 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.items.forEach( i => {
          this.holes.forEach( h => {
             if ( h.checkForSink( i ) ) {
-               console.log("SUNK "+i.label)
                this.removePhysicsItem( i )
                if ( i.tag == "striker") {
                   this.addStriker()
@@ -155,8 +132,8 @@ class Hole extends  PIXI.Container {
          if ( dist <= shape.radius/2 ) {
             shape.stop()
             return true
-         } else if ( dist <= this.radius ) {
-            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/9000, y:dY/9000})
+         } else if ( dist <= this.radius+(shape.radius*.6) ) {
+            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/5000, y:dY/5000})
          }
       }
       return false
@@ -169,7 +146,6 @@ class Hole extends  PIXI.Container {
       this.gfx.drawCircle(0,0,this.radius)
       this.gfx.endFill()    
    }
-
 }
 
 class Striker extends BasePhysicsItem {
@@ -198,9 +174,9 @@ class Striker extends BasePhysicsItem {
 
       this.cursor ="pointer"
       this.eventMode = 'static'
-      this.on('pointerdown', () => {
+      this.on('pointerdown', (e) => {
          this.dragging = true
-         this.touchListener( this )
+         this.touchListener( e.global.x, e.global.y, this )
       })
    }
 

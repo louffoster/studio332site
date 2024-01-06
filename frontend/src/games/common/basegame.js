@@ -71,6 +71,13 @@ export default class BaseGame {
       this.app.renderer.resize( window.innerWidth, windowH)
    }
 
+   get scaleX() {
+      return this.scene.scale.x
+   }
+   get scaleY() {
+      return this.scene.scale.y
+   }
+
    addChild( child ) {
       this.scene.addChild(child)
    }
