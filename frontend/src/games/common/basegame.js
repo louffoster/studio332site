@@ -42,6 +42,14 @@ export default class BaseGame {
       this.gfx = new PIXI.Graphics() 
       this.scene.addChild(this.gfx)
 
+      // add a mask to crop the screen to game dimensions
+      let m = new PIXI.Graphics() 
+      m.beginFill(0x000000)
+      m.drawRect(0, 0, this.gameWidth, this.gameHeight);
+      m.endFill()
+      this.scene.addChild(m)
+      this.scene.mask = m
+
       this.app.ticker.add( this.update.bind(this) )
    }
 
