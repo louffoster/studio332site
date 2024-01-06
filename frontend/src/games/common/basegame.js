@@ -26,7 +26,6 @@ export default class BaseGame {
       })
 
       if (window.innerWidth <= this.gameWidth || windowH <= this.gameHeight   ) {
-         // hdr.style.display = "none"
          this.gameElement = document.body
          this.gameElement.appendChild( this.app.view )
          this.scene = new PIXI.Container()

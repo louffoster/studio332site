@@ -25,19 +25,28 @@ export default class PhysicsGame extends BasePhysicsGame {
       this.addChild(h2)
 
       // note: make walls thick so ou cany move someting so fast it skips thru the wall
-      var ground = Shape.createBox(this.gameWidth/2, this.gameHeight+90, this.gameWidth, 200, 0xF7F7FF, 0x577399, true)
+      var ground = Shape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(ground)
-      var top = Shape.createBox( this.gameWidth/2, -90, this.gameWidth, 200, 0xF7F7FF, 0x577399, true)
+      var top = Shape.createBox( this.gameWidth/2, 5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(top)
-      var left = Shape.createBox( -90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
+      var left = Shape.createBox( 5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(left)
-      var right = Shape.createBox(this.gameWidth+90, this.gameHeight/2, 200, this.gameHeight, 0xF7F7FF, 0x577399, true)
+      var right = Shape.createBox(this.gameWidth-5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(right)
 
-      this.addBall(80,this.gameHeight/2)
-      this.addBall(140,this.gameHeight/2)
-      this.addBall(220,this.gameHeight/2)
-      this.addBall(300,this.gameHeight/2)
+      let rackLeft = (this.gameWidth-160)/2
+      let rackTop = this.gameHeight/4
+      let sz = 5
+      let xPos = rackLeft
+      for (let r = 0; r<5;r++) {
+         for ( let c = 0; c< sz; c++) {
+            this.addBall(xPos, rackTop)
+            xPos += 40
+         }
+         sz--
+         xPos = rackLeft+20*(5-sz)
+         rackTop+=36
+      }
 
       this.addStriker()
 
@@ -51,7 +60,7 @@ export default class PhysicsGame extends BasePhysicsGame {
    }
 
    addStriker() {
-      let striker = new Striker(this.gameWidth/2, 180, 0x000066, 0x5E5FF5)
+      let striker = new Striker(this.gameWidth/2, this.gameHeight*0.75, 0x000066, 0x5E5FF5)
       striker.setTouchListener( this.dragStart.bind(this))
       this.addPhysicsItem(striker)
    }
@@ -102,8 +111,6 @@ export default class PhysicsGame extends BasePhysicsGame {
                this.removePhysicsItem( i )
                if ( i.tag == "striker") {
                   this.addStriker()
-               } else {
-                  this.addBall(this.gameWidth/2, this.gameHeight/2)
                }
             }
          })
@@ -165,7 +172,6 @@ class Striker extends BasePhysicsItem {
       this.pivot.set(0,0)
       this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02, frictiion: 0, label: "striker"})
       this.hitArea = new PIXI.Circle(0,0, this.radius)
-      console.log("orig mass "+this.body.mass)
       this.setMass(5.0)
       
       this.update()
