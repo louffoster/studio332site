@@ -52,23 +52,12 @@ export default class BaseGame {
       let hdrH = hdr.getBoundingClientRect().height
       let windowH = window.innerHeight-hdrH
 
-      let ratioW = window.innerWidth / this.gameWidth
-      let ratioH = windowH / this.gameHeight
-      let delW = window.innerWidth - this.gameWidth 
-      let delH = windowH - this.gameHeight
-      if (delW < 0 || delH < 0 ) {
-         if ( delW < delH ) {
-            this.scene.scale.x = this.scene.scale.y = ratioW 
-         } else {
-            this.scene.scale.x = this.scene.scale.y = ratioH  
-            if ( delW < 0) {
-               this.scene.position.x = ((window.innerWidth - this.gameWidth*ratioH) / 2.0) 
-            } else {
-               this.scene.position.x = ((window.innerWidth - this.gameWidth) / 2.0) / ratioW 
-            }
-         }
-      } 
+      var ratio = Math.min(window.innerWidth / this.gameWidth, windowH / this.gameHeight)
+      this.scene.scale.x = this.scene.scale.y = ratio 
       this.app.renderer.resize( window.innerWidth, windowH)
+      if ( this.gameWidth * ratio < window.innerWidth ) {
+         this.scene.position.x = ((window.innerWidth - this.gameWidth*ratio) / 2.0) 
+      }
    }
 
    get scaleX() {
