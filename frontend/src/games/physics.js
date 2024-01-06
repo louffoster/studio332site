@@ -132,8 +132,8 @@ class Hole extends  PIXI.Container {
          if ( dist <= shape.radius/2 ) {
             shape.stop()
             return true
-         } else if ( dist <= this.radius+(shape.radius*.6) ) {
-            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/5000, y:dY/5000})
+         } else if ( dist <= this.radius+(shape.radius*.25) ) { // 3/4 of the puck is over the hole before it gets pulled in
+            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/4000, y:dY/4000})
          }
       }
       return false
