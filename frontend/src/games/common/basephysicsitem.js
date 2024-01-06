@@ -17,6 +17,14 @@ export default class BasePhysicsItem  extends  PIXI.Container {
       return this.body.label
    }
 
+   setRestitution( r ) {
+      this.body.restitution = r
+   }
+
+   setAirFriction( af ) {
+      this.body.frictionAir = af
+   }
+
    setDensity( d ) {
       Matter.Body.setDensity(this.body, d)
    }

@@ -1,5 +1,6 @@
 import BasePhysicsGame from "@/games/common/basephysicsgame"
 import BasePhysicsItem from "@/games/common/basephysicsitem"
+import PhysicsShape from "@/games/common/physicsshape"
 import Matter from 'matter-js'
 import * as PIXI from "pixi.js"
 
@@ -11,7 +12,6 @@ export default class Charrom extends BasePhysicsGame {
    gameTimeMs = 0
    holes = []
    ballCnt = 0
-   dragGfx = null
 
    initialize() {
       this.physics.gravity.scale = 0
@@ -24,16 +24,32 @@ export default class Charrom extends BasePhysicsGame {
       this.holes.push(h2)
       this.addChild(h2)
 
-      // note: make walls thick so ou cany move someting so fast it skips thru the wall
-      var ground = Shape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(ground)
-      var top = Shape.createBox( this.gameWidth/2, 5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(top)
-      var left = Shape.createBox( 5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(left)
-      var right = Shape.createBox(this.gameWidth-5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(right)
+      this.createTableBounds()
+      this.rackLetterPucks()
+      this.addStriker()
 
+      this.app.stage.eventMode = 'static'
+      this.app.stage.hitArea = this.app.screen
+      this.app.stage.on('pointerup', this.dragEnd.bind(this))
+      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+   }
+
+   createTableBounds() {
+      var ground = PhysicsShape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
+      ground.setOutlined(false)
+      this.addPhysicsItem(ground)
+      var top = PhysicsShape.createBox( this.gameWidth/2, 5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
+      this.addPhysicsItem(top)
+      top.setOutlined(false)
+      var left = PhysicsShape.createBox( 5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
+      this.addPhysicsItem(left)
+      left.setOutlined(false)
+      var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
+      this.addPhysicsItem(right)
+      right.setOutlined(false)
+   }
+
+   rackLetterPucks() {
       let rackLeft = (this.gameWidth-160)/2
       let rackTop = this.gameHeight/4
       let sz = 5
@@ -47,16 +63,6 @@ export default class Charrom extends BasePhysicsGame {
          xPos = rackLeft+20*(5-sz)
          rackTop+=36
       }
-
-      this.addStriker()
-
-      this.app.stage.eventMode = 'static'
-      this.app.stage.hitArea = this.app.screen
-      this.app.stage.on('pointerup', this.dragEnd.bind(this))
-      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
-
-      this.dragGfx = new  PIXI.Graphics()
-      this.addChild(this.dragGfx)
    }
 
    addStriker() {
@@ -67,8 +73,11 @@ export default class Charrom extends BasePhysicsGame {
 
    addBall(x,y) {
       this.ballCnt++
-      var ball = Shape.createCircle( x,y, 20, 0x660000, 0xFE5F55)
+      var ball = PhysicsShape.createCircle( x,y, 20, 0x660000, 0xFE5F55)
       ball.setLabel(`${this.ballCnt}`)
+      ball.setAirFriction(0.02)
+      ball.setRestitution( 1 )
+      ball.setMass(4.75)
       this.addPhysicsItem( ball )
    }
 
@@ -200,77 +209,3 @@ class Striker extends BasePhysicsItem {
 }
 
 
-class Shape extends BasePhysicsItem {
-   lineColor = null 
-   fillColor = null
-   shape = "box"
-   isStatic = false
-
-   static createCircle(x,y, radius, lineColor, fillColor) {
-      let params = {type: "circle", radius: radius, lineColor: lineColor, fillColor: fillColor }
-      return new Shape(x,y, params)
-   }
-
-   static createBox(x,y, w,h, lineColor, fillColor, isStatic = false) {
-      let params = {type: "box", w: w, h: h, lineColor: lineColor, fillColor: fillColor, isStatic: isStatic }
-      return new Shape(x,y, params)    
-   }
-
-   constructor( x,y, params = {type: "box", w: 40, h:40, lineColor: 0xffffff, fillColor: 0x666666}) {
-      super(x,y)
-     
-      this.shape = params.type
-      this.isStatic = false
-      if ( params.isStatic ) {
-         this.isStatic = params.isStatic 
-      }
-      if ( this.shape != "circle" && this.shape != "box") {
-         this.shape = "box"
-      }
-
-      this.lineColor = new PIXI.Color( params.lineColor )
-      this.fillColor = new PIXI.Color( params.fillColor )
-
-      if (params.type == "circle") {
-         this.w = params.radius*2
-         this.h = params.radius*2
-         this.radius = params.radius
-         this.pivot.set(0,0)
-         this.body = Matter.Bodies.circle(x, y, params.radius, {restitution: 1, isStatic: this.isStatic, frictionAir: 0.02})
-         this.hitArea = new PIXI.Circle(0,0, params.radius)
-         this.setMass(4.75)
-      } else {
-         this.w = params.w 
-         this.h = params.h
-         this.pivot.set(this.w/2, this.h/2)   
-         this.body = Matter.Bodies.rectangle(x, y, this.w, this.h, { restitution: 1, isStatic: this.isStatic})
-         this.hitArea = new PIXI.Rectangle(0,0, this.w, this.h)
-      }
-
-      this.update()
-
-      this.draw() 
-   }
-
-   setLabel( val ) {
-      let label = new PIXI.Text(val, {fontSize: 12, fill: 0x550000, fontWeight: "bold"})
-      label.anchor.set(0.5,0.5)
-      this.addChild(label)
-   }
-
-   draw() {
-      this.gfx.clear() 
-      let line = 1 
-      if ( this.shape == "box") {
-         line = 0
-      }
-      this.gfx.lineStyle(line, this.lineColor, 1)
-      this.gfx.beginFill( this.fillColor )
-      if (this.shape == "circle") {
-         this.gfx.drawCircle(0,0,this.radius)
-      } else {
-         this.gfx.drawRect(0,0,this.w, this.h)
-      }
-      this.gfx.endFill()
-   }
-}
