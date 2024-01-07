@@ -92,7 +92,6 @@ export default class Charrom extends BasePhysicsGame {
    dragEnd(e) {
       this.app.stage.off('pointermove', this.dragMove)
       if ( this.targetObject ) {
-         this.dragGfx.clear()
          let elapsedMS = this.gameTimeMs - this.dragStartTime 
          let dX = e.global.x - this.dragStartX
          let dY = e.global.y - this.dragStartY
