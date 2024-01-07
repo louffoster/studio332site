@@ -31,6 +31,9 @@ export default class BasePhysicsItem  extends  PIXI.Container {
    setMass( m ) {
       Matter.Body.setMass(this.body, m)
    }
+   setAngle( rad ) {
+      Matter.Body.setAngle(this.body, rad)
+   }
 
    applyForce(fX, fY) {
       Matter.Body.applyForce( this.body, this.body.position, {x:fX, y:fY})

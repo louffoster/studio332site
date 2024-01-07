@@ -32,7 +32,7 @@ export default class PhysicsShape extends BasePhysicsItem {
       if ( params.isStatic ) {
          this.isStatic = params.isStatic 
       }
-      if ( this.shape != "circle" && this.shape != "box") {
+      if ( this.shape != "circle" && this.shape != "box" && this.shape != "triangle") {
          this.shape = "box"
       }
 
@@ -47,7 +47,13 @@ export default class PhysicsShape extends BasePhysicsItem {
          this.body = Matter.Bodies.circle(x, y, params.radius, {isStatic: this.isStatic})
          this.hitArea = new PIXI.Circle(0,0, params.radius)
       } else if ( params.type == "triangle") {
-
+         this.w = params.w 
+         this.h = params.h
+         let v = Matter.Vertices.fromPath(`0,0, ${this.w},0, 0,${this.h}`)
+         let c = Matter.Vertices.centre(v) 
+         this.pivot.set(c.x, c.y)  
+         this.body = Matter.Bodies.fromVertices(x, y, v, {isStatic: this.isStatic})
+         Matter.Body.setCentre(this.body, {x:0,y:0}, true)
       } else {
          this.w = params.w 
          this.h = params.h
@@ -82,6 +88,12 @@ export default class PhysicsShape extends BasePhysicsItem {
       this.gfx.beginFill( this.fillColor )
       if (this.shape == "circle") {
          this.gfx.drawCircle(0,0,this.radius)
+      } else if ( this.shape == "triangle") {
+         console.log(`Draw triangle: ${this.x}, ${this.y} ${this.w}, ${this.h}`)
+         this.gfx.moveTo(0,0)
+         this.gfx.lineTo(this.w, 0)
+         this.gfx.lineTo(0, this.h)
+         this.gfx.closePath()
       } else {
          this.gfx.drawRect(0,0,this.w, this.h)
       }

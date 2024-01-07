@@ -24,6 +24,15 @@ export default class Charrom extends BasePhysicsGame {
       this.holes.push(h2)
       this.addChild(h2)
 
+      let h3 = new Hole(75, this.gameHeight/2, 30)
+      this.holes.push(h3)
+      this.addChild(h3)
+
+      let h4 = new Hole(this.gameWidth-75, this.gameHeight/2, 30)
+      this.holes.push(h4)
+      this.addChild(h4)
+
+
       this.createTableBounds()
       this.rackLetterPucks()
       this.addStriker()
@@ -35,6 +44,7 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    createTableBounds() {
+      // walls
       var ground = PhysicsShape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth, 10, 0xF7F7FF, 0x577399, true)
       ground.setOutlined(false)
       this.addPhysicsItem(ground)
@@ -47,6 +57,23 @@ export default class Charrom extends BasePhysicsGame {
       var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight/2, 10, this.gameHeight, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(right)
       right.setOutlined(false)
+
+      // angled corner bumpers
+      var tru = PhysicsShape.createTriangle( 30,30, 60, 60, 0x660000, 0x577399, true)
+      tru.setOutlined(false)
+      this.addPhysicsItem(tru)
+      var t2 = PhysicsShape.createTriangle( this.gameWidth-30,30, 60, 60, 0x660000, 0x577399, true)
+      t2.setOutlined(false)
+      t2.setAngle(1.57)
+      this.addPhysicsItem(t2)
+      var t3 = PhysicsShape.createTriangle( this.gameWidth-30,this.gameHeight-30, 60, 60, 0x660000, 0x577399, true)
+      t3.setOutlined(false)
+      t3.setAngle(3.14)
+      this.addPhysicsItem(t3)
+      var t4 = PhysicsShape.createTriangle( 30,this.gameHeight-30, 60, 60, 0x660000, 0x577399, true)
+      t4.setOutlined(false)
+      t4.setAngle(4.71)
+      this.addPhysicsItem(t4)
    }
 
    rackLetterPucks() {
@@ -98,7 +125,7 @@ export default class Charrom extends BasePhysicsGame {
 
          let dist = Math.sqrt( dX*dX + dY*dY) 
          let ratePxMerMs = dist / elapsedMS
-         ratePxMerMs = Math.min(ratePxMerMs, 0.15)
+         ratePxMerMs = Math.min(ratePxMerMs, 0.18)
          let fX = dX * (ratePxMerMs / 100)
          let fY = dY * (ratePxMerMs / 100)
 
