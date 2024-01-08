@@ -14,7 +14,7 @@ export default class Charrom extends BasePhysicsGame {
    dragStartY = 0
    gameTimeMs = 0
    holes = []
-   ballCnt = 0
+   word = null
 
    initialize() {
       this.physics.gravity.scale = 0
@@ -39,6 +39,18 @@ export default class Charrom extends BasePhysicsGame {
       this.createTableBounds()
       this.rackLetterPucks()
       this.addStriker()
+
+      let wordStyle = new PIXI.TextStyle({
+         fill: "#BDD5EA",
+         fontFamily: "Arial",
+         fontSize: 20,
+         lineHeight: 20
+      })
+      this.word = new PIXI.Text("", wordStyle)
+      this.word.anchor.set(0.5,1)
+      this.word.x = this.gameWidth/2
+      this.word.y = this.gameHeight - 20
+      this.addChild(this.word)
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
@@ -80,17 +92,17 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    rackLetterPucks() {
-      let rackLeft = (this.gameWidth-160)/2
+      let rackLeft = (this.gameWidth-120)/2
       let rackTop = this.gameHeight/4
-      let sz = 5
+      let sz = 4
       let xPos = rackLeft
-      for (let r = 0; r<5;r++) {
+      for (let r = 0; r<4;r++) {
          for ( let c = 0; c< sz; c++) {
             this.addBall(xPos, rackTop)
             xPos += 40
          }
          sz--
-         xPos = rackLeft+20*(5-sz)
+         xPos = rackLeft+20*(4-sz)
          rackTop+=36
       }
    }
@@ -102,12 +114,6 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    addBall(x,y) {
-      // this.ballCnt++
-      // var ball = PhysicsShape.createCircle( x,y, 20, 0x660000, 0xFE5F55)
-      // ball.setLabel(`${this.ballCnt}`)
-      // ball.setAirFriction(0.02)
-      // ball.setRestitution( 1 )
-      // ball.setMass(4.75)
       if ( this.pool.hasTilesLeft() == false ) {
          this.pool.refill()
       }
@@ -154,6 +160,8 @@ export default class Charrom extends BasePhysicsGame {
                this.removePhysicsItem( i )
                if ( i.tag == "striker") {
                   this.addStriker()
+               } else {
+                  this.word.text += i.text
                }
             }
          })
@@ -183,7 +191,7 @@ class Hole extends  PIXI.Container {
             shape.stop()
             return true
          } else if ( dist <= this.radius+(shape.radius*.25) ) { // 3/4 of the puck is over the hole before it gets pulled in
-            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/4000, y:dY/4000})
+            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/2000, y:dY/2000})
          }
       }
       return false

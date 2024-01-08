@@ -45,7 +45,7 @@ export default class LetterBall extends PhysicsShape {
 
    get text() {
       let out = this.letter.text 
-      if (extra) {
+      if ( this.extra) {
          out += this.extra.text
       }
       return out
