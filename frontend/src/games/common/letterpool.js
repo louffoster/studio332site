@@ -19,6 +19,11 @@ export default class LetterPool {
       return new Letter(txt, this.value(txt))
    }
 
+   isVowel( letter ) {
+      let vowel = ["A","E","I","O","U","Y"]
+      return ( vowel.includes( letter ) )
+   }
+
    value( letter ) {
       let values = [
          ["A", "E", "I", "N", "O", "R", "S", "T", "U"],  // 1 pt

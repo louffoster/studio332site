@@ -1,10 +1,13 @@
 import BasePhysicsGame from "@/games/common/basephysicsgame"
 import BasePhysicsItem from "@/games/common/basephysicsitem"
 import PhysicsShape from "@/games/common/physicsshape"
+import LetterPool from "@/games/common/letterpool"
+import LetterBall from "@/games/charrom/letterball"
 import Matter from 'matter-js'
 import * as PIXI from "pixi.js"
 
 export default class Charrom extends BasePhysicsGame {
+   pool = new LetterPool()
    targetObject = null
    dragStartTime = -1
    dragStartX = 0 
@@ -99,12 +102,17 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    addBall(x,y) {
-      this.ballCnt++
-      var ball = PhysicsShape.createCircle( x,y, 20, 0x660000, 0xFE5F55)
-      ball.setLabel(`${this.ballCnt}`)
-      ball.setAirFriction(0.02)
-      ball.setRestitution( 1 )
-      ball.setMass(4.75)
+      // this.ballCnt++
+      // var ball = PhysicsShape.createCircle( x,y, 20, 0x660000, 0xFE5F55)
+      // ball.setLabel(`${this.ballCnt}`)
+      // ball.setAirFriction(0.02)
+      // ball.setRestitution( 1 )
+      // ball.setMass(4.75)
+      if ( this.pool.hasTilesLeft() == false ) {
+         this.pool.refill()
+      }
+      let letter = this.pool.pop()
+      let ball = new LetterBall(x,y,letter)
       this.addPhysicsItem( ball )
    }
 
