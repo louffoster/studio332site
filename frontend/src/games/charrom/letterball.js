@@ -7,7 +7,7 @@ export default class LetterBall extends PhysicsShape {
    extra = null
 
    constructor( x,y, letter) {
-      super( x,y, {type: "circle", radius: 20})
+      super( x,y, {type: "circle", radius: 25})
 
       this.setAirFriction(0.02)
       this.setRestitution( 1 )
@@ -26,6 +26,7 @@ export default class LetterBall extends PhysicsShape {
          fill: letterColor,
          fontFamily: "Arial",
          fontSize: 16,
+         fontWeight: "bold"
       })
       let smallStyle = new PIXI.TextStyle({
          fill: letterColor,

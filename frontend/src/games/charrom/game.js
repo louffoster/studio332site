@@ -19,22 +19,6 @@ export default class Charrom extends BasePhysicsGame {
    initialize() {
       this.physics.gravity.scale = 0
 
-      let h1 = new Hole(15,15, 35)
-      this.holes.push(h1)
-      this.addChild(h1)
-
-      let h2 = new Hole(this.gameWidth-15, 15, 35)
-      this.holes.push(h2)
-      this.addChild(h2)
-
-      let h3 = new Hole(15, this.gameHeight-15, 35)
-      this.holes.push(h3)
-      this.addChild(h3)
-
-      let h4 = new Hole(this.gameWidth-15, this.gameHeight-15, 35)
-      this.holes.push(h4)
-      this.addChild(h4)
-
 
       this.createTableBounds()
       this.rackLetterPucks()
@@ -66,12 +50,42 @@ export default class Charrom extends BasePhysicsGame {
       var top = PhysicsShape.createBox( this.gameWidth/2, 5, this.gameWidth-100, 10, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(top)
       top.setOutlined(false)
-      var left = PhysicsShape.createBox( 5, this.gameHeight/2, 10, this.gameHeight-100, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(left)
+      var left = PhysicsShape.createBox( 5, this.gameHeight*.25+8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
       left.setOutlined(false)
-      var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight/2, 10, this.gameHeight-100, 0xF7F7FF, 0x577399, true)
+      this.addPhysicsItem(left)
+      var left2 = PhysicsShape.createBox( 5, this.gameHeight*.75-8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
+      left2.setOutlined(false)
+      this.addPhysicsItem(left2)
+     
+      var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.25+8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(right)
       right.setOutlined(false)
+      var right2 = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.75-8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
+      this.addPhysicsItem(right2)
+      right2.setOutlined(false)
+
+      let h1 = new Hole(15,15, 35)
+      this.holes.push(h1)
+      this.addChild(h1)
+
+      let hx = new Hole(10,this.gameHeight/2, 35)
+      this.holes.push(hx)
+      this.addChild(hx)
+      let hy = new Hole(this.gameWidth-10,this.gameHeight/2, 35)
+      this.holes.push(hy)
+      this.addChild(hy)
+
+      let h2 = new Hole(this.gameWidth-15, 15, 35)
+      this.holes.push(h2)
+      this.addChild(h2)
+
+      let h3 = new Hole(15, this.gameHeight-15, 35)
+      this.holes.push(h3)
+      this.addChild(h3)
+
+      let h4 = new Hole(this.gameWidth-15, this.gameHeight-15, 35)
+      this.holes.push(h4)
+      this.addChild(h4)
 
       // angled corner bumpers
       // var tru = PhysicsShape.createTriangle( 30,30, 60, 60, 0x660000, 0x577399, true)
@@ -100,11 +114,11 @@ export default class Charrom extends BasePhysicsGame {
       for (let r = 0; r<5;r++) {
          for ( let c = 0; c< sz; c++) {
             this.addBall(xPos, rackTop)
-            xPos += 40
+            xPos += 50
          }
          sz--
-         xPos = rackLeft+20*(5-sz)
-         rackTop+=36
+         xPos = rackLeft+25*(5-sz)
+         rackTop+=46
       }
    }
 
