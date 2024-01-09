@@ -13,16 +13,22 @@ export default class LetterBall extends PhysicsShape {
       this.setRestitution( 1 )
       this.setMass(4.75)
       
+      let letterColor = "#333333"
       this.lineColor = new PIXI.Color( 0x600000 )
-      this.fillColor = new PIXI.Color( 0xd00000 )
+      if ( this.isVowel(letter)) {
+         this.fillColor = new PIXI.Color( 0xddddff )
+         // letterColor = "#333333"
+      } else  {
+         this.fillColor = new PIXI.Color( 0xd00000 )
+      }
 
       let style = new PIXI.TextStyle({
-         fill: "#FFFFFF",
+         fill: letterColor,
          fontFamily: "Arial",
          fontSize: 16,
       })
       let smallStyle = new PIXI.TextStyle({
-         fill: "#FFFFFF",
+         fill: letterColor,
          fontFamily: "Arial",
          fontSize: 12,
       })
@@ -41,6 +47,19 @@ export default class LetterBall extends PhysicsShape {
          this.addChild(this.extra)
       }
       this.draw()
+   }
+
+   draw() {
+      super.draw() 
+      this.gfx.lineStyle(1, this.lineColor, 1)
+      this.gfx.beginFill(0xaaaaaa)
+      this.gfx.drawCircle(0,0,this.radius-6)
+      this.gfx.endFill()
+   }
+
+   isVowel( letter ) {
+      let vowel = ["A","E","I","O","U","Y"]
+      return ( vowel.includes( letter ) )
    }
 
    get text() {
