@@ -5,6 +5,7 @@ import LetterPool from "@/games/common/letterpool"
 import LetterBall from "@/games/charrom/letterball"
 import Matter from 'matter-js'
 import * as PIXI from "pixi.js"
+import { all } from "axios"
 
 export default class Charrom extends BasePhysicsGame {
    pool = new LetterPool()
@@ -15,6 +16,9 @@ export default class Charrom extends BasePhysicsGame {
    gameTimeMs = 0
    holes = []
    word = null
+   placePuck = true
+   justFlicked = false
+   flickTimeoutMS = 0
 
    initialize() {
       this.physics.gravity.scale = 0
@@ -22,7 +26,6 @@ export default class Charrom extends BasePhysicsGame {
 
       this.createTableBounds()
       this.rackLetterPucks()
-      this.addStriker()
 
       let wordStyle = new PIXI.TextStyle({
          fill: "#BDD5EA",
@@ -38,29 +41,31 @@ export default class Charrom extends BasePhysicsGame {
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
+      this.app.stage.on('pointerdown', this.pointerDown.bind(this))
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
    }
 
    createTableBounds() {
       // walls
-      var ground = PhysicsShape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth-100, 10, 0xF7F7FF, 0x577399, true)
+      var ground = PhysicsShape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth-110, 25, 0xF7F7FF, 0x577399, true)
       ground.setOutlined(false)
       this.addPhysicsItem(ground)
-      var top = PhysicsShape.createBox( this.gameWidth/2, 5, this.gameWidth-100, 10, 0xF7F7FF, 0x577399, true)
+      var top = PhysicsShape.createBox( this.gameWidth/2, 5, this.gameWidth-110, 25, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(top)
       top.setOutlined(false)
-      var left = PhysicsShape.createBox( 5, this.gameHeight*.25+8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
+
+      var left = PhysicsShape.createBox( 5, this.gameHeight*.25+5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
       left.setOutlined(false)
       this.addPhysicsItem(left)
-      var left2 = PhysicsShape.createBox( 5, this.gameHeight*.75-8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
+      var left2 = PhysicsShape.createBox( 5, this.gameHeight*.75-5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
       left2.setOutlined(false)
       this.addPhysicsItem(left2)
      
-      var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.25+8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
+      var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.25+5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(right)
       right.setOutlined(false)
-      var right2 = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.75-8, 10, this.gameHeight/2-100+18, 0xF7F7FF, 0x577399, true)
+      var right2 = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.75-5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(right2)
       right2.setOutlined(false)
 
@@ -122,10 +127,13 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
-   addStriker() {
-      let striker = new Striker(this.gameWidth/2, this.gameHeight*0.75, 0x000066, 0x5E5FF5)
-      striker.setTouchListener( this.dragStart.bind(this))
-      this.addPhysicsItem(striker)
+   pointerDown(e) {
+      if ( this.placePuck )    {
+         let striker = new Striker(e.global.x, e.global.y, 0x000066, 0x5E5FF5)
+         striker.setTouchListener( this.dragStart.bind(this))
+         this.addPhysicsItem(striker)
+         this.placePuck = false
+      }
    }
 
    addBall(x,y) {
@@ -163,24 +171,59 @@ export default class Charrom extends BasePhysicsGame {
          this.dragStartTime = -1
          this.dragStartX = 0
          this.dragStartY = 0
+         this.flickTimeoutMS = 1500
+         this.justFlicked = true
       }
    }
 
    update() {
       super.update()
       this.gameTimeMs += this.app.ticker.deltaMS
+      if ( this.placePuck || this.justFlicked == false ) return 
+
+      if ( this.flickTimeoutMS > 0) {
+         this.flickTimeoutMS -= this.app.ticker.deltaMS
+         this.flickTimeoutMS = Math.max(0, this.flickTimeoutMS)
+      }
+
+      let removeItems = []
+      let allStopped = true
+      let striker = null
       this.items.forEach( i => {
+
+         if ( this.flickTimeoutMS == 0 ) {
+            if ( i.velocity > 0.005) {
+               allStopped = false
+               i.stop()
+            }
+         } else {
+            allStopped = false
+         }
+
+         if ( i.tag == "striker") {
+            striker = i
+         }
+
          this.holes.forEach( h => {
             if ( h.checkForSink( i ) ) {
-               this.removePhysicsItem( i )
-               if ( i.tag == "striker") {
-                  this.addStriker()
-               } else {
+               removeItems.push( i )
+               striker  = null
+               if ( i.tag != "striker") {
                   this.word.text += i.text
                }
             }
          })
       })
+
+      if (allStopped ) {
+         this.justFlicked = false 
+         this.placePuck = true
+         if ( striker ) {
+            removeItems.push( striker)
+         }
+      }
+ 
+      removeItems.forEach( i => this.removePhysicsItem( i ) )
    }
 }
 

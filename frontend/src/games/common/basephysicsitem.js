@@ -43,6 +43,10 @@ export default class BasePhysicsItem  extends  PIXI.Container {
       Matter.Body.setAngularVelocity(this.body, angularVelocityRad)  
    }
 
+   get velocity() {
+      return Matter.Vector.magnitude(Matter.Body.getVelocity(this.body))
+   }
+
    stop() {
       Matter.Body.setVelocity(this.body, {x:0, y:0})
       Matter.Body.setAngularVelocity(this.body, 0)
