@@ -67,11 +67,8 @@ export default class BaseGame {
       }
    }
 
-   get scaleX() {
+   get scale() {
       return this.scene.scale.x
-   }
-   get scaleY() {
-      return this.scene.scale.y
    }
 
    addChild( child ) {

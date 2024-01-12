@@ -19,6 +19,7 @@ export default class Charrom extends BasePhysicsGame {
    placePuck = true
    justFlicked = false
    flickTimeoutMS = 0
+   mc = null
 
    initialize() {
       this.physics.gravity.scale = 0
@@ -92,11 +93,45 @@ export default class Charrom extends BasePhysicsGame {
       this.holes.push(h4)
       this.addChild(h4)
 
+      // this.mc = Matter.MouseConstraint.create(this.physics, {
+      //    mouse: Matter.Mouse.create(this.gameElement)
+      // })
+      // Matter.Composite.add( this.physics.world, this.mc)
+
+      // Matter.Events.on( this.mc, "mousedown", (event) => {
+      // //    if ( this.placePuck == false) return
+      //    let mp = event.mouse.position 
+      //    console.log("PHYS")
+      //    console.log(mp)
+      //    console.log("END PHYS")
+
+        
+         
+      // //    let canvasEle = null
+      // //    this.gameElement.childNodes.forEach( n => {
+      // //       if (n.nodeName.toLowerCase() == "canvas" ) {
+      // //          canvasEle = n
+      // //       }
+      // //    })
+      // //    if ( canvasEle ) {
+      // //       let rect  = canvasEle.getBoundingClientRect()
+      // //       console.log(rect)
+      // //       // if ( this.placePuck )    {
+      // //          let striker = new Striker( (mp.x-rect.left)*this.scale, (mp.y-rect.top)*this.scale, 0x000066, 0x5E5FF5)
+      // //          striker.setTouchListener( this.dragStart.bind(this))
+      // //          this.addPhysicsItem(striker)
+      // //          this.placePuck = false
+      // //       // }
+      // //    } else {
+      // //       console.log("FUCK")
+      // //    }
+      // })
+
       // angled corner bumpers
       // var tru = PhysicsShape.createTriangle( 30,30, 60, 60, 0x660000, 0x577399, true)
       // tru.setOutlined(false)
       // this.addPhysicsItem(tru)
-      // var t2 = PhysicsShape.createTriangle( this.gameWidth-30,30, 60, 60, 0x660000, 0x577399, true)
+      // var t2 = PhysicsShape.createTriangle( this.gameWidth-30,30, 60.node, 60, 0x660000, 0x577399, true)
       // t2.setOutlined(false)
       // t2.setAngle(1.57)
       // this.addPhysicsItem(t2)
@@ -127,12 +162,19 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
+   placeStriker(x,y) {
+      let striker = new Striker( x, y, 0x000066, 0x5E5FF5)
+      striker.setTouchListener( this.dragStart.bind(this))
+      this.addPhysicsItem(striker)
+      this.placePuck = false
+   }
+
    pointerDown(e) {
-      if ( this.placePuck )    {
-         let striker = new Striker(e.global.x, e.global.y, 0x000066, 0x5E5FF5)
-         striker.setTouchListener( this.dragStart.bind(this))
-         this.addPhysicsItem(striker)
-         this.placePuck = false
+      if ( this.placePuck) {
+         let actualW = this.gameWidth*this.scale
+         let scale = (this.gameWidth / actualW )
+         console.log("SCALE "+scale)
+         this.placeStriker(e.global.x*scale, (e.global.y)*scale)
       }
    }
 
