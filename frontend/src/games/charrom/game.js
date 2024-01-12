@@ -24,7 +24,6 @@ export default class Charrom extends BasePhysicsGame {
    initialize() {
       this.physics.gravity.scale = 0
 
-
       this.createTableBounds()
       this.rackLetterPucks()
 
@@ -49,84 +48,59 @@ export default class Charrom extends BasePhysicsGame {
 
    createTableBounds() {
       // walls
-      var ground = PhysicsShape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth-110, 25, 0xF7F7FF, 0x577399, true)
+      var ground = PhysicsShape.createBox(this.gameWidth/2, this.gameHeight-5, this.gameWidth-120, 25, 0xF7F7FF, 0x577399, true)
       ground.setOutlined(false)
       this.addPhysicsItem(ground)
-      var top = PhysicsShape.createBox( this.gameWidth/2, 5, this.gameWidth-110, 25, 0xF7F7FF, 0x577399, true)
+      var top = PhysicsShape.createBox( this.gameWidth/2, 5, this.gameWidth-120, 25, 0xF7F7FF, 0x577399, true)
       this.addPhysicsItem(top)
       top.setOutlined(false)
 
-      var left = PhysicsShape.createBox( 5, this.gameHeight*.25+5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
+      var left = PhysicsShape.createBox( 5, this.gameHeight/2, 25, this.gameHeight-120, 0xF7F7FF, 0x577399, true)
       left.setOutlined(false)
       this.addPhysicsItem(left)
-      var left2 = PhysicsShape.createBox( 5, this.gameHeight*.75-5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
-      left2.setOutlined(false)
-      this.addPhysicsItem(left2)
-     
-      var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.25+5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(right)
-      right.setOutlined(false)
-      var right2 = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.75-5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
-      this.addPhysicsItem(right2)
-      right2.setOutlined(false)
 
-      let h1 = new Hole(15,15, 35)
+      var right = PhysicsShape.createBox( this.gameWidth-5, this.gameHeight/2, 25, this.gameHeight-120, 0xF7F7FF, 0x577399, true)
+      right.setOutlined(false)
+      this.addPhysicsItem(right)
+
+      // var left = PhysicsShape.createBox( 5, this.gameHeight*.25+5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
+      // left.setOutlined(false)
+      // this.addPhysicsItem(left)
+      // var left2 = PhysicsShape.createBox( 5, this.gameHeight*.75-5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
+      // left2.setOutlined(false)
+      // this.addPhysicsItem(left2)
+     
+      // var right = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.25+5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
+      // this.addPhysicsItem(right)
+      // right.setOutlined(false)
+      // var right2 = PhysicsShape.createBox(this.gameWidth-5, this.gameHeight*.75-5, 25, this.gameHeight/2-100, 0xF7F7FF, 0x577399, true)
+      // this.addPhysicsItem(right2)
+      // right2.setOutlined(false)
+
+      let h1 = new Hole(25,25, 35)
       this.holes.push(h1)
       this.addChild(h1)
 
-      let hx = new Hole(10,this.gameHeight/2, 35)
-      this.holes.push(hx)
-      this.addChild(hx)
-      let hy = new Hole(this.gameWidth-10,this.gameHeight/2, 35)
-      this.holes.push(hy)
-      this.addChild(hy)
+      // // let hx = new Hole(10,this.gameHeight/2, 35)
+      // // this.holes.push(hx)
+      // // this.addChild(hx)
+      // // let hy = new Hole(this.gameWidth-10,this.gameHeight/2, 35)
+      // // this.holes.push(hy)
+      // // this.addChild(hy)
 
-      let h2 = new Hole(this.gameWidth-15, 15, 35)
+      let h2 = new Hole(this.gameWidth-25, 25, 35)
       this.holes.push(h2)
       this.addChild(h2)
 
-      let h3 = new Hole(15, this.gameHeight-15, 35)
+      let h3 = new Hole(25, this.gameHeight-25, 35)
       this.holes.push(h3)
       this.addChild(h3)
 
-      let h4 = new Hole(this.gameWidth-15, this.gameHeight-15, 35)
+      let h4 = new Hole(this.gameWidth-25, this.gameHeight-25, 35)
       this.holes.push(h4)
       this.addChild(h4)
 
-      // this.mc = Matter.MouseConstraint.create(this.physics, {
-      //    mouse: Matter.Mouse.create(this.gameElement)
-      // })
-      // Matter.Composite.add( this.physics.world, this.mc)
-
-      // Matter.Events.on( this.mc, "mousedown", (event) => {
-      // //    if ( this.placePuck == false) return
-      //    let mp = event.mouse.position 
-      //    console.log("PHYS")
-      //    console.log(mp)
-      //    console.log("END PHYS")
-
-        
-         
-      // //    let canvasEle = null
-      // //    this.gameElement.childNodes.forEach( n => {
-      // //       if (n.nodeName.toLowerCase() == "canvas" ) {
-      // //          canvasEle = n
-      // //       }
-      // //    })
-      // //    if ( canvasEle ) {
-      // //       let rect  = canvasEle.getBoundingClientRect()
-      // //       console.log(rect)
-      // //       // if ( this.placePuck )    {
-      // //          let striker = new Striker( (mp.x-rect.left)*this.scale, (mp.y-rect.top)*this.scale, 0x000066, 0x5E5FF5)
-      // //          striker.setTouchListener( this.dragStart.bind(this))
-      // //          this.addPhysicsItem(striker)
-      // //          this.placePuck = false
-      // //       // }
-      // //    } else {
-      // //       console.log("FUCK")
-      // //    }
-      // })
-
+   
       // angled corner bumpers
       // var tru = PhysicsShape.createTriangle( 30,30, 60, 60, 0x660000, 0x577399, true)
       // tru.setOutlined(false)
@@ -147,17 +121,18 @@ export default class Charrom extends BasePhysicsGame {
 
    rackLetterPucks() {
       // let rackLeft = (this.gameWidth-120)/2
+      let numRows = 4
       let rackLeft = (this.gameWidth-160)/2
-      let rackTop = this.gameHeight/5
-      let sz = 5
+      let rackTop = this.gameHeight/numRows
+      let sz = numRows
       let xPos = rackLeft
-      for (let r = 0; r<5;r++) {
+      for (let r = 0; r<numRows;r++) {
          for ( let c = 0; c< sz; c++) {
             this.addBall(xPos, rackTop)
             xPos += 50
          }
          sz--
-         xPos = rackLeft+25*(5-sz)
+         xPos = rackLeft+25*(numRows-sz)
          rackTop+=46
       }
    }
