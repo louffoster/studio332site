@@ -4,6 +4,7 @@ import LetterBall from "@/games/charrom/letterball"
 import Board from "@/games/charrom/board"
 import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
+import Button from "@/games/common/button"
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
@@ -15,11 +16,16 @@ export default class Charrom extends BasePhysicsGame {
    dragStartY = 0
    gameTimeMs = 0
    sunkLetters = []
+   tileRackX = 7 
+   tileRackY = Charrom.BOARD_HEIGHT+7
+   tileRackHeight = 69
    word = null
    placePuck = true
    justFlicked = false
    flickTimeoutMS = 0
    board = null
+   clearBtn = null 
+   submitBtn = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
@@ -29,19 +35,37 @@ export default class Charrom extends BasePhysicsGame {
 
       this.board = new Board(this, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
-
       this.rackLetterPucks()
+
+      let buttonsY = this.tileRackY+this.tileRackHeight + 5
+      this.submitBtn = new Button( 338, buttonsY, "Submit", () => {
+         this.submitWord()
+      }, 0xFCFAFA,0x2f6690,0x5482bc)
+      this.submitBtn.small()
+      this.submitBtn.alignTopLeft()
+      this.submitBtn.noShadow()
+      this.submitBtn.setEnabled( false )
+      this.addChild(this.submitBtn )
+
+      this.clearBtn = new Button( 260, buttonsY, "Clear", () => {
+         this.clearWord()
+      }, 0xFCFAFA,0x9c5060,0x5482bc)
+      this.clearBtn.small()
+      this.clearBtn.alignTopLeft()
+      this.clearBtn.noShadow()
+      this.clearBtn.setEnabled( false )
+      this.addChild(this.clearBtn )
 
       let wordStyle = new PIXI.TextStyle({
          fill: "#BDD5EA",
          fontFamily: "Arial",
-         fontSize: 20,
-         lineHeight: 20
+         fontSize: 28,
+         lineHeight: 28
       })
       this.word = new PIXI.Text("", wordStyle)
-      this.word.anchor.set(0.5,1)
-      this.word.x = this.gameWidth/2
-      this.word.y = this.gameHeight - 20
+      this.word.anchor.set(0,0.5)
+      this.word.x = 10
+      this.word.y = buttonsY+10
       this.addChild(this.word)
 
       this.app.stage.eventMode = 'static'
@@ -49,6 +73,8 @@ export default class Charrom extends BasePhysicsGame {
       this.app.stage.on('pointerdown', this.pointerDown.bind(this))
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+
+      this.draw()
 
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
@@ -129,9 +155,9 @@ export default class Charrom extends BasePhysicsGame {
 
    puckSunk( puck ) {
       if ( this.sunkLetters.length < 10) {
-         let tilesLeft = 10
-         let tilesTop = Charrom.BOARD_HEIGHT + 10
-         let t = new Tile(puck.letter, tilesLeft + this.sunkLetters.length*Tile.WIDTH, tilesTop, this.tileSelected.bind(this))
+         let x = this.tileRackX
+         let y = this.tileRackY
+         let t = new Tile(puck.letter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
          this.sunkLetters.push(t)
          this.addChild(t)
       } else {
@@ -141,6 +167,26 @@ export default class Charrom extends BasePhysicsGame {
 
    tileSelected( t ) {
       this.word.text += t.text
+   }
+
+   drawLetterRack() {
+      this.gfx.clear() 
+      this.gfx.lineStyle( 1, 0x5E3023, 1 )
+      this.gfx.beginFill(0x7A6C5D)
+      this.gfx.drawRect(0,Charrom.BOARD_HEIGHT, this.gameWidth, this.tileRackHeight)
+
+      this.gfx.lineStyle( 1, 0x5E3023)
+      this.gfx.beginFill(0xF3E9DC)
+      let x = this.tileRackX
+      let y = this.tileRackY
+      for (let i=0; i<10; i++) {
+         this.gfx.drawRect(x,y, Tile.WIDTH, Tile.HEIGHT)
+         x += Tile.WIDTH+4
+      }
+   }
+
+   draw() {
+      this.drawLetterRack()
    }
 
    update() {

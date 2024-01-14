@@ -111,17 +111,14 @@ export default class Tile extends PIXI.Container {
    draw() {
       this.graphics.clear()
  
-      this.graphics.beginFill(0xFAFAFF, 1.0)
-      this.graphics.lineStyle(1, 0x03045E, 1)
+      this.graphics.beginFill(0xF3E9DC, 1.0)
+      this.graphics.lineStyle(1, 0x5E3023, 1)
 
       if ( this.error ) {
          this.graphics.beginFill(0xd36582) 
       } else {
-         if ( this.enabled == false ) {
-            this.graphics.beginFill(0xFAFAFF, 0.3) 
-         }
          if (this.selected) {
-            this.graphics.beginFill(0x6bbce8)
+            this.graphics.beginFill(0x8ecae6)
          } 
       }
       this.graphics.drawRect(0,0, Tile.WIDTH, Tile.HEIGHT)
