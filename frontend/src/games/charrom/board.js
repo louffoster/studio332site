@@ -1,11 +1,14 @@
 import * as PIXI from "pixi.js"
 import Matter from 'matter-js'
 
+
+// PALETTE: https://coolors.co/palette/7a6c5d-2a3d45-ddc9b4-bcac9b-c17c74
 export default class Board extends PIXI.Container {
    boardW = 0 
    boardH = 0 
    gfx = null
    holes = []
+   shotLineY = 0
 
    constructor( game, w, h ) {
       super()
@@ -13,7 +16,7 @@ export default class Board extends PIXI.Container {
       this.addChild( this.gfx )
       this.boardW = w 
       this.boardH = h
-
+      this.shotLineY = this.boardH * 0.7
 
       let h1 = new Hole(35,35, 35)
       this.holes.push(h1)
@@ -54,6 +57,10 @@ export default class Board extends PIXI.Container {
       return sunk
    }
 
+   canPlaceStriker(y, radius) {
+      return ( y-radius >= this.shotLineY && y+radius < this.boardH )
+   }
+
    draw() {
       this.gfx.beginFill(0x7A6C5D)
       this.gfx.drawRect(0,0, this.boardW, this.boardH)
@@ -62,6 +69,11 @@ export default class Board extends PIXI.Container {
       this.gfx.lineStyle( 3, 0x7A6C5D, 1 )
       this.gfx.drawRoundedRect(0,0, this.boardW, this.boardH, 50)
       this.gfx.endFill()
+
+            
+      this.gfx.lineStyle(8, 0xC17C74,1)
+      this.gfx.moveTo(2, this.shotLineY)
+      this.gfx.lineTo(this.boardW-2, this.shotLineY)
    }
 }
 
@@ -98,6 +110,6 @@ class Hole extends PIXI.Container {
       this.gfx.lineStyle(1, 0x7A6C5D, 1)
       this.gfx.beginFill( 0x020202 )
       this.gfx.drawCircle(0,0,this.radius)
-      this.gfx.endFill()    
+      this.gfx.endFill()   
    }
 }

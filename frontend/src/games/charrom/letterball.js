@@ -12,14 +12,14 @@ export default class LetterBall extends PhysicsShape {
       this.setAirFriction(0.02)
       this.setRestitution( 1 )
       this.setMass(2.75)
+      this.letter = letter
       
       let letterColor = "#333333"
       this.lineColor = new PIXI.Color( 0x600000 )
-      if ( this.isVowel(letter)) {
-         this.fillColor = new PIXI.Color( 0xBCAC9B )
-         // letterColor = "#333333"
+      if ( letter.isVowel()) {
+         this.fillColor = new PIXI.Color( 0xC08552 )
       } else  {
-         this.fillColor = new PIXI.Color( 0xC17C74 )
+         this.fillColor = new PIXI.Color( 0x895737 )
       }
 
       let style = new PIXI.TextStyle({
@@ -33,18 +33,18 @@ export default class LetterBall extends PhysicsShape {
          fontSize: 15,
       })
 
-      this.letter = new PIXI.Text(letter, style)
-      this.letter.anchor.set(0.5)
-      this.letter.x = 0
-      this.letter.y = 0
-      this.addChild(this.letter)
-      if (letter == "Q") {
-         this.extra = new PIXI.Text("U", smallStyle)
-         this.extra.anchor.set(0.5)
-         this.extra.x = 8
-         this.extra.y = 4    
+      let txt = new PIXI.Text(letter.text, style)
+      txt.anchor.set(0.5)
+      txt.x = 0
+      txt.y = 0
+      this.addChild(txt)
+      if (letter.text == "Q") {
+         let uTxt = new PIXI.Text("U", smallStyle)
+         uTxt.anchor.set(0.5)
+         uTxt.x = 8
+         uTxt.y = 4    
          this.letter.x-= 4
-         this.addChild(this.extra)
+         this.addChild(uTxt)
       }
       this.draw()
    }
@@ -52,21 +52,20 @@ export default class LetterBall extends PhysicsShape {
    draw() {
       super.draw() 
       this.gfx.lineStyle(1, this.lineColor, 1)
-      this.gfx.beginFill(0xcfcfcf)
+      this.gfx.beginFill(0xF3E9DC)
       this.gfx.drawCircle(0,0,this.radius-6)
       this.gfx.endFill()
    }
 
-   isVowel( letter ) {
-      let vowel = ["A","E","I","O","U","Y"]
-      return ( vowel.includes( letter ) )
-   }
-
    get text() {
       let out = this.letter.text 
-      if ( this.extra) {
-         out += this.extra.text
+      if ( out == "Q") {
+         out += "U"
       }
       return out
+   }
+
+   get value() {
+      return this.letter.value
    }
 }

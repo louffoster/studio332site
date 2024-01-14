@@ -1,11 +1,11 @@
 import BasePhysicsGame from "@/games/common/basephysicsgame"
-import BasePhysicsItem from "@/games/common/basephysicsitem"
-import PhysicsShape from "@/games/common/physicsshape"
 import LetterPool from "@/games/common/letterpool"
 import LetterBall from "@/games/charrom/letterball"
 import Board from "@/games/charrom/board"
-import Matter from 'matter-js'
+import Striker from "@/games/charrom/striker"
+import Tile from "@/games/charrom/tile"
 import * as PIXI from "pixi.js"
+import * as TWEEDLE from "tweedle.js"
 
 export default class Charrom extends BasePhysicsGame {
    pool = new LetterPool()
@@ -14,6 +14,7 @@ export default class Charrom extends BasePhysicsGame {
    dragStartX = 0 
    dragStartY = 0
    gameTimeMs = 0
+   sunkLetters = []
    word = null
    placePuck = true
    justFlicked = false
@@ -48,17 +49,19 @@ export default class Charrom extends BasePhysicsGame {
       this.app.stage.on('pointerdown', this.pointerDown.bind(this))
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+
+      this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
 
    rackLetterPucks() {
       let numRows = 4
       let rackLeft = (this.gameWidth-160)/2
-      let rackTop = this.gameHeight/numRows
+      let rackTop = this.gameHeight*.15
       let sz = numRows
       let xPos = rackLeft
       for (let r = 0; r<numRows;r++) {
          for ( let c = 0; c< sz; c++) {
-            this.addBall(xPos, rackTop)
+            this.addPuck(xPos, rackTop)
             xPos += 50
          }
          sz--
@@ -67,8 +70,17 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
+   addPuck(x,y) {
+      if ( this.pool.hasTilesLeft() == false ) {
+         this.pool.refill()
+      }
+      let letter = this.pool.popScoringLetter()
+      let ball = new LetterBall(x,y,letter)
+      this.addPhysicsItem( ball )
+   }
+
    placeStriker(x,y) {
-      let striker = new Striker( x, y, 0x000066, 0x7A6C5D)
+      let striker = new Striker( x, y, 0x000066, 0x5E3023)
       striker.setTouchListener( this.dragStart.bind(this))
       this.addPhysicsItem(striker)
       this.placePuck = false
@@ -78,18 +90,10 @@ export default class Charrom extends BasePhysicsGame {
       if ( this.placePuck) {
          let actualW = this.gameWidth*this.scale
          let scale = (this.gameWidth / actualW )
-         console.log("SCALE "+scale)
-         this.placeStriker(e.global.x*scale, (e.global.y)*scale)
+         if ( this.board.canPlaceStriker(e.global.y*scale, Striker.RADIUS) ) {
+            this.placeStriker(e.global.x*scale, e.global.y*scale)
+         } 
       }
-   }
-
-   addBall(x,y) {
-      if ( this.pool.hasTilesLeft() == false ) {
-         this.pool.refill()
-      }
-      let letter = this.pool.pop()
-      let ball = new LetterBall(x,y,letter)
-      this.addPhysicsItem( ball )
    }
 
    dragStart( x,y,tgt ) {  
@@ -123,6 +127,22 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
+   puckSunk( puck ) {
+      if ( this.sunkLetters.length < 10) {
+         let tilesLeft = 10
+         let tilesTop = Charrom.BOARD_HEIGHT + 10
+         let t = new Tile(puck.letter, tilesLeft + this.sunkLetters.length*Tile.WIDTH, tilesTop, this.tileSelected.bind(this))
+         this.sunkLetters.push(t)
+         this.addChild(t)
+      } else {
+         console.log("game over")
+      }
+   }
+
+   tileSelected( t ) {
+      this.word.text += t.text
+   }
+
    update() {
       super.update()
       this.gameTimeMs += this.app.ticker.deltaMS
@@ -153,7 +173,7 @@ export default class Charrom extends BasePhysicsGame {
          if (this.board.isSunk(i)) {
             removeItems.push( i )  
             if ( i.tag != "striker") {
-               this.word.text += i.text
+               this.puckSunk( i )
             } else {
                striker = null
             }
@@ -164,54 +184,11 @@ export default class Charrom extends BasePhysicsGame {
          this.justFlicked = false 
          this.placePuck = true
          if ( striker ) {
-            removeItems.push( striker)
+            striker.fade( () => this.removePhysicsItem(striker))
          }
       }
  
+
       removeItems.forEach( i => this.removePhysicsItem( i ) )
-   }
-}
-
-class Striker extends BasePhysicsItem {
-   lineColor = null 
-   fillColor = null
-   dragging = false 
-   shape = "box"
-   touchListener = null
-   radius = 0
-
-   constructor( x,y, lineColor=0xffffff, fillColor=0x666666) {
-      super(x,y)
-     
-      this.lineColor = new PIXI.Color( lineColor )
-      this.fillColor = new PIXI.Color( fillColor )
-      this.radius = 30
-      this.pivot.set(0,0)
-      this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02, frictiion: 0, label: "striker"})
-      this.hitArea = new PIXI.Circle(0,0, this.radius)
-      this.setMass(3.0)
-      
-      this.update()
-
-      this.draw() 
-
-      this.cursor ="pointer"
-      this.eventMode = 'static'
-      this.on('pointerdown', (e) => {
-         this.dragging = true
-         this.touchListener( e.global.x, e.global.y, this )
-      })
-   }
-
-   setTouchListener( l ) {
-      this.touchListener = l
-   }
-
-   draw() {
-      this.gfx.clear() 
-      this.gfx.lineStyle(1, this.lineColor, 1)
-      this.gfx.beginFill( this.fillColor )
-      this.gfx.drawCircle(0,0,this.radius)
-      this.gfx.endFill()
    }
 }

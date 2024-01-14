@@ -12,4 +12,9 @@ export default class Letter {
    get value() {
       return this.#value
    }
+   
+   isVowel( ) {
+      let vowel = ["A","E","I","O","U","Y"]
+      return ( vowel.includes( this.#letter ) )
+   }
 }
