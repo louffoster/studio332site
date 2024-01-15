@@ -1,6 +1,6 @@
 import BasePhysicsGame from "@/games/common/basephysicsgame"
-import LetterPool from "@/games/common/letterpool"
-import LetterBall from "@/games/charrom/letterball"
+import Supply from "@/games/charrom/supply"
+import Puck from "@/games/charrom/puck"
 import Board from "@/games/charrom/board"
 import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
@@ -9,7 +9,7 @@ import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
 export default class Charrom extends BasePhysicsGame {
-   pool = new LetterPool()
+   supply = new Supply()
    targetObject = null
    dragStartTime = -1
    dragStartX = 0 
@@ -80,29 +80,22 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    rackLetterPucks() {
-      let numRows = 4
-      let rackLeft = (this.gameWidth-160)/2
-      let rackTop = this.gameHeight*.15
-      let sz = numRows
-      let xPos = rackLeft
-      for (let r = 0; r<numRows;r++) {
-         for ( let c = 0; c< sz; c++) {
-            this.addPuck(xPos, rackTop)
-            xPos += 50
-         }
-         sz--
-         xPos = rackLeft+25*(numRows-sz)
-         rackTop+=46
-      }
-   }
+      let y = this.gameHeight*.15
+      let x = (this.gameWidth-Puck.WIDTH)/2
+      let rack = this.supply.getRack()
+      rack.forEach( (l, idx) => {
+         let puck = new Puck(x,y, l)
+         this.addPhysicsItem( puck )
+         x+= Puck.WIDTH
 
-   addPuck(x,y) {
-      if ( this.pool.hasTilesLeft() == false ) {
-         this.pool.refill()
-      }
-      let letter = this.pool.popScoringLetter()
-      let ball = new LetterBall(x,y,letter)
-      this.addPhysicsItem( ball )
+         if ( idx == 1 ) {
+            y += 45
+            x = ((this.gameWidth-Puck.WIDTH)/2 - Puck.WIDTH/2)
+         } else if ( idx == 4) {
+            y += 45  
+            x = (this.gameWidth-Puck.WIDTH)/2
+         }
+      })
    }
 
    placeStriker(x,y) {

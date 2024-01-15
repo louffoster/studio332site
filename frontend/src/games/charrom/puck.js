@@ -1,13 +1,13 @@
 import PhysicsShape from "@/games/common/physicsshape"
 import * as PIXI from "pixi.js"
-// import Matter from 'matter-js'
 
-export default class LetterBall extends PhysicsShape {
+export default class Puck extends PhysicsShape {
    letter = null 
    extra = null
+   static WIDTH = 50
 
    constructor( x,y, letter) {
-      super( x,y, {type: "circle", radius: 25})
+      super( x,y, {type: "circle", radius: Puck.WIDTH/2})
 
       this.setAirFriction(0.02)
       this.setRestitution( 1 )
