@@ -43,7 +43,7 @@ export default class Puck extends PhysicsShape {
          uTxt.anchor.set(0.5)
          uTxt.x = 8
          uTxt.y = 4    
-         this.letter.x-= 4
+         txt.x-= 4
          this.addChild(uTxt)
       }
       this.draw()

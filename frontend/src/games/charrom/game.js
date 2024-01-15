@@ -16,8 +16,6 @@ export default class Charrom extends BasePhysicsGame {
    dragStartY = 0
    gameTimeMs = 0
    sunkLetters = []
-   tileRackX = 7 
-   tileRackY = Charrom.BOARD_HEIGHT+7
    tileRackHeight = 69
    word = null
    placePuck = true
@@ -26,6 +24,7 @@ export default class Charrom extends BasePhysicsGame {
    board = null
    clearBtn = null 
    submitBtn = null
+   rackBtn = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
@@ -37,36 +36,51 @@ export default class Charrom extends BasePhysicsGame {
       this.addChild(this.board)
       this.rackLetterPucks()
 
-      let buttonsY = this.tileRackY+this.tileRackHeight + 5
-      this.submitBtn = new Button( 338, buttonsY, "Submit", () => {
-         this.submitWord()
-      }, 0xFCFAFA,0x2f6690,0x5482bc)
-      this.submitBtn.small()
-      this.submitBtn.alignTopLeft()
-      this.submitBtn.noShadow()
-      this.submitBtn.setEnabled( false )
-      this.addChild(this.submitBtn )
-
-      this.clearBtn = new Button( 260, buttonsY, "Clear", () => {
-         this.clearWord()
-      }, 0xFCFAFA,0x9c5060,0x5482bc)
-      this.clearBtn.small()
-      this.clearBtn.alignTopLeft()
-      this.clearBtn.noShadow()
-      this.clearBtn.setEnabled( false )
-      this.addChild(this.clearBtn )
-
+      let buttonsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+7
       let wordStyle = new PIXI.TextStyle({
          fill: "#BDD5EA",
          fontFamily: "Arial",
          fontSize: 28,
          lineHeight: 28
       })
+      let lbl = new PIXI.Text("Word:", wordStyle) 
+      lbl.anchor.set(0,0.5)
+      lbl.x = 15
+      lbl.y = buttonsY+14
+      this.addChild(lbl)
+
       this.word = new PIXI.Text("", wordStyle)
       this.word.anchor.set(0,0.5)
-      this.word.x = 10
-      this.word.y = buttonsY+10
+      this.word.x = 100
+      this.word.y = buttonsY+14
       this.addChild(this.word)
+
+      this.clearBtn = new Button( 300, buttonsY, "Clear", () => {
+         this.clearWord()
+      }, 0xFCFAFA,0x9c5060,0x7c3040)
+      this.clearBtn.alignTopLeft()
+      this.clearBtn.small()
+      this.clearBtn.noShadow()
+      this.clearBtn.setEnabled( false )
+      this.addChild(this.clearBtn )
+
+      this.submitBtn = new Button( 300+this.clearBtn.btnWidth+10, buttonsY, "Submit", () => {
+         this.submitWord()
+      }, 0xFCFAFA,0x2f6690,0x5482bc)
+      this.submitBtn.alignTopLeft()
+      this.submitBtn.small()
+      this.submitBtn.noShadow()
+      this.submitBtn.setEnabled( false )
+      this.addChild(this.submitBtn )
+
+      this.rackBtn = new Button( this.gameWidth-5, buttonsY, "New Rack", () => {
+         this.clearWord()
+      }, 0xFCFAFA,0x9c5060,0x5482bc)
+      this.rackBtn.alignTopRight()
+      this.rackBtn.small()
+      this.rackBtn.noShadow()
+      this.rackBtn.setEnabled( false )
+      this.addChild(this.rackBtn )
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
@@ -148,8 +162,8 @@ export default class Charrom extends BasePhysicsGame {
 
    puckSunk( puck ) {
       if ( this.sunkLetters.length < 10) {
-         let x = this.tileRackX
-         let y = this.tileRackY
+         let x = 7
+         let y = Charrom.BOARD_HEIGHT+7
          let t = new Tile(puck.letter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
          this.sunkLetters.push(t)
          this.addChild(t)
@@ -160,6 +174,13 @@ export default class Charrom extends BasePhysicsGame {
 
    tileSelected( t ) {
       this.word.text += t.text
+      this.clearBtn.setEnabled( true )
+   }
+
+   clearWord() {
+      this.word.text = ""
+      this.sunkLetters.forEach( t => t.deselect() )
+      this.clearBtn.setEnabled( false )
    }
 
    drawLetterRack() {
@@ -170,8 +191,8 @@ export default class Charrom extends BasePhysicsGame {
 
       this.gfx.lineStyle( 1, 0x5E3023)
       this.gfx.beginFill(0xF3E9DC)
-      let x = this.tileRackX
-      let y = this.tileRackY
+      let x = 7
+      let y = Charrom.BOARD_HEIGHT+7
       for (let i=0; i<10; i++) {
          this.gfx.drawRect(x,y, Tile.WIDTH, Tile.HEIGHT)
          x += Tile.WIDTH+4

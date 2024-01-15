@@ -86,6 +86,12 @@ export default class Button extends PIXI.Container {
       this.y += this.btnHeight / 2.0
    }
 
+   alignTopRight() {
+      console.log(this,this.btnWidth)
+      this.x -= this.btnWidth * .25
+      this.y += this.btnHeight / 2.0
+   }
+
    drawButton() {
       this.graphics.clear()
       let alpha = 1.0 

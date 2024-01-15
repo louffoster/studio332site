@@ -13,7 +13,7 @@ const GAME_HEIGHT = 800
 var game = null
 
 onMounted(async () => {
-   game = new Charrom(GAME_WIDTH, GAME_HEIGHT, 0x495867 )
+   game = new Charrom(GAME_WIDTH, GAME_HEIGHT, 0x2A3D45 )
    game.initialize()
 })
 
