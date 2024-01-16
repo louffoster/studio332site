@@ -57,6 +57,10 @@ func main() {
 	{
 		letterDrop.POST("/check", svc.authMiddleware, svc.letterDropWordCheck)
 	}
+	charrom := router.Group("/charrom")
+	{
+		charrom.POST("/check", svc.authMiddleware, svc.charromWordCheck)
+	}
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)
 	log.Printf("Starting Studio332 site server on port %s", portStr)

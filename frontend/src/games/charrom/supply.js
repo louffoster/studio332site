@@ -7,6 +7,10 @@ export default class Supply {
    static NUM_VOWELS = 3
    static NUM_CONSONANTS = 4
 
+   get rackSize() {
+      return Supply.NUM_VOWELS + Supply.NUM_CONSONANTS
+   }
+
    getRack() {
       let out = [] 
       for ( let v = 0; v < Supply.NUM_VOWELS; v++) {

@@ -87,7 +87,6 @@ export default class Button extends PIXI.Container {
    }
 
    alignTopRight() {
-      console.log(this,this.btnWidth)
       this.x -= this.btnWidth * .25
       this.y += this.btnHeight / 2.0
    }

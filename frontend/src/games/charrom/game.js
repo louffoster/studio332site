@@ -5,8 +5,12 @@ import Board from "@/games/charrom/board"
 import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
 import Button from "@/games/common/button"
+import StartOverlay from "@/games/charrom/startoverlay"
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
+import axios from 'axios'
+
+const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 export default class Charrom extends BasePhysicsGame {
    supply = new Supply()
@@ -16,6 +20,7 @@ export default class Charrom extends BasePhysicsGame {
    dragStartY = 0
    gameTimeMs = 0
    sunkLetters = []
+   puckCount = 0
    tileRackHeight = 69
    word = null
    placePuck = true
@@ -25,6 +30,8 @@ export default class Charrom extends BasePhysicsGame {
    clearBtn = null 
    submitBtn = null
    rackBtn = null
+   gameState = "init"
+   startOverlay = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
@@ -34,7 +41,6 @@ export default class Charrom extends BasePhysicsGame {
 
       this.board = new Board(this, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
-      this.rackLetterPucks()
 
       let buttonsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+7
       let wordStyle = new PIXI.TextStyle({
@@ -74,7 +80,7 @@ export default class Charrom extends BasePhysicsGame {
       this.addChild(this.submitBtn )
 
       this.rackBtn = new Button( this.gameWidth-5, buttonsY, "New Rack", () => {
-         this.clearWord()
+         this.rackLetterPucks()
       }, 0xFCFAFA,0x9c5060,0x5482bc)
       this.rackBtn.alignTopRight()
       this.rackBtn.small()
@@ -90,6 +96,12 @@ export default class Charrom extends BasePhysicsGame {
 
       this.draw()
 
+      this.startOverlay = new StartOverlay( API_SERVICE,  this.gameWidth, this.gameHeight, () => {
+         this.rackLetterPucks()
+         this.removeChild(this.startOverlay)
+      }) 
+      this.addChild(this.startOverlay)
+
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
 
@@ -100,6 +112,7 @@ export default class Charrom extends BasePhysicsGame {
       rack.forEach( (l, idx) => {
          let puck = new Puck(x,y, l)
          this.addPhysicsItem( puck )
+         this.puckCount++
          x+= Puck.WIDTH
 
          if ( idx == 1 ) {
@@ -110,6 +123,7 @@ export default class Charrom extends BasePhysicsGame {
             x = (this.gameWidth-Puck.WIDTH)/2
          }
       })
+      this.rackBtn.setEnabled(false)
    }
 
    placeStriker(x,y) {
@@ -167,6 +181,8 @@ export default class Charrom extends BasePhysicsGame {
          let t = new Tile(puck.letter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
          this.sunkLetters.push(t)
          this.addChild(t)
+         this.puckCount-- 
+         this.rackBtn.setEnabled( this.puckCount < this.supply.rackSize )
       } else {
          console.log("game over")
       }
@@ -175,6 +191,15 @@ export default class Charrom extends BasePhysicsGame {
    tileSelected( t ) {
       this.word.text += t.text
       this.clearBtn.setEnabled( true )
+   }
+
+   submitWord() {
+      let url = `${API_SERVICE}/charrom/check?w=${this.word.text}`
+      axios.post(url).then( () => {
+         this.submitSuccess()
+      }).catch( _e => {
+         this.submitFailed()
+      })
    }
 
    clearWord() {
