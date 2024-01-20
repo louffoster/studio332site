@@ -23,6 +23,10 @@ export default class Charrom extends BasePhysicsGame {
    puckCount = 0
    tileRackHeight = 69
    word = null
+   score = 0
+   scoreTxt = null
+   scratchesLeft = 5
+   scratchTxt = null
    placePuck = true
    justFlicked = false
    flickTimeoutMS = 0
@@ -42,51 +46,28 @@ export default class Charrom extends BasePhysicsGame {
       this.board = new Board(this, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
 
-      let buttonsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+7
-      let wordStyle = new PIXI.TextStyle({
-         fill: "#BDD5EA",
+      let statsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+7
+      this.scoreTxt = new PIXI.Text("00000", {
          fontFamily: "Arial",
          fontSize: 28,
-         lineHeight: 28
+         lineHeight: 28,
+         fill: 0xF3E9DC
       })
-      let lbl = new PIXI.Text("Word:", wordStyle) 
-      lbl.anchor.set(0,0.5)
-      lbl.x = 15
-      lbl.y = buttonsY+14
-      this.addChild(lbl)
+      this.scoreTxt.anchor.set(0.5,0)
+      this.scoreTxt.x = this.gameWidth/2
+      this.scoreTxt.y = statsY+2
+      this.addChild(this.scoreTxt )
 
-      this.word = new PIXI.Text("", wordStyle)
-      this.word.anchor.set(0,0.5)
-      this.word.x = 100
-      this.word.y = buttonsY+14
-      this.addChild(this.word)
-
-      this.clearBtn = new Button( 300, buttonsY, "Clear", () => {
-         this.clearWord()
-      }, 0xFCFAFA,0x9c5060,0x7c3040)
-      this.clearBtn.alignTopLeft()
-      this.clearBtn.small()
-      this.clearBtn.noShadow()
-      this.clearBtn.setEnabled( false )
-      this.addChild(this.clearBtn )
-
-      this.submitBtn = new Button( 300+this.clearBtn.btnWidth+10, buttonsY, "Submit", () => {
-         this.submitWord()
-      }, 0xFCFAFA,0x2f6690,0x5482bc)
-      this.submitBtn.alignTopLeft()
-      this.submitBtn.small()
-      this.submitBtn.noShadow()
-      this.submitBtn.setEnabled( false )
-      this.addChild(this.submitBtn )
-
-      this.rackBtn = new Button( this.gameWidth-5, buttonsY, "New Rack", () => {
-         this.rackLetterPucks()
-      }, 0xFCFAFA,0x9c5060,0x5482bc)
-      this.rackBtn.alignTopRight()
-      this.rackBtn.small()
-      this.rackBtn.noShadow()
-      this.rackBtn.setEnabled( false )
-      this.addChild(this.rackBtn )
+      this.scratchTxt = new PIXI.Text(`= ${this.scratchesLeft}`, {
+         fontFamily: "Arial",
+         fontSize: 18,
+         lineHeight: 18,
+         fill: 0xF3E9DC
+      })
+      this.scratchTxt.anchor.set(0,0)
+      this.scratchTxt.x = 52
+      this.scratchTxt.y = statsY+5
+      this.addChild(this.scratchTxt )
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
@@ -96,9 +77,49 @@ export default class Charrom extends BasePhysicsGame {
 
       this.draw()
 
+      this.word = new PIXI.Text("", {
+         fontFamily: "Arial",
+         fontSize: 28,
+         lineHeight: 28,
+         fill: 0xBDD5EA
+      })
+      this.word.anchor.set(0,1)
+      this.word.x = 25
+      this.word.y =  this.gameHeight - 16
+      this.addChild(this.word)
+
+      let buttonsY = this.gameHeight - 50
+      let btnX = 230
+      this.clearBtn = new Button( btnX, buttonsY, "Clear", () => {
+         this.clearWord()
+      }, 0xFCFAFA,0x9c5060,0x7c3040)
+      this.clearBtn.alignTopLeft()
+      this.clearBtn.noShadow()
+      this.clearBtn.setEnabled( false )
+      this.addChild(this.clearBtn )
+
+      btnX += this.clearBtn.btnWidth+10
+      this.submitBtn = new Button( btnX, buttonsY, "Submit", () => {
+         this.submitWord()
+      }, 0xFCFAFA,0x2f6690,0x5482bc)
+      this.submitBtn.alignTopLeft()
+      this.submitBtn.noShadow()
+      this.submitBtn.setEnabled( false )
+      this.addChild(this.submitBtn )
+
+      btnX += this.submitBtn.btnWidth+35
+      this.rackBtn = new Button( btnX, buttonsY, "New Rack", () => {
+         this.rackLetterPucks()
+      }, 0xFCFAFA,0x1b998b,0x3bb9ab)
+      this.rackBtn.alignTopLeft()
+      this.rackBtn.noShadow()
+      this.rackBtn.setEnabled( false )
+      this.addChild(this.rackBtn )
+
       this.startOverlay = new StartOverlay( API_SERVICE,  this.gameWidth, this.gameHeight, () => {
          this.rackLetterPucks()
          this.removeChild(this.startOverlay)
+         this.gameState = "play"
       }) 
       this.addChild(this.startOverlay)
 
@@ -134,6 +155,7 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    pointerDown(e) {
+      if ( this.gameState != "play") return
       if ( this.placePuck) {
          let actualW = this.gameWidth*this.scale
          let scale = (this.gameWidth / actualW )
@@ -148,7 +170,6 @@ export default class Charrom extends BasePhysicsGame {
       this.dragStartTime = this.gameTimeMs
       this.dragStartX = x
       this.dragStartY = y
-      
    }
 
    dragEnd(e) {
@@ -183,9 +204,15 @@ export default class Charrom extends BasePhysicsGame {
          this.addChild(t)
          this.puckCount-- 
          this.rackBtn.setEnabled( this.puckCount < this.supply.rackSize )
+         this.score += 25
+         this.renderScore()
       } else {
          console.log("game over")
       }
+   }
+
+   renderScore() {
+      this.scoreTxt.text = `${this.score}`.padStart(5,"0")
    }
 
    tileSelected( t ) {
@@ -213,6 +240,11 @@ export default class Charrom extends BasePhysicsGame {
       this.gfx.lineStyle( 1, 0x5E3023, 1 )
       this.gfx.beginFill(0x7A6C5D)
       this.gfx.drawRect(0,Charrom.BOARD_HEIGHT, this.gameWidth, this.tileRackHeight)
+     
+      this.gfx.lineStyle( 2, 0xBDD5EA, 1 )
+      let bottomY = Charrom.BOARD_HEIGHT+this.tileRackHeight+2
+      this.gfx.moveTo(0, bottomY)
+      this.gfx.lineTo(this.gameWidth, bottomY)
 
       this.gfx.lineStyle( 1, 0x5E3023)
       this.gfx.beginFill(0xF3E9DC)
@@ -222,10 +254,30 @@ export default class Charrom extends BasePhysicsGame {
          this.gfx.drawRect(x,y, Tile.WIDTH, Tile.HEIGHT)
          x += Tile.WIDTH+4
       }
+      this.gfx.endFill()
    }
 
    draw() {
       this.drawLetterRack()
+
+      let statsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+1
+      this.gfx.lineStyle( 1, 0x7A6C5D, 1 )
+      this.gfx.beginFill(0x7A6C5D)
+      this.gfx.drawRect(0, statsY, this.gameWidth, 50)
+      this.gfx.endFill()
+
+      // draw striker for scratch count marker
+      this.gfx.lineStyle(1, 0x000066, 1)
+      this.gfx.beginFill( 0x5E3023 )
+      this.gfx.drawCircle(25,statsY+25,20)
+      this.gfx.beginFill( 0x895737 )
+      this.gfx.drawCircle(25,statsY+25,10)
+      this.gfx.endFill()
+
+      let divY = statsY + 52
+      this.gfx.lineStyle( 1, 0x5E3023, 1 )
+      this.gfx.moveTo(0, divY-1)
+      this.gfx.lineTo(this.gameWidth, divY-1)
    }
 
    update() {
@@ -261,6 +313,8 @@ export default class Charrom extends BasePhysicsGame {
                this.puckSunk( i )
             } else {
                striker = null
+               this.scratchesLeft--
+               this.scratchTxt.text = `= ${this.scratchesLeft}`
             }
          }
       })

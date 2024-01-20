@@ -8,7 +8,7 @@ import { onMounted, onBeforeUnmount } from "vue"
 import Charrom from "@/games/charrom/game.js"
 
 const GAME_WIDTH = 600
-const GAME_HEIGHT = 800
+const GAME_HEIGHT = 780
 
 var game = null
 
