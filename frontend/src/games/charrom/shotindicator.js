@@ -11,14 +11,12 @@ export default class ShotIndicator extends PIXI.Container {
       this.pivot.set(this.pointWidth/2.0, 0)
       this.addChild(this.gfx)
       this.draw()
-      this.visible = false
    }
 
    place( x, y ) {
       this.x = x 
       this.y = y 
       this.angle = 180
-      this.visible = true
       this.power = 0
    }
 
@@ -35,13 +33,12 @@ export default class ShotIndicator extends PIXI.Container {
       this.draw()
    }
 
-   hide() {
-      this.visible = 0
-   }
-
    draw() {
       this.gfx.clear() 
       this.gfx.lineStyle(1, 0x2A3D45, 1)
+      this.gfx.beginFill( 0xF3E9DC )
+      this.gfx.drawCircle(this.pointWidth/2.0, 0, 10)
+
       this.gfx.beginFill( 0xF3E9DC )
       this.gfx.drawRect(this.pointWidth/2.0-3, 0, 6, this.arrowLength)
 

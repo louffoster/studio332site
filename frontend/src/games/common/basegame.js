@@ -74,9 +74,11 @@ export default class BaseGame {
    addChild( child ) {
       this.scene.addChild(child)
    }
-   removeChild( child ) {
+   removeChild( child, destroy = true ) {
       this.scene.removeChild(child)
-      child.destroy()
+      if ( destroy ) {
+         child.destroy()
+      }
    }
 
    shuffleArray( array ) {

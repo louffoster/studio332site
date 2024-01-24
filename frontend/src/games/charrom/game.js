@@ -117,7 +117,6 @@ export default class Charrom extends BasePhysicsGame {
       this.addChild(this.rackBtn )
 
       this.shotOverlay = new ShotIndicator()
-      this.addChild(this.shotOverlay)
 
       this.startOverlay = new StartOverlay( API_SERVICE,  this.gameWidth, this.gameHeight, () => {
          this.rackLetterPucks()
@@ -186,18 +185,24 @@ export default class Charrom extends BasePhysicsGame {
    strikerTouched() {  
       if ( this.gameState != "touch") return
       this.shotOverlay.place( this.striker.x, this.striker.y)
+      this.addChild(this.shotOverlay)
       this.gameState = "aim"
    }
 
-   dragEnd(e) {
+   dragEnd() {
       if (  this.gameState == "aim" ) {
-         let fX = Math.cos(this.shotAngle) * 0.5 * this.shotOverlay.power
-         let fY = Math.sin(this.shotAngle) * 0.5 * this.shotOverlay.power
+         if ( this.shotOverlay.power > 0.01) {
+            let fX = Math.cos(this.shotAngle) * 0.5 * this.shotOverlay.power
+            let fY = Math.sin(this.shotAngle) * 0.5 * this.shotOverlay.power
 
-         this.striker.applyForce(fX,fY)
-         this.flickTimeoutMS = 1500
-         this.gameState = "shot"
-         this.shotOverlay.hide() 
+            this.striker.applyForce(fX,fY)
+            this.flickTimeoutMS = 1500
+            this.gameState = "shot"
+            this.removeChild(this.shotOverlay, false)
+         } else {
+            this.gameState = "touch"
+            this.removeChild(this.shotOverlay, false)   
+         }
       }
    }
 
