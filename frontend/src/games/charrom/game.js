@@ -5,6 +5,7 @@ import Board from "@/games/charrom/board"
 import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
 import Button from "@/games/common/button"
+import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
@@ -14,10 +15,7 @@ const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 export default class Charrom extends BasePhysicsGame {
    supply = new Supply()
-   targetObject = null
-   dragStartTime = -1
-   dragStartX = 0 
-   dragStartY = 0
+   striker = null
    gameTimeMs = 0
    sunkLetters = []
    puckCount = 0
@@ -36,6 +34,7 @@ export default class Charrom extends BasePhysicsGame {
    rackBtn = null
    gameState = "init"
    startOverlay = null
+   shotOverlay = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
@@ -72,6 +71,7 @@ export default class Charrom extends BasePhysicsGame {
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
       this.app.stage.on('pointerdown', this.pointerDown.bind(this))
+      this.app.stage.on('pointermove', this.pointerMove.bind(this))
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
 
@@ -116,10 +116,13 @@ export default class Charrom extends BasePhysicsGame {
       this.rackBtn.setEnabled( false )
       this.addChild(this.rackBtn )
 
+      this.shotOverlay = new ShotIndicator()
+      this.addChild(this.shotOverlay)
+
       this.startOverlay = new StartOverlay( API_SERVICE,  this.gameWidth, this.gameHeight, () => {
          this.rackLetterPucks()
          this.removeChild(this.startOverlay)
-         this.gameState = "play"
+         this.gameState = "place"
       }) 
       this.addChild(this.startOverlay)
 
@@ -148,15 +151,14 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    placeStriker(x,y) {
-      let striker = new Striker( x, y, 0x000066, 0x5E3023)
-      striker.setTouchListener( this.dragStart.bind(this))
-      this.addPhysicsItem(striker)
-      this.placePuck = false
+      this.striker = new Striker( x, y, 0x000066, 0x5E3023)
+      this.striker.setTouchListener( this.strikerTouched.bind(this))
+      this.addPhysicsItem(this.striker)
+      this.gameState = "touch"
    }
 
    pointerDown(e) {
-      if ( this.gameState != "play") return
-      if ( this.placePuck) {
+      if ( this.gameState == "place") {
          let actualW = this.gameWidth*this.scale
          let scale = (this.gameWidth / actualW )
          if ( this.board.canPlaceStriker(e.global.y*scale, Striker.RADIUS) ) {
@@ -165,33 +167,37 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
-   dragStart( x,y,tgt ) {  
-      this.targetObject = tgt 
-      this.dragStartTime = this.gameTimeMs
-      this.dragStartX = x
-      this.dragStartY = y
+   pointerMove( e ) {
+      if (  this.gameState != "aim" ) return
+
+      let actualW = this.gameWidth*this.scale
+      let scale = (this.gameWidth / actualW )
+      let ptX = e.global.x*scale
+      let ptY = e.global.y*scale
+      let dX =  ptX - this.striker.x
+      let dY =  ptY - this.striker.y
+      let pullDist = Math.sqrt( dX*dX + dY*dY)
+      let angle = Math.atan2(dY, dX)
+      this.shotAngle = angle + Math.PI
+      this.shotOverlay.setRotation(this.shotAngle* 180.0 / Math.PI)
+      this.shotOverlay.setPullbackDistance( pullDist )
+   }
+
+   strikerTouched() {  
+      if ( this.gameState != "touch") return
+      this.shotOverlay.place( this.striker.x, this.striker.y)
+      this.gameState = "aim"
    }
 
    dragEnd(e) {
-      this.app.stage.off('pointermove', this.dragMove)
-      if ( this.targetObject ) {
-         let elapsedMS = this.gameTimeMs - this.dragStartTime 
-         let dX = e.global.x - this.dragStartX
-         let dY = e.global.y - this.dragStartY
+      if (  this.gameState == "aim" ) {
+         let fX = Math.cos(this.shotAngle) * 0.5 * this.shotOverlay.power
+         let fY = Math.sin(this.shotAngle) * 0.5 * this.shotOverlay.power
 
-         let dist = Math.sqrt( dX*dX + dY*dY) 
-         let ratePxMerMs = dist / elapsedMS
-         ratePxMerMs = Math.min(ratePxMerMs, 0.15)
-         let fX = dX * (ratePxMerMs / 100)
-         let fY = dY * (ratePxMerMs / 100)
-
-         this.targetObject.applyForce(fX,fY)
-         this.targetObject = null 
-         this.dragStartTime = -1
-         this.dragStartX = 0
-         this.dragStartY = 0
+         this.striker.applyForce(fX,fY)
          this.flickTimeoutMS = 1500
-         this.justFlicked = true
+         this.gameState = "shot"
+         this.shotOverlay.hide() 
       }
    }
 
@@ -208,6 +214,7 @@ export default class Charrom extends BasePhysicsGame {
          this.renderScore()
       } else {
          console.log("game over")
+         this.gameState = "over"
       }
    }
 
@@ -283,7 +290,7 @@ export default class Charrom extends BasePhysicsGame {
    update() {
       super.update()
       this.gameTimeMs += this.app.ticker.deltaMS
-      if ( this.placePuck || this.justFlicked == false ) return 
+      if ( this.gameState != "shot" ) return 
 
       if ( this.flickTimeoutMS > 0) {
          this.flickTimeoutMS -= this.app.ticker.deltaMS
@@ -291,28 +298,23 @@ export default class Charrom extends BasePhysicsGame {
       }
 
       let removeItems = []
-      let striker = null
       let stopped = 0
+      let scratched = false
       this.items.forEach( i => {
 
          if ( this.flickTimeoutMS == 0 ) {
             if ( i.velocity <= 0.05) {
               i.stop()
               stopped++
-              
             }
          } 
-
-         if ( i.tag == "striker") {
-            striker = i
-         }
 
          if (this.board.isSunk(i)) {
             removeItems.push( i )  
             if ( i.tag != "striker") {
                this.puckSunk( i )
             } else {
-               striker = null
+               scratched = true
                this.scratchesLeft--
                this.scratchTxt.text = `= ${this.scratchesLeft}`
             }
@@ -320,14 +322,20 @@ export default class Charrom extends BasePhysicsGame {
       })
 
       if ( stopped == this.items.length ) {
-         this.justFlicked = false 
-         this.placePuck = true
-         if ( striker ) {
-            striker.fade( () => this.removePhysicsItem(striker))
+         this.gameState = "place"
+         if ( scratched == false ) {
+            this.striker.fade( () => {
+               this.removePhysicsItem( this.striker )
+               this.striker = null
+            })
          }
       }
- 
 
-      removeItems.forEach( i => this.removePhysicsItem( i ) )
+      removeItems.forEach( i => {
+         this.removePhysicsItem( i ) 
+         if ( i.tag == "striker") {
+            this.striker = null
+         }
+      })
    }
 }

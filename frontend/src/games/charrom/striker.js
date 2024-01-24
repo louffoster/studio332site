@@ -9,7 +9,6 @@ export default class Striker extends BasePhysicsItem {
    
    lineColor = null 
    fillColor = null
-   dragging = false 
    shape = "box"
    touchListener = null
    radius = 0
@@ -31,9 +30,8 @@ export default class Striker extends BasePhysicsItem {
 
       this.cursor ="pointer"
       this.eventMode = 'static'
-      this.on('pointerdown', (e) => {
-         this.dragging = true
-         this.touchListener( e.global.x, e.global.y, this )
+      this.on('pointerdown', () => {
+         this.touchListener()
       })
    }
 

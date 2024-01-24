@@ -89,7 +89,6 @@ export default class PhysicsShape extends BasePhysicsItem {
       if (this.shape == "circle") {
          this.gfx.drawCircle(0,0,this.radius)
       } else if ( this.shape == "triangle") {
-         console.log(`Draw triangle: ${this.x}, ${this.y} ${this.w}, ${this.h}`)
          this.gfx.moveTo(0,0)
          this.gfx.lineTo(this.w, 0)
          this.gfx.lineTo(0, this.h)
