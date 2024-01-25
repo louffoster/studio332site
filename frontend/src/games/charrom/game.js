@@ -9,7 +9,9 @@ import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
+import * as particles from '@pixi/particle-emitter'
 import axios from 'axios'
+import scratchJson from '@/assets/trash.json'
 
 const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
@@ -25,6 +27,7 @@ export default class Charrom extends BasePhysicsGame {
    scoreTxt = null
    scratchesLeft = 5
    scratchTxt = null
+   scratchAnim = null
    placePuck = true
    justFlicked = false
    flickTimeoutMS = 0
@@ -40,6 +43,7 @@ export default class Charrom extends BasePhysicsGame {
    static BOARD_HEIGHT = 600
 
    initialize() {
+      this.scratchAnim = particles.upgradeConfig(scratchJson, ['smoke.png'])
       this.physics.gravity.scale = 0
 
       this.board = new Board(this, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
@@ -322,6 +326,10 @@ export default class Charrom extends BasePhysicsGame {
                scratched = true
                this.scratchesLeft--
                this.scratchTxt.text = `= ${this.scratchesLeft}`
+               var emitter = new particles.Emitter(this.scene, this.scratchAnim )
+               emitter.updateOwnerPos(0,0)
+               emitter.updateSpawnPos(this.striker.x, this.striker.y)
+               emitter.playOnceAndDestroy( () => this.gameState = "place") 
             }
          }
       })
@@ -332,6 +340,7 @@ export default class Charrom extends BasePhysicsGame {
             this.striker.fade( () => {
                this.removePhysicsItem( this.striker )
                this.striker = null
+               this.gameState = "place"
             })
          }
       }
