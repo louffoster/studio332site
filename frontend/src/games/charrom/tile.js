@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js"
+import * as TWEEDLE from "tweedle.js"
 
 export default class Tile extends PIXI.Container {
    static WIDTH = 55 
@@ -75,6 +76,10 @@ export default class Tile extends PIXI.Container {
       if (uTxt ) {
          this.addChild(uTxt)
       }
+   }
+
+   fade() {
+      new TWEEDLE.Tween(this.graphics).to({ alpha: 0}, 250).start().easing(TWEEDLE.Easing.Linear.None)//.onComplete(fadeDone)
    }
 
    get value() {

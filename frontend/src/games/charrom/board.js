@@ -58,7 +58,7 @@ export default class Board extends PIXI.Container {
    }
 
    canPlaceStriker(y, radius) {
-      return ( y-radius >= this.shotLineY && y+radius < this.boardH )
+      return ( y-radius*.5 >= this.shotLineY && y+radius < this.boardH )
    }
 
    draw() {

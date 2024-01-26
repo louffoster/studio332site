@@ -28,8 +28,6 @@ export default class Charrom extends BasePhysicsGame {
    scratchesLeft = 5
    scratchTxt = null
    scratchAnim = null
-   placePuck = true
-   justFlicked = false
    flickTimeoutMS = 0
    board = null
    clearBtn = null 
@@ -234,6 +232,7 @@ export default class Charrom extends BasePhysicsGame {
    tileSelected( t ) {
       this.word.text += t.text
       this.clearBtn.setEnabled( true )
+      this.submitBtn.setEnabled( this.word.text.length >= 3 )
    }
 
    submitWord() {
@@ -243,6 +242,47 @@ export default class Charrom extends BasePhysicsGame {
       }).catch( _e => {
          this.submitFailed()
       })
+      this.clearBtn.setEnabled( false )
+      this.submitBtn.setEnabled( false )
+   }
+
+   submitSuccess() {
+      let tileCnt = this.word.text.length
+      let totalTileValue = 0
+      let clear = []
+      this.sunkLetters.forEach( sl => {
+         if ( sl.selected ) {
+            clear.push(sl)
+            sl.fade()
+         }
+      })
+
+      this.score += (totalTileValue * tileCnt) 
+      this.renderScore()
+
+      setTimeout( () => {
+         clear.forEach( c => {
+            let idx = this.sunkLetters.findIndex( sl => sl == c)
+            if ( idx > -1 ) {
+               this.removeChild(c)
+               this.sunkLetters.splice(idx,1)
+            }
+         })
+
+         // collapse tiles back to left
+         this.word.text = ""
+         let tgtX = 7
+         this.sunkLetters.forEach( sl => {
+            if ( sl.x != tgtX) {
+               new TWEEDLE.Tween(sl).to({ x: tgtX}, 250).start().easing(TWEEDLE.Easing.Linear.None)
+            }
+            tgtX += (Tile.WIDTH+4)
+         })
+      }, 300)
+   }
+
+   submitFailed() {
+      console.log("eat a bunny")
    }
 
    clearWord() {
@@ -312,7 +352,7 @@ export default class Charrom extends BasePhysicsGame {
       this.items.forEach( i => {
 
          if ( this.flickTimeoutMS == 0 ) {
-            if ( i.velocity <= 0.05) {
+            if ( i.velocity <= 0.15) {
               i.stop()
               stopped++
             }
@@ -343,6 +383,11 @@ export default class Charrom extends BasePhysicsGame {
                this.gameState = "place"
             })
          }
+         // if ( scratched ) {
+         //    this.gameState = "place"
+         // } else {
+         //    this.gameState = "touch"
+         // }
       }
 
       removeItems.forEach( i => {
