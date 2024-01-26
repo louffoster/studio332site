@@ -27,10 +27,12 @@ export default class Board extends PIXI.Container {
       this.addChild(h2)
 
       let h3 = new Hole(35, this.boardH-35, 35)
+      h3.setTrashMode()
       this.holes.push(h3)
       this.addChild(h3)
 
       let h4 = new Hole(this.boardW-35, this.boardH-35, 35)
+      h4.setTrashMode()
       this.holes.push(h4)
       this.addChild(h4)
 
@@ -43,6 +45,13 @@ export default class Board extends PIXI.Container {
       Matter.Composite.add(game.physics.world, l)
       let r = Matter.Bodies.rectangle(this.boardW+25, this.boardH/2, 50, this.boardH, { isStatic: true, friction: 0, restitution: 1})
       Matter.Composite.add(game.physics.world, r)
+
+      let m = new PIXI.Graphics() 
+      m.beginFill(0x000000)
+      m.drawRect(0, 0, this.boardW, this.boardH);
+      m.endFill()
+      this.addChild(m)
+      this.mask = m
 
       this.draw()
    }
@@ -74,11 +83,27 @@ export default class Board extends PIXI.Container {
       this.gfx.lineStyle(8, 0xC17C74,1)
       this.gfx.moveTo(2, this.shotLineY)
       this.gfx.lineTo(this.boardW-2, this.shotLineY)
+
+      this.gfx.lineStyle(10, 0xC17C74,1)
+      this.gfx.drawCircle(35, this.boardH-35, 60)
+      this.gfx.drawCircle(this.boardW-35, this.boardH-35, 60)
+
+      this.gfx.lineStyle(10, 0x5574bd,1)
+      this.gfx.drawCircle(35, 35, 60)
+      this.gfx.drawCircle(this.boardW-35, 35, 60)
+
+      this.gfx.lineStyle(1, 0x7A6C5D,1)
+      this.gfx.drawCircle(this.boardW/2, 162, 85)
+      this.gfx.beginFill(0x7A6C5D)
+      this.gfx.drawCircle(this.boardW/2, 162, 10)
+
+      this.gfx.endFill()
    }
 }
 
 class Hole extends PIXI.Container {
    gfx = null
+   trashPucks = false
    constructor( x,y, radius) {
       super() 
       this.x = x 
@@ -88,6 +113,10 @@ class Hole extends PIXI.Container {
       this.gfx = new PIXI.Graphics()
       this.addChild(this.gfx)
       this.draw()
+   }
+
+   setTrashMode() {
+      this.trashPucks = true
    }
 
    checkForSink( shape ) {

@@ -244,6 +244,7 @@ export default class Charrom extends BasePhysicsGame {
       })
       this.clearBtn.setEnabled( false )
       this.submitBtn.setEnabled( false )
+      this.word.text = ""
    }
 
    submitSuccess() {
@@ -270,7 +271,6 @@ export default class Charrom extends BasePhysicsGame {
          })
 
          // collapse tiles back to left
-         this.word.text = ""
          let tgtX = 7
          this.sunkLetters.forEach( sl => {
             if ( sl.x != tgtX) {
@@ -282,7 +282,11 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    submitFailed() {
-      console.log("eat a bunny")
+      this.sunkLetters.forEach( sl => {
+         if ( sl.selected ) {
+            sl.setError()
+         }
+      })
    }
 
    clearWord() {
@@ -358,6 +362,7 @@ export default class Charrom extends BasePhysicsGame {
             }
          } 
 
+         // FIXME need to know if sunk for letter or to trash letter
          if (this.board.isSunk(i)) {
             removeItems.push( i )  
             if ( i.tag != "striker") {

@@ -93,10 +93,14 @@ export default class Tile extends PIXI.Container {
       return txt
    }
 
-   setError( flag ) {
-      this.error = flag 
+   setError( ) {
+      this.error = true 
       this.selected = false
       this.draw()
+      setTimeout( () => {
+         this.error = false 
+         this.draw()
+      }, 250)
    }
 
    select() {
@@ -120,7 +124,7 @@ export default class Tile extends PIXI.Container {
       this.graphics.lineStyle(1, 0x5E3023, 1)
 
       if ( this.error ) {
-         this.graphics.beginFill(0xd36582) 
+         this.graphics.beginFill(0xe0adc1) 
       } else {
          if (this.selected) {
             this.graphics.beginFill(0x8ecae6)
