@@ -383,14 +383,11 @@ export default class Charrom extends BasePhysicsGame {
          this.rackBtn.setEnabled( true )
          this.gameState = "place"
          if ( scratched == false ) {
-            // this.striker.fade( () => {
-            //    this.removePhysicsItem( this.striker )
-            //    this.striker = null
-            //    this.gameState = "place"
-            // })
-            this.gameState = "touch"
-         } else {
-            this.gameState = "place"
+            this.striker.fade( () => {
+               this.removePhysicsItem( this.striker )
+               this.striker = null
+               this.gameState = "place"
+            })
          }
       } else {
          this.rackBtn.setEnabled( false )
