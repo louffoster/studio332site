@@ -28,7 +28,6 @@ export default class Charrom extends BasePhysicsGame {
    scratchesLeft = 5
    scratchTxt = null
    scratchAnim = null
-   flickTimeoutMS = 0
    board = null
    clearBtn = null 
    submitBtn = null
@@ -198,7 +197,6 @@ export default class Charrom extends BasePhysicsGame {
             let fY = Math.sin(this.shotAngle) * 0.5 * this.shotOverlay.power
 
             this.striker.applyForce(fX,fY)
-            this.flickTimeoutMS = 1500
             this.gameState = "shot"
             this.removeChild(this.shotOverlay, false)
          } else {
@@ -248,10 +246,11 @@ export default class Charrom extends BasePhysicsGame {
          this.submitSuccess()
       }).catch( _e => {
          this.submitFailed()
+      }).finally( () => {
+         this.clearBtn.setEnabled( false )
+         this.submitBtn.setEnabled( false )
+         this.clearWord()
       })
-      this.clearBtn.setEnabled( false )
-      this.submitBtn.setEnabled( false )
-      this.word.text = ""
    }
 
    submitSuccess() {
@@ -262,13 +261,16 @@ export default class Charrom extends BasePhysicsGame {
          if ( sl.selected ) {
             clear.push(sl)
             sl.fade()
+            totalTileValue += sl.value
          }
       })
 
+      console.log("SCORE TILE "+totalTileValue+" cnt "+tileCnt)
       this.score += (totalTileValue * tileCnt) 
       this.renderScore()
+      this.word.text = ""
 
-      setTimeout( () => {
+      // setTimeout( () => {
          clear.forEach( c => {
             let idx = this.sunkLetters.findIndex( sl => sl == c)
             if ( idx > -1 ) {
@@ -285,7 +287,7 @@ export default class Charrom extends BasePhysicsGame {
             }
             tgtX += (Tile.WIDTH+4)
          })
-      }, 300)
+      // }, 300)
    }
 
    submitFailed() {
@@ -352,29 +354,25 @@ export default class Charrom extends BasePhysicsGame {
       this.gameTimeMs += this.app.ticker.deltaMS
       if ( this.gameState != "shot" ) return 
 
-      if ( this.flickTimeoutMS > 0) {
-         this.flickTimeoutMS -= this.app.ticker.deltaMS
-         this.flickTimeoutMS = Math.max(0, this.flickTimeoutMS)
-      }
-
       let removeItems = []
       let stopped = 0
       let scratched = false
       this.items.forEach( i => {
 
-         if ( this.flickTimeoutMS == 0 ) {
-            if ( i.velocity <= 0.15) {
-              i.stop()
-              stopped++
-            }
-         } 
+         if ( i.velocity <= 0.15) {
+            i.stop()
+            stopped++
+         }
 
          let sunkResp = this.board.checkSunk( i )
          if ( sunkResp.sunk ) {
+            console.log("SUNK!")
+            console.log(i)
             removeItems.push( i )  
             if ( i.tag != "striker") {
                this.puckSunk( i, sunkResp.trash )
             } else {
+               console.log("scratch")
                scratched = true
                this.scratchesLeft--
                this.scratchTxt.text = `= ${this.scratchesLeft}`
@@ -387,6 +385,7 @@ export default class Charrom extends BasePhysicsGame {
       })
 
       if ( stopped == this.items.length ) {
+         this.rackBtn.setEnabled( true )
          this.gameState = "place"
          if ( scratched == false ) {
             this.striker.fade( () => {
@@ -395,6 +394,8 @@ export default class Charrom extends BasePhysicsGame {
                this.gameState = "place"
             })
          }
+      } else {
+         this.rackBtn.setEnabled( false )
       }
 
       removeItems.forEach( i => {
