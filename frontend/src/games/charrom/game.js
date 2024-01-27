@@ -208,20 +208,27 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
-   puckSunk( puck ) {
-      if ( this.sunkLetters.length < 10) {
-         let x = 7
-         let y = Charrom.BOARD_HEIGHT+7
-         let t = new Tile(puck.letter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
-         this.sunkLetters.push(t)
-         this.addChild(t)
-         this.puckCount-- 
-         this.rackBtn.setEnabled( this.puckCount < this.supply.rackSize )
-         this.score += 25
-         this.renderScore()
+   puckSunk( puck, trash ) {
+      this.puckCount--
+      this.rackBtn.setEnabled( this.puckCount < this.supply.rackSize )
+      this.score += 25
+      this.renderScore()
+      if ( trash ) {
+         var emitter = new particles.Emitter(this.scene, this.scratchAnim )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(puck.x, puck.y)
+         emitter.playOnceAndDestroy() 
       } else {
-         console.log("game over")
-         this.gameState = "over"
+         if ( this.sunkLetters.length < 10) {
+            let x = 7
+            let y = Charrom.BOARD_HEIGHT+7
+            let t = new Tile(puck.letter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
+            this.sunkLetters.push(t)
+            this.addChild(t)
+         } else {
+            console.log("game over")
+            this.gameState = "over"
+         }
       }
    }
 
@@ -362,11 +369,11 @@ export default class Charrom extends BasePhysicsGame {
             }
          } 
 
-         // FIXME need to know if sunk for letter or to trash letter
-         if (this.board.isSunk(i)) {
+         let sunkResp = this.board.checkSunk( i )
+         if ( sunkResp.sunk ) {
             removeItems.push( i )  
             if ( i.tag != "striker") {
-               this.puckSunk( i )
+               this.puckSunk( i, sunkResp.trash )
             } else {
                scratched = true
                this.scratchesLeft--
@@ -388,11 +395,6 @@ export default class Charrom extends BasePhysicsGame {
                this.gameState = "place"
             })
          }
-         // if ( scratched ) {
-         //    this.gameState = "place"
-         // } else {
-         //    this.gameState = "touch"
-         // }
       }
 
       removeItems.forEach( i => {

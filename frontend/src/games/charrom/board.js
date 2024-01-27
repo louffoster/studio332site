@@ -56,14 +56,16 @@ export default class Board extends PIXI.Container {
       this.draw()
    }
 
-   isSunk( puck ) {
+   checkSunk( puck ) {
       let sunk = false
+      let trash = false
       this.holes.forEach( h => {
          if ( h.checkForSink( puck ) ) {
             sunk = true
+            trash = h.trashPucks
          }
       })
-      return sunk
+      return {sunk: sunk, trash: trash}
    }
 
    canPlaceStriker(y, radius) {
@@ -104,6 +106,7 @@ export default class Board extends PIXI.Container {
 class Hole extends PIXI.Container {
    gfx = null
    trashPucks = false
+
    constructor( x,y, radius) {
       super() 
       this.x = x 
