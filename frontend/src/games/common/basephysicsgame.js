@@ -17,8 +17,10 @@ export default class BasePhysicsGame extends BaseGame {
    }
 
    removePhysicsItem( item ) {
-      this.removeChild(item)
+      console.log("remove item")
+      console.log(item)
       Matter.Composite.remove(this.physics.world, item.body)
+      this.removeChild(item)
       let idx = this.items.findIndex( s => s == item )
       this.items.splice(idx,1)
    }

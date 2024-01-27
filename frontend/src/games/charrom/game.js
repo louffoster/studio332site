@@ -352,10 +352,10 @@ export default class Charrom extends BasePhysicsGame {
       this.gameTimeMs += this.app.ticker.deltaMS
       if ( this.gameState != "shot" ) return 
 
-      let removeItems = []
+      // let removeItems = []
       let stopped = 0
       let scratched = false
-      this.items.forEach( i => {
+      this.items.slice().forEach( i => {
 
          if ( i.velocity <= 0.15) {
             i.stop()
@@ -364,7 +364,7 @@ export default class Charrom extends BasePhysicsGame {
 
          let sunkResp = this.board.checkSunk( i )
          if ( sunkResp.sunk ) {
-            removeItems.push( i )  
+            // removeItems.push( i )  
             if ( i.tag != "striker") {
                this.puckSunk( i, sunkResp.trash )
             } else {
@@ -375,7 +375,9 @@ export default class Charrom extends BasePhysicsGame {
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
                emitter.playOnceAndDestroy( () => this.gameState = "place") 
+               this.striker =  null
             }
+            this.removePhysicsItem( i )
          }
       })
 
@@ -393,11 +395,11 @@ export default class Charrom extends BasePhysicsGame {
          this.rackBtn.setEnabled( false )
       }
 
-      removeItems.forEach( i => {
-         this.removePhysicsItem( i ) 
-         if ( i.tag == "striker") {
-            this.striker = null
-         }
-      })
+      // removeItems.forEach( i => {
+      //    this.removePhysicsItem( i ) 
+      //    if ( i.tag == "striker") {
+      //       this.striker = null
+      //    }
+      // })
    }
 }
