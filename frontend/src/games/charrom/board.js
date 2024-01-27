@@ -23,6 +23,7 @@ export default class Board extends PIXI.Container {
       this.addChild(h1)
 
       let h2 = new Hole(this.boardW-35, 35, 35)
+      h2.setTrashMode()
       this.holes.push(h2)
       this.addChild(h2)
 
@@ -32,7 +33,6 @@ export default class Board extends PIXI.Container {
       this.addChild(h3)
 
       let h4 = new Hole(this.boardW-35, this.boardH-35, 35)
-      h4.setTrashMode()
       this.holes.push(h4)
       this.addChild(h4)
 
@@ -82,17 +82,17 @@ export default class Board extends PIXI.Container {
       this.gfx.endFill()
 
             
-      this.gfx.lineStyle(8, 0xC17C74,1)
+      this.gfx.lineStyle(4, 0xC17C74,1)
       this.gfx.moveTo(2, this.shotLineY)
       this.gfx.lineTo(this.boardW-2, this.shotLineY)
 
       this.gfx.lineStyle(10, 0xC17C74,1)
       this.gfx.drawCircle(35, this.boardH-35, 60)
-      this.gfx.drawCircle(this.boardW-35, this.boardH-35, 60)
+      this.gfx.drawCircle(this.boardW-35, 35, 60)
 
       this.gfx.lineStyle(10, 0x5574bd,1)
       this.gfx.drawCircle(35, 35, 60)
-      this.gfx.drawCircle(this.boardW-35, 35, 60)
+      this.gfx.drawCircle(this.boardW-35, this.boardH-35, 60)
 
       this.gfx.lineStyle(1, 0x7A6C5D,1)
       this.gfx.drawCircle(this.boardW/2, 162, 85)

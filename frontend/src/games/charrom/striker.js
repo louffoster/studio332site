@@ -22,7 +22,7 @@ export default class Striker extends BasePhysicsItem {
       this.pivot.set(0,0)
       this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02, frictiion: 0, label: "striker"})
       this.hitArea = new PIXI.Circle(0,0, this.radius)
-      this.setMass(3.0)
+      this.setMass(3.5)
       
       this.update()
 

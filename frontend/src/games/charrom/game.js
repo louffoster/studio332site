@@ -270,24 +270,22 @@ export default class Charrom extends BasePhysicsGame {
       this.renderScore()
       this.word.text = ""
 
-      // setTimeout( () => {
-         clear.forEach( c => {
-            let idx = this.sunkLetters.findIndex( sl => sl == c)
-            if ( idx > -1 ) {
-               this.removeChild(c)
-               this.sunkLetters.splice(idx,1)
-            }
-         })
+      clear.forEach( c => {
+         let idx = this.sunkLetters.findIndex( sl => sl == c)
+         if ( idx > -1 ) {
+            this.removeChild(c)
+            this.sunkLetters.splice(idx,1)
+         }
+      })
 
-         // collapse tiles back to left
-         let tgtX = 7
-         this.sunkLetters.forEach( sl => {
-            if ( sl.x != tgtX) {
-               new TWEEDLE.Tween(sl).to({ x: tgtX}, 250).start().easing(TWEEDLE.Easing.Linear.None)
-            }
-            tgtX += (Tile.WIDTH+4)
-         })
-      // }, 300)
+      // collapse tiles back to left
+      let tgtX = 7
+      this.sunkLetters.forEach( sl => {
+         if ( sl.x != tgtX) {
+            new TWEEDLE.Tween(sl).to({ x: tgtX}, 250).start().easing(TWEEDLE.Easing.Linear.None)
+         }
+         tgtX += (Tile.WIDTH+4)
+      })
    }
 
    submitFailed() {
@@ -366,13 +364,10 @@ export default class Charrom extends BasePhysicsGame {
 
          let sunkResp = this.board.checkSunk( i )
          if ( sunkResp.sunk ) {
-            console.log("SUNK!")
-            console.log(i)
             removeItems.push( i )  
             if ( i.tag != "striker") {
                this.puckSunk( i, sunkResp.trash )
             } else {
-               console.log("scratch")
                scratched = true
                this.scratchesLeft--
                this.scratchTxt.text = `= ${this.scratchesLeft}`
@@ -388,11 +383,14 @@ export default class Charrom extends BasePhysicsGame {
          this.rackBtn.setEnabled( true )
          this.gameState = "place"
          if ( scratched == false ) {
-            this.striker.fade( () => {
-               this.removePhysicsItem( this.striker )
-               this.striker = null
-               this.gameState = "place"
-            })
+            // this.striker.fade( () => {
+            //    this.removePhysicsItem( this.striker )
+            //    this.striker = null
+            //    this.gameState = "place"
+            // })
+            this.gameState = "touch"
+         } else {
+            this.gameState = "place"
          }
       } else {
          this.rackBtn.setEnabled( false )
