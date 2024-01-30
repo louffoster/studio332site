@@ -36,7 +36,7 @@ export default class Striker extends BasePhysicsItem {
    }
 
    fade( fadeDone) {
-      new TWEEDLE.Tween(this.gfx).to({ alpha: 0}, 250).start().easing(TWEEDLE.Easing.Linear.None).onComplete(fadeDone)
+      new TWEEDLE.Tween(this.gfx).to({ alpha: 0}, 150).start().easing(TWEEDLE.Easing.Linear.None).onComplete(fadeDone)
    }
 
    setTouchListener( l ) {

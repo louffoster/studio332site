@@ -4,6 +4,7 @@ import Puck from "@/games/charrom/puck"
 import Board from "@/games/charrom/board"
 import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
+import Timer from "@/games/charrom/timer"
 import Button from "@/games/common/button"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
@@ -35,6 +36,7 @@ export default class Charrom extends BasePhysicsGame {
    gameState = "init"
    startOverlay = null
    shotOverlay = null
+   timer = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
@@ -68,6 +70,10 @@ export default class Charrom extends BasePhysicsGame {
       this.scratchTxt.x = 52
       this.scratchTxt.y = statsY+5
       this.addChild(this.scratchTxt )
+
+      this.timer = new Timer(this.gameWidth-100, statsY+5, 90, 25 )
+      this.timer.setTimeoutHandler( this.timeExpired.bind(this) )
+      this.addChild(this.timer)
 
       this.app.stage.eventMode = 'static'
       this.app.stage.hitArea = this.app.screen
@@ -193,8 +199,8 @@ export default class Charrom extends BasePhysicsGame {
    dragEnd() {
       if (  this.gameState == "aim" ) {
          if ( this.shotOverlay.power > 0.01) {
-            let fX = Math.cos(this.shotAngle) * 0.5 * this.shotOverlay.power
-            let fY = Math.sin(this.shotAngle) * 0.5 * this.shotOverlay.power
+            let fX = Math.cos(this.shotAngle) * 0.45 * this.shotOverlay.power
+            let fY = Math.sin(this.shotAngle) * 0.45 * this.shotOverlay.power
 
             this.striker.applyForce(fX,fY)
             this.gameState = "shot"
@@ -210,6 +216,8 @@ export default class Charrom extends BasePhysicsGame {
       this.puckCount--
       this.rackBtn.setEnabled( this.puckCount < this.supply.rackSize )
       this.score += 25
+      this.timer.puckSunk()
+
       this.renderScore()
       if ( trash ) {
          var emitter = new particles.Emitter(this.scene, this.scratchAnim )
@@ -265,10 +273,10 @@ export default class Charrom extends BasePhysicsGame {
          }
       })
 
-      console.log("SCORE TILE "+totalTileValue+" cnt "+tileCnt)
       this.score += (totalTileValue * tileCnt) 
       this.renderScore()
       this.word.text = ""
+      this.timer.reset()
 
       clear.forEach( c => {
          let idx = this.sunkLetters.findIndex( sl => sl == c)
@@ -294,6 +302,10 @@ export default class Charrom extends BasePhysicsGame {
             sl.setError()
          }
       })
+   }
+
+   timeExpired() {
+      console.log("GAME OVER")
    }
 
    clearWord() {
@@ -348,23 +360,25 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    update() {
+      if ( this.gameState == "init") return 
+
       super.update()
       this.gameTimeMs += this.app.ticker.deltaMS
+      this.timer.tick(this.app.ticker.deltaMS)
+
       if ( this.gameState != "shot" ) return 
 
-      // let removeItems = []
       let stopped = 0
       let scratched = false
       this.items.slice().forEach( i => {
 
-         if ( i.velocity <= 0.15) {
+         if ( i.velocity <= 0.25) {
             i.stop()
             stopped++
          }
 
          let sunkResp = this.board.checkSunk( i )
          if ( sunkResp.sunk ) {
-            // removeItems.push( i )  
             if ( i.tag != "striker") {
                this.puckSunk( i, sunkResp.trash )
             } else {
@@ -374,7 +388,7 @@ export default class Charrom extends BasePhysicsGame {
                var emitter = new particles.Emitter(this.scene, this.scratchAnim )
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
-               emitter.playOnceAndDestroy( () => this.gameState = "place") 
+               emitter.playOnceAndDestroy() 
                this.striker =  null
             }
             this.removePhysicsItem( i )
@@ -384,22 +398,20 @@ export default class Charrom extends BasePhysicsGame {
       if ( stopped == this.items.length ) {
          this.rackBtn.setEnabled( true )
          this.gameState = "place"
-         if ( scratched == false ) {
+         if ( scratched == false && this.striker ) {
             this.striker.fade( () => {
                this.removePhysicsItem( this.striker )
                this.striker = null
                this.gameState = "place"
+               console.log("STOPPED. CNT "+this.puckCount+" vs "+this.items.length)
+               console.log( this.items )
             })
+         } else {
+            console.log("STOPPED. CNT "+this.puckCount+" vs "+this.items.length)
+            console.log( this.items )
          }
       } else {
          this.rackBtn.setEnabled( false )
       }
-
-      // removeItems.forEach( i => {
-      //    this.removePhysicsItem( i ) 
-      //    if ( i.tag == "striker") {
-      //       this.striker = null
-      //    }
-      // })
    }
 }

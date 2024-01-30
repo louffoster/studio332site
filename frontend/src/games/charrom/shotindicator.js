@@ -35,6 +35,7 @@ export default class ShotIndicator extends PIXI.Container {
 
    draw() {
       this.gfx.clear() 
+      this.gfx.alpha = 0.6
       this.gfx.lineStyle(1, 0x2A3D45, 1)
       this.gfx.beginFill( 0xF3E9DC )
       this.gfx.drawCircle(this.pointWidth/2.0, 0, 10)

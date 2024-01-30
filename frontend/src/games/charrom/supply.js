@@ -4,8 +4,8 @@ import Letter from "@/games/common/letter"
 export default class Supply {
    consonants = []
    vowels = ["A", "E", "I", "O", "U"]
-   static NUM_VOWELS = 3
-   static NUM_CONSONANTS = 4
+   static NUM_VOWELS = 2
+   static NUM_CONSONANTS = 5
 
    get rackSize() {
       return Supply.NUM_VOWELS + Supply.NUM_CONSONANTS
