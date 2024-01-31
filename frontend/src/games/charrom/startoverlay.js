@@ -34,19 +34,19 @@ export default class StartOverlay extends PIXI.Container {
       })
 
       let msg = `Each turn, place your striker behind the red line. `
-      msg += "Flick it into the letter pucks to sink them into the pockets."
+      msg += "Flick it into the letter pucks to sink them into the pockets. "
+      msg += "Red pockets trash the letter, blue add it to your letter supply."
       let note1 = new PIXI.Text(msg, style)
       note1.anchor.set(0.5,0)
       note1.x = this.panelW/2
       note1.y = 25
       this.addChild(note1)
 
-      msg = "Each puck sunk gives you a letter in your letter rack. "
-      msg += "Tap these letters in any order to create and score words."
+      msg = "Tap letters from your supply in any order to create and score words."
       let note2 = new PIXI.Text(msg, style)
       note2.anchor.set(0.5,0)
       note2.x = this.panelW/2
-      note2.y = 100
+      note2.y = 120
       this.addChild(note2)
 
       msg = `The game is over when your letter rack exceeds 10 letters, time expires or you scratch 5 times.`

@@ -8,6 +8,7 @@ import Timer from "@/games/charrom/timer"
 import Button from "@/games/common/button"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
+import EndOverlay from "@/games/charrom/endoverlay"
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
@@ -19,12 +20,14 @@ const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 export default class Charrom extends BasePhysicsGame {
    supply = new Supply()
    striker = null
-   gameTimeMs = 0
    sunkLetters = []
    puckCount = 0
    tileRackHeight = 69
    word = null
    score = 0
+   sunkCount = 0 
+   wordCount = 0
+   endReason = ""
    scoreTxt = null
    scratchesLeft = 5
    scratchTxt = null
@@ -36,14 +39,20 @@ export default class Charrom extends BasePhysicsGame {
    gameState = "init"
    startOverlay = null
    shotOverlay = null
+   endOverlay = null
    timer = null
+   replayHandler  = null 
+   backHandler = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
 
-   initialize() {
+   initialize(replayHandler, backHandler) {
       this.scratchAnim = particles.upgradeConfig(scratchJson, ['smoke.png'])
       this.physics.gravity.scale = 0
+
+      this.replayHandler  = replayHandler 
+      this.backHandler = backHandler
 
       this.board = new Board(this, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
@@ -55,9 +64,9 @@ export default class Charrom extends BasePhysicsGame {
          lineHeight: 28,
          fill: 0xF3E9DC
       })
-      this.scoreTxt.anchor.set(0.5,0)
+      this.scoreTxt.anchor.set(0.5,1)
       this.scoreTxt.x = this.gameWidth/2
-      this.scoreTxt.y = statsY+2
+      this.scoreTxt.y = statsY+32
       this.addChild(this.scoreTxt )
 
       this.scratchTxt = new PIXI.Text(`= ${this.scratchesLeft}`, {
@@ -161,6 +170,11 @@ export default class Charrom extends BasePhysicsGame {
       this.striker.setTouchListener( this.strikerTouched.bind(this))
       this.addPhysicsItem(this.striker)
       this.gameState = "touch"
+
+
+      // HACK
+      // this.endReason = "scratch"
+      // this.gameOver()
    }
 
    pointerDown(e) {
@@ -213,12 +227,16 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    puckSunk( puck, trash ) {
+      this.sunkCount++
       this.puckCount--
-      this.rackBtn.setEnabled( this.puckCount < this.supply.rackSize )
       this.score += 25
       this.timer.puckSunk()
-
       this.renderScore()
+
+      if ( this.puckCount == 0 ) {
+         this.rackLetterPucks()
+      }
+
       if ( trash ) {
          var emitter = new particles.Emitter(this.scene, this.scratchAnim )
          emitter.updateOwnerPos(0,0)
@@ -232,8 +250,9 @@ export default class Charrom extends BasePhysicsGame {
             this.sunkLetters.push(t)
             this.addChild(t)
          } else {
-            console.log("game over")
-            this.gameState = "over"
+            // TODO something to show what happened
+            this.endReason = "overflow"
+            this.gameOver()
          }
       }
    }
@@ -276,6 +295,7 @@ export default class Charrom extends BasePhysicsGame {
       this.score += (totalTileValue * tileCnt) 
       this.renderScore()
       this.word.text = ""
+      this.wordCount++
       this.timer.reset()
 
       clear.forEach( c => {
@@ -305,6 +325,15 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    timeExpired() {
+      this.endReason = "expired"
+      this.gameOver()
+   }
+
+   gameOver() {
+      this.gameState = "over"
+      let endOverlay = new EndOverlay(Charrom.BOARD_HEIGHT, Charrom.BOARD_HEIGHT, this.endReason, this.replayHandler, this.backHandler)
+      endOverlay.setResults(this.score, this.sunkCount, this.wordCount )
+      this.addChild( endOverlay )
       console.log("GAME OVER")
    }
 
@@ -363,7 +392,6 @@ export default class Charrom extends BasePhysicsGame {
       if ( this.gameState == "init") return 
 
       super.update()
-      this.gameTimeMs += this.app.ticker.deltaMS
       this.timer.tick(this.app.ticker.deltaMS)
 
       if ( this.gameState != "shot" ) return 
@@ -372,7 +400,7 @@ export default class Charrom extends BasePhysicsGame {
       let scratched = false
       this.items.slice().forEach( i => {
 
-         if ( i.velocity <= 0.25) {
+         if ( i.velocity <= 0.5) {
             i.stop()
             stopped++
          }
@@ -390,6 +418,10 @@ export default class Charrom extends BasePhysicsGame {
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
                emitter.playOnceAndDestroy() 
                this.striker =  null
+               if ( this.scratchesLeft == 0 ) {
+                  this.endReason = "scratch"
+                  this.gameOver()
+               }
             }
             this.removePhysicsItem( i )
          }
@@ -403,13 +435,8 @@ export default class Charrom extends BasePhysicsGame {
                this.removePhysicsItem( this.striker )
                this.striker = null
                this.gameState = "place"
-               console.log("STOPPED. CNT "+this.puckCount+" vs "+this.items.length)
-               console.log( this.items )
             })
-         } else {
-            console.log("STOPPED. CNT "+this.puckCount+" vs "+this.items.length)
-            console.log( this.items )
-         }
+         } 
       } else {
          this.rackBtn.setEnabled( false )
       }
