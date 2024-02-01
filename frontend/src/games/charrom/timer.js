@@ -3,7 +3,7 @@ export default class Timer extends PIXI.Container {
    meterW = 0
    meterH = 0 
    percent = 100
-   percentPerSec = 0.3
+   percentPerSec = 3.25 // 30 secs
 
    constructor(x, y, w, h ) {
       super()

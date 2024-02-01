@@ -246,6 +246,7 @@ export default class Charrom extends BasePhysicsGame {
             this.addChild(t)
          } else {
             // TODO something to show what happened
+            // TODO maybe wait until all pucks stop moving!
             this.endReason = "overflow"
             this.gameOver()
          }
@@ -325,10 +326,12 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    gameOver() {
-      this.striker.fade( () => {
-         this.removePhysicsItem( this.striker )
-         this.striker = null
-      })
+      if ( this.striker ) {
+         this.striker.fade( () => {
+            this.removePhysicsItem( this.striker )
+            this.striker = null
+         })
+      }
       this.gameState = "over"
       let endOverlay = new EndOverlay(Charrom.BOARD_HEIGHT, Charrom.BOARD_HEIGHT, this.endReason, this.replayHandler, this.backHandler)
       endOverlay.setResults(this.score, this.sunkCount, this.wordCount )
@@ -417,10 +420,6 @@ export default class Charrom extends BasePhysicsGame {
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
                emitter.playOnceAndDestroy() 
                this.striker =  null
-               if ( this.scratchesLeft == 0 ) {
-                  this.endReason = "scratch"
-                  this.gameOver()
-               }
             }
             this.removePhysicsItem( i )
          }
@@ -436,6 +435,11 @@ export default class Charrom extends BasePhysicsGame {
                this.gameState = "place"
             })
          } 
+
+         if ( this.scratchesLeft == 0 ) {
+            this.endReason = "scratch"
+            this.gameOver()
+         }
       } else {
          this.rackBtn.setEnabled( false )
       }
