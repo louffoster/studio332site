@@ -170,11 +170,6 @@ export default class Charrom extends BasePhysicsGame {
       this.striker.setTouchListener( this.strikerTouched.bind(this))
       this.addPhysicsItem(this.striker)
       this.gameState = "touch"
-
-
-      // HACK
-      // this.endReason = "scratch"
-      // this.gameOver()
    }
 
    pointerDown(e) {
@@ -330,6 +325,10 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    gameOver() {
+      this.striker.fade( () => {
+         this.removePhysicsItem( this.striker )
+         this.striker = null
+      })
       this.gameState = "over"
       let endOverlay = new EndOverlay(Charrom.BOARD_HEIGHT, Charrom.BOARD_HEIGHT, this.endReason, this.replayHandler, this.backHandler)
       endOverlay.setResults(this.score, this.sunkCount, this.wordCount )
