@@ -12,42 +12,43 @@ export default class Board extends PIXI.Container {
    topShotLineY = 0
    shotZoneH = 135
 
-   constructor( game, w, h ) {
+   constructor( game, top, w, h ) {
       super()
       this.gfx = new PIXI.Graphics()
       this.addChild( this.gfx )
       this.boardW = w 
       this.boardH = h
+      this.y = top
 
       this.topShotLineY = this.shotZoneH
       this.bottomShotLineY = this.boardH - this.shotZoneH
 
-      let h1 = new Hole(35,35, 35)
+      let h1 = new Hole(top, 35,35, 35)
       this.holes.push(h1)
       this.addChild(h1)
 
-      let h2 = new Hole(this.boardW-35, 35, 35)
+      let h2 = new Hole(top, this.boardW-35, 35, 35)
       this.holes.push(h2)
       this.addChild(h2)
 
-      let h3 = new Hole(35, this.boardH-35, 35)
+      let h3 = new Hole(top, 35, this.boardH-35, 35)
       h3.setTrashMode()
       this.holes.push(h3)
       this.addChild(h3)
 
-      let h4 = new Hole(this.boardW-35, this.boardH-35, 35)
+      let h4 = new Hole(top, this.boardW-35, this.boardH-35, 35)
       h4.setTrashMode()
       this.holes.push(h4)
       this.addChild(h4)
 
       // add non-rendered rails around the edge of the board
-      let b = Matter.Bodies.rectangle(this.boardW/2, this.boardH+25, this.boardW, 50, { isStatic: true, friction: 0, restitution: 1})
+      let b = Matter.Bodies.rectangle(this.boardW/2, this.y+this.boardH+25, this.boardW, 50, { isStatic: true, friction: 0, restitution: 1})
       Matter.Composite.add(game.physics.world, b)
-      let t = Matter.Bodies.rectangle(this.boardW/2, -25, this.boardW, 50, { isStatic: true, friction: 0, restitution: 1})
+      let t = Matter.Bodies.rectangle(this.boardW/2, this.y-25, this.boardW, 50, { isStatic: true, friction: 0, restitution: 1})
       Matter.Composite.add(game.physics.world, t)
-      let l = Matter.Bodies.rectangle(-25, this.boardH/2, 50, this.boardH, { isStatic: true, friction: 0, restitution: 1})
+      let l = Matter.Bodies.rectangle(-25, this.y+this.boardH/2, 50, this.boardH, { isStatic: true, friction: 0, restitution: 1})
       Matter.Composite.add(game.physics.world, l)
-      let r = Matter.Bodies.rectangle(this.boardW+25, this.boardH/2, 50, this.boardH, { isStatic: true, friction: 0, restitution: 1})
+      let r = Matter.Bodies.rectangle(this.boardW+25, this.y+this.boardH/2, 50, this.boardH, { isStatic: true, friction: 0, restitution: 1})
       Matter.Composite.add(game.physics.world, r)
 
       let m = new PIXI.Graphics() 
@@ -74,8 +75,8 @@ export default class Board extends PIXI.Container {
 
    canPlaceStriker(y, radius) {
       return (
-         ( y-radius*.5 >= this.bottomShotLineY && y+radius < this.boardH ) ||
-         ( y+radius*.5 <= this.topShotLineY && y-radius > 0 )
+         ( y-radius*.5 >= this.bottomShotLineY+this.y && y+radius < this.boardH+this.y) ||
+         ( y+radius*.5 <= this.topShotLineY+this.y && y-radius > this.y )
       )
    }
 
@@ -118,8 +119,9 @@ class Hole extends PIXI.Container {
    gfx = null
    trashPucks = false
 
-   constructor( x,y, radius) {
+   constructor( physTop, x,y, radius) {
       super() 
+      this.physTop = physTop
       this.x = x 
       this.y = y 
       this.radius = radius
@@ -136,13 +138,13 @@ class Hole extends PIXI.Container {
    checkForSink( shape ) {
       if ( Matter.Vector.magnitude(shape.body.velocity) > 0) {
          let dX = this.x - shape.x 
-         let dY = this.y - shape.y 
+         let dY = (this.y+this.physTop) - shape.y 
          let dist = Math.sqrt( dX*dX + dY*dY)
          if ( dist <= shape.radius/2 ) {
             shape.stop()
             return true
          } else if ( dist <= this.radius+(shape.radius*.25) ) { // 3/4 of the puck is over the hole before it gets pulled in
-            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/2000, y:dY/2000})
+            Matter.Body.applyForce( shape.body, shape.body.position, {x:dX/5000, y:dY/5000})
          }
       }
       return false

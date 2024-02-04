@@ -11,7 +11,7 @@ export default class StartOverlay extends PIXI.Container {
       this.panelH = gameH*0.4
       this.apiService = apiURL
       this.x = (gameW - this.panelW) / 2
-      this.y = 75
+      this.y = 150
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(10, 0x7A6C5D, 1)

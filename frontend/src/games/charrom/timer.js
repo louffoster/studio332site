@@ -22,7 +22,7 @@ export default class Timer extends PIXI.Container {
       this.percent = 100
    }
    puckSunk() {
-      this.percent += 15
+      this.percent += 20
       this.percent = Math.min(this.percent, 100.0)
    }
 

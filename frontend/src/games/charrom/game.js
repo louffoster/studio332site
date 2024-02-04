@@ -23,6 +23,7 @@ export default class Charrom extends BasePhysicsGame {
    sunkLetters = []
    puckCount = 0
    tileRackHeight = 69
+   statsHeight = 55
    word = null
    score = 0
    sunkCount = 0 
@@ -46,15 +47,16 @@ export default class Charrom extends BasePhysicsGame {
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
+   static LETTER_LIMIT = 8
 
    initialize(replayHandler, backHandler) {
       this.scratchAnim = particles.upgradeConfig(scratchJson, ['smoke.png'])
       this.physics.gravity.scale = 0
 
-      this.replayHandler  = replayHandler 
+      this.replayHandler = replayHandler 
       this.backHandler = backHandler
 
-      this.board = new Board(this, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
+      this.board = new Board(this, this.statsHeight, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
 
       let statsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+7
@@ -64,9 +66,9 @@ export default class Charrom extends BasePhysicsGame {
          lineHeight: 28,
          fill: 0xF3E9DC
       })
-      this.scoreTxt.anchor.set(0.5,1)
-      this.scoreTxt.x = this.gameWidth/2
-      this.scoreTxt.y = statsY+32
+      this.scoreTxt.anchor.set(1,0.5)
+      this.scoreTxt.x = this.gameWidth-10
+      this.scoreTxt.y = 26
       this.addChild(this.scoreTxt )
 
       this.scratchTxt = new PIXI.Text(`= ${this.scratchesLeft}`, {
@@ -75,12 +77,13 @@ export default class Charrom extends BasePhysicsGame {
          lineHeight: 18,
          fill: 0xF3E9DC
       })
-      this.scratchTxt.anchor.set(0,0)
+      this.scratchTxt.anchor.set(0,0.5)
       this.scratchTxt.x = 52
-      this.scratchTxt.y = statsY+5
+      this.scratchTxt.y = 26
       this.addChild(this.scratchTxt )
 
-      this.timer = new Timer(this.gameWidth-100, statsY+5, 90, 25 )
+      this.timer = new Timer(this.gameWidth-113, Charrom.BOARD_HEIGHT+this.statsHeight+10, 
+         101, this.tileRackHeight-20 )
       this.timer.setTimeoutHandler( this.timeExpired.bind(this) )
       this.addChild(this.timer)
 
@@ -147,7 +150,7 @@ export default class Charrom extends BasePhysicsGame {
    rackLetterPucks() {
       let rack = this.supply.getRack()
       let centerX = Charrom.BOARD_WIDTH/2 
-      let centerY =  Charrom.BOARD_HEIGHT/2
+      let centerY =  Charrom.BOARD_HEIGHT/2+this.statsHeight
       let spots = [
          {x: centerX-Puck.DIAMETER/2, y: centerY-45}, {x: centerX+Puck.DIAMETER/2, y: centerY-45}, 
          {x: centerX, y: centerY}, {x: centerX-Puck.DIAMETER, y: centerY}, {x: centerX+Puck.DIAMETER, y: centerY},
@@ -231,20 +234,18 @@ export default class Charrom extends BasePhysicsGame {
       }
       this.renderScore()
 
-      if ( this.puckCount == 0 ) {
-         this.rackLetterPucks()
-      }
-
+      let sunkLetter = puck.letter
       if ( trash ) {
          var emitter = new particles.Emitter(this.scene, this.scratchAnim )
          emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(puck.x, puck.y)
-         emitter.playOnceAndDestroy() 
+         emitter.playOnceAndDestroy( () => this.removePhysicsItem( puck )) 
       } else {
-         if ( this.sunkLetters.length < 10) {
+         this.removePhysicsItem( puck )
+         if ( this.sunkLetters.length < Charrom.LETTER_LIMIT) {
             let x = 7
-            let y = Charrom.BOARD_HEIGHT+7
-            let t = new Tile(puck.letter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
+            let y = Charrom.BOARD_HEIGHT+7+this.statsHeight
+            let t = new Tile(sunkLetter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
             this.sunkLetters.push(t)
             this.addChild(t)
          } else {
@@ -253,6 +254,10 @@ export default class Charrom extends BasePhysicsGame {
                this.gameOver()
             }
          }
+      }
+
+      if ( this.puckCount == 0 ) {
+         this.rackLetterPucks()
       }
    }
 
@@ -362,52 +367,58 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    drawLetterRack() {
-      this.gfx.clear() 
-      this.gfx.lineStyle( 1, 0x5E3023, 1 )
+      // background and border
+      let rackY = Charrom.BOARD_HEIGHT+this.statsHeight
+      this.gfx.lineStyle( 0, 0x5E3023, 1 )
       this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawRect(0,Charrom.BOARD_HEIGHT, this.gameWidth, this.tileRackHeight)
-     
-      this.gfx.lineStyle( 2, 0xBDD5EA, 1 )
-      let bottomY = Charrom.BOARD_HEIGHT+this.tileRackHeight+2
-      this.gfx.moveTo(0, bottomY)
-      this.gfx.lineTo(this.gameWidth, bottomY)
+      this.gfx.drawRect(0,rackY, this.gameWidth, this.tileRackHeight)
+      this.gfx.lineStyle( 5, 0x5E3023, 1 )
+      this.gfx.moveTo(0, rackY)
+      this.gfx.lineTo(this.gameWidth, rackY)
 
+      // empty letters
       this.gfx.lineStyle( 1, 0x5E3023)
       this.gfx.beginFill(0xF3E9DC)
       let x = 7
-      let y = Charrom.BOARD_HEIGHT+7
-      for (let i=0; i<10; i++) {
+      let y = rackY+7
+      for (let i=0; i< Charrom.LETTER_LIMIT; i++) {
          this.gfx.drawRect(x,y, Tile.WIDTH, Tile.HEIGHT)
          x += Tile.WIDTH+4
       }
+
+      // background for timer
+      x+= 5
+      this.gfx.beginFill(0x2E4347)
+      this.gfx.drawRect(x,y, this.gameWidth-x-8, this.tileRackHeight-14)
       this.gfx.endFill()
    }
 
-   draw() {
-      this.drawLetterRack()
-
-      let statsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+1
-      this.gfx.lineStyle( 1, 0x7A6C5D, 1 )
+   drawTopBar() {
+      // background and board sep
+      this.gfx.lineStyle( 0, 0x5E3023, 1 )
       this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawRect(0, statsY, this.gameWidth, 50)
-      this.gfx.endFill()
+      this.gfx.drawRect(0,0, this.gameWidth, this.statsHeight)
+      this.gfx.lineStyle( 5, 0x5E3023, 1 )
+      this.gfx.moveTo(0,this.statsHeight)
+      this.gfx.lineTo(this.gameWidth,this.statsHeight)
 
       // draw striker for scratch count marker
       this.gfx.lineStyle(1, 0x000066, 1)
       this.gfx.beginFill( 0x5E3023 )
-      this.gfx.drawCircle(25,statsY+25,20)
+      this.gfx.drawCircle(25,25,20)
       this.gfx.beginFill( 0x895737 )
-      this.gfx.drawCircle(25,statsY+25,10)
+      this.gfx.drawCircle(25,25,10)
       this.gfx.endFill()
+   }
 
-      let divY = statsY + 52
-      this.gfx.lineStyle( 1, 0x5E3023, 1 )
-      this.gfx.moveTo(0, divY-1)
-      this.gfx.lineTo(this.gameWidth, divY-1)
+   draw() {
+      this.gfx.clear() 
+      this.drawLetterRack()
+      this.drawTopBar()
    }
 
    update() {
-      if ( this.gameState == "init") return 
+      if ( this.gameState == "init" || this.gameState == "over") return 
 
       super.update()
       this.timer.tick(this.app.ticker.deltaMS)
@@ -434,15 +445,13 @@ export default class Charrom extends BasePhysicsGame {
                var emitter = new particles.Emitter(this.scene, this.scratchAnim )
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
-               emitter.playOnceAndDestroy() 
+               emitter.playOnceAndDestroy()
+               this.removePhysicsItem( this.striker, false ) 
             }
-            // destroy all but the striker as it will be replaced next
-            this.removePhysicsItem( i, (i.tag != "striker") )
          }
       })
 
-      if ( stopped == this.items.length ) {
-         console.log("end reason ["+this.endReason+"]")
+      if ( stopped == this.items.length ) {         
          if ( this.scratchesLeft == 0 ) {
             this.endReason = "scratch"
          }
@@ -453,10 +462,15 @@ export default class Charrom extends BasePhysicsGame {
             this.gameState = "place"
             if ( scratched == false  ) {
                this.striker.fade( () => {
+                  console.log("fade striker delete")
                   this.removePhysicsItem( this.striker, false )
                   this.gameState = "place"
+                  console.log("SCRATCHED")
+                  console.log( this.items )
                })
-            } 
+            }  else {
+               console.log( this.items )
+            }
          }
       } else {
          this.rackBtn.setEnabled( false )
