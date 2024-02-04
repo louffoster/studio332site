@@ -8,7 +8,9 @@ export default class Board extends PIXI.Container {
    boardH = 0 
    gfx = null
    holes = []
-   shotLineY = 0
+   bottomShotLineY = 0
+   topShotLineY = 0
+   shotZoneH = 135
 
    constructor( game, w, h ) {
       super()
@@ -16,7 +18,9 @@ export default class Board extends PIXI.Container {
       this.addChild( this.gfx )
       this.boardW = w 
       this.boardH = h
-      this.shotLineY = this.boardH * 0.7
+
+      this.topShotLineY = this.shotZoneH
+      this.bottomShotLineY = this.boardH - this.shotZoneH
 
       let h1 = new Hole(35,35, 35)
       this.holes.push(h1)
@@ -69,7 +73,10 @@ export default class Board extends PIXI.Container {
    }
 
    canPlaceStriker(y, radius) {
-      return ( y-radius*.5 >= this.shotLineY && y+radius < this.boardH )
+      return (
+         ( y-radius*.5 >= this.bottomShotLineY && y+radius < this.boardH ) ||
+         ( y+radius*.5 <= this.topShotLineY && y-radius > 0 )
+      )
    }
 
    draw() {
@@ -81,16 +88,18 @@ export default class Board extends PIXI.Container {
       this.gfx.drawRoundedRect(0,0, this.boardW, this.boardH, 50)
       this.gfx.endFill()
 
-      // shot line
-      this.gfx.lineStyle(4, 0xC17C74,1)
-      this.gfx.moveTo(2, this.shotLineY)
-      this.gfx.lineTo(this.boardW-2, this.shotLineY)
+      // shot lines
+      this.gfx.lineStyle(1, 0xC17C74,1)
+      this.gfx.moveTo(2, this.topShotLineY)
+      this.gfx.lineTo(this.boardW-2, this.topShotLineY)
+      this.gfx.moveTo(2, this.bottomShotLineY)
+      this.gfx.lineTo(this.boardW-2, this.bottomShotLineY)
 
       // rack circle
       this.gfx.lineStyle(1, 0x7A6C5D,1)
-      this.gfx.drawCircle(this.boardW/2, 162, 85)
+      this.gfx.drawCircle(this.boardW/2, this.boardH/2, 85)
       this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawCircle(this.boardW/2, 162, 10)
+      this.gfx.drawCircle(this.boardW/2, this.boardH/2, 10)
       this.gfx.endFill()
 
       // trash marker

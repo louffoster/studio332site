@@ -4,10 +4,10 @@ import * as PIXI from "pixi.js"
 export default class Puck extends PhysicsShape {
    letter = null 
    extra = null
-   static WIDTH = 50
+   static DIAMETER = 50
 
    constructor( x,y, letter) {
-      super( x,y, {type: "circle", radius: Puck.WIDTH/2})
+      super( x,y, {type: "circle", radius: Puck.DIAMETER/2})
 
       this.setAirFriction(0.02)
       this.setRestitution( 1 )

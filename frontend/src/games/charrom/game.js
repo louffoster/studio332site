@@ -145,22 +145,18 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    rackLetterPucks() {
-      let y = this.gameHeight*.15
-      let x = (this.gameWidth-Puck.WIDTH)/2
       let rack = this.supply.getRack()
-      rack.forEach( (l, idx) => {
-         let puck = new Puck(x,y, l)
+      let centerX = Charrom.BOARD_WIDTH/2 
+      let centerY =  Charrom.BOARD_HEIGHT/2
+      let spots = [
+         {x: centerX-Puck.DIAMETER/2, y: centerY-45}, {x: centerX+Puck.DIAMETER/2, y: centerY-45}, 
+         {x: centerX, y: centerY}, {x: centerX-Puck.DIAMETER, y: centerY}, {x: centerX+Puck.DIAMETER, y: centerY},
+         {x: centerX-Puck.DIAMETER/2, y: centerY+45}, {x: centerX+Puck.DIAMETER/2, y: centerY+45}, 
+      ]
+      spots.forEach( (pos,idx) => {
+         let puck = new Puck(pos.x, pos.y, rack[idx])
          this.addPhysicsItem( puck )
          this.puckCount++
-         x+= Puck.WIDTH
-
-         if ( idx == 1 ) {
-            y += 45
-            x = ((this.gameWidth-Puck.WIDTH)/2 - Puck.WIDTH/2)
-         } else if ( idx == 4) {
-            y += 45  
-            x = (this.gameWidth-Puck.WIDTH)/2
-         }
       })
       this.rackBtn.setEnabled(false)
    }
@@ -230,6 +226,9 @@ export default class Charrom extends BasePhysicsGame {
       this.puckCount--
       this.score += 25
       this.timer.puckSunk()
+      if ( this.endReason == "expired") {
+         this.endReason = ""
+      }
       this.renderScore()
 
       if ( this.puckCount == 0 ) {
@@ -249,10 +248,10 @@ export default class Charrom extends BasePhysicsGame {
             this.sunkLetters.push(t)
             this.addChild(t)
          } else {
-            // TODO something to show what happened
-            // TODO maybe wait until all pucks stop moving!
             this.endReason = "overflow"
-            this.gameOver()
+            if ( this.gameState != "shot") {
+               this.gameOver()
+            }
          }
       }
    }
@@ -325,8 +324,11 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    timeExpired() {
+      // set the end reason, but don't end the game if a shot is in progress
       this.endReason = "expired"
-      this.gameOver()
+      if ( this.gameState != "shot" ) {
+         this.gameOver()
+      }
    }
 
    gameOver() {
@@ -337,10 +339,20 @@ export default class Charrom extends BasePhysicsGame {
          })
       }
       this.gameState = "over"
-      let endOverlay = new EndOverlay(Charrom.BOARD_HEIGHT, Charrom.BOARD_HEIGHT, this.endReason, this.replayHandler, this.backHandler)
-      endOverlay.setResults(this.score, this.sunkCount, this.wordCount )
-      this.addChild( endOverlay )
-      console.log("GAME OVER")
+      if ( this.endReason == "overflow") {
+         this.sunkLetters.forEach( sl => {
+            var emitter = new particles.Emitter(this.scene, this.scratchAnim )
+            emitter.updateOwnerPos(0,0)
+            emitter.updateSpawnPos(sl.x, sl.y)
+            emitter.playOnceAndDestroy() 
+         })
+      }
+
+      setTimeout( () => {
+         let endOverlay = new EndOverlay(Charrom.BOARD_HEIGHT, Charrom.BOARD_HEIGHT, this.endReason, this.replayHandler, this.backHandler)
+         endOverlay.setResults(this.score, this.sunkCount, this.wordCount )
+         this.addChild( endOverlay )
+      }, 500)
    }
 
    clearWord() {
@@ -430,18 +442,21 @@ export default class Charrom extends BasePhysicsGame {
       })
 
       if ( stopped == this.items.length ) {
-         this.rackBtn.setEnabled( true )
-         this.gameState = "place"
-         if ( scratched == false  ) {
-            this.striker.fade( () => {
-               this.removePhysicsItem( this.striker, false )
-               this.gameState = "place"
-            })
-         } 
-
+         console.log("end reason ["+this.endReason+"]")
          if ( this.scratchesLeft == 0 ) {
             this.endReason = "scratch"
+         }
+         if ( this.endReason != "" ) {
             this.gameOver()
+         } else {
+            this.rackBtn.setEnabled( true )
+            this.gameState = "place"
+            if ( scratched == false  ) {
+               this.striker.fade( () => {
+                  this.removePhysicsItem( this.striker, false )
+                  this.gameState = "place"
+               })
+            } 
          }
       } else {
          this.rackBtn.setEnabled( false )
