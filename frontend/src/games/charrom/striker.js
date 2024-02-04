@@ -35,6 +35,13 @@ export default class Striker extends BasePhysicsItem {
       })
    }
 
+   setPosition(x,y) {
+      Matter.Body.setPosition(this.body, {x:x,y:y})
+      this.x = x
+      this.y = y
+      this.gfx.alpha = 1
+   }
+
    fade( fadeDone) {
       new TWEEDLE.Tween(this.gfx).to({ alpha: 0}, 150).start().easing(TWEEDLE.Easing.Linear.None).onComplete(fadeDone)
    }

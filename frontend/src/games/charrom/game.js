@@ -166,8 +166,12 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    placeStriker(x,y) {
-      this.striker = new Striker( x, y, 0x000066, 0x5E3023)
-      this.striker.setTouchListener( this.strikerTouched.bind(this))
+      if ( this.striker == null) {
+         this.striker = new Striker( x, y, 0x000066, 0x5E3023)
+         this.striker.setTouchListener( this.strikerTouched.bind(this))
+      } else {
+         this.striker.setPosition( x, y)
+      }
       this.addPhysicsItem(this.striker)
       this.gameState = "touch"
    }
@@ -419,19 +423,18 @@ export default class Charrom extends BasePhysicsGame {
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
                emitter.playOnceAndDestroy() 
-               this.striker =  null
             }
-            this.removePhysicsItem( i )
+            // destroy all but the striker as it will be replaced next
+            this.removePhysicsItem( i, (i.tag != "striker") )
          }
       })
 
       if ( stopped == this.items.length ) {
          this.rackBtn.setEnabled( true )
          this.gameState = "place"
-         if ( scratched == false && this.striker ) {
+         if ( scratched == false  ) {
             this.striker.fade( () => {
-               this.removePhysicsItem( this.striker )
-               this.striker = null
+               this.removePhysicsItem( this.striker, false )
                this.gameState = "place"
             })
          } 
