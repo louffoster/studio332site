@@ -20,6 +20,7 @@ const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 export default class Charrom extends BasePhysicsGame {
    supply = new Supply()
    striker = null
+   offTable = []
    sunkLetters = []
    puckCount = 0
    tileRackHeight = 69
@@ -168,10 +169,10 @@ export default class Charrom extends BasePhysicsGame {
       if ( this.striker == null) {
          this.striker = new Striker( x, y, 0x000066, 0x5E3023)
          this.striker.setTouchListener( this.strikerTouched.bind(this))
+         this.addPhysicsItem(this.striker)
       } else {
-         this.striker.setPosition( x, y)
+         this.striker.placeOnTable( x, y)
       }
-      this.addPhysicsItem(this.striker)
       this.gameState = "touch"
    }
 
@@ -239,9 +240,8 @@ export default class Charrom extends BasePhysicsGame {
          var emitter = new particles.Emitter(this.scene, this.scratchAnim )
          emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(puck.x, puck.y)
-         emitter.playOnceAndDestroy( () => this.removePhysicsItem( puck )) 
+         emitter.playOnceAndDestroy() 
       } else {
-         this.removePhysicsItem( puck )
          if ( this.sunkLetters.length < Charrom.LETTER_LIMIT) {
             let x = 7
             let y = Charrom.BOARD_HEIGHT+7+this.statsHeight
@@ -348,7 +348,7 @@ export default class Charrom extends BasePhysicsGame {
          this.sunkLetters.forEach( sl => {
             var emitter = new particles.Emitter(this.scene, this.scratchAnim )
             emitter.updateOwnerPos(0,0)
-            emitter.updateSpawnPos(sl.x, sl.y)
+            emitter.updateSpawnPos(sl.x+Puck.DIAMETER/2, sl.y+Puck.DIAMETER/2)
             emitter.playOnceAndDestroy() 
          })
       }
@@ -427,7 +427,7 @@ export default class Charrom extends BasePhysicsGame {
 
       let stopped = 0
       let scratched = false
-      this.items.slice().forEach( i => {
+      this.items.forEach( i => {
 
          if ( i.velocity <= 0.5) {
             i.stop()
@@ -437,7 +437,10 @@ export default class Charrom extends BasePhysicsGame {
          let sunkResp = this.board.checkSunk( i )
          if ( sunkResp.sunk ) {
             if ( i.tag != "striker") {
+               console.log("sunk puck "+i.tag)
                this.puckSunk( i, sunkResp.trash )
+               i.removeFromTable()
+               this.offTable.push( i )
             } else {
                scratched = true
                this.scratchesLeft--
@@ -446,7 +449,8 @@ export default class Charrom extends BasePhysicsGame {
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(this.striker.x, this.striker.y)
                emitter.playOnceAndDestroy()
-               this.removePhysicsItem( this.striker, false ) 
+               this.striker.removeFromTable()
+               this.offTable.push( this.striker )
             }
          }
       })
@@ -462,15 +466,22 @@ export default class Charrom extends BasePhysicsGame {
             this.gameState = "place"
             if ( scratched == false  ) {
                this.striker.fade( () => {
-                  console.log("fade striker delete")
-                  this.removePhysicsItem( this.striker, false )
+                  this.striker.removeFromTable()
+                  this.offTable.push( this.striker )
                   this.gameState = "place"
-                  console.log("SCRATCHED")
-                  console.log( this.items )
                })
-            }  else {
-               console.log( this.items )
-            }
+            } 
+
+            setTimeout( () => {
+               this.offTable.forEach( p => {
+                  if ( p.tag != "striker") {
+                     console.log(p)
+                     this.removePhysicsItem(p, false )
+                  } 
+               })
+               this.offTable = [] 
+               console.log(this.items)
+            }, 250)
          }
       } else {
          this.rackBtn.setEnabled( false )

@@ -35,11 +35,17 @@ export default class Striker extends BasePhysicsItem {
       })
    }
 
-   setPosition(x,y) {
-      Matter.Body.setPosition(this.body, {x:x,y:y})
-      this.x = x
-      this.y = y
+   removeFromTable() {
+      this.body.isSensor = true
+      this.gfx.alpha = 0
+   }
+
+   placeOnTable(x,y) {
       this.gfx.alpha = 1
+      Matter.Body.setPosition(this.body, {x:x,y:y})
+      this.update()
+      this.body.isSensor = false
+      
    }
 
    fade( fadeDone) {

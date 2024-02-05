@@ -1,5 +1,6 @@
 import PhysicsShape from "@/games/common/physicsshape"
 import * as PIXI from "pixi.js"
+import Matter from 'matter-js'
 
 export default class Puck extends PhysicsShape {
    letter = null 
@@ -9,6 +10,7 @@ export default class Puck extends PhysicsShape {
    constructor( x,y, letter) {
       super( x,y, {type: "circle", radius: Puck.DIAMETER/2})
 
+      this.body.label = "puck-"+letter.text
       this.setAirFriction(0.02)
       this.setRestitution( 1 )
       this.setMass(2.75)
@@ -47,6 +49,11 @@ export default class Puck extends PhysicsShape {
          this.addChild(uTxt)
       }
       this.draw()
+   }
+
+   removeFromTable() {
+      this.body.isSensor = true
+      this.gfx.alpha = 0
    }
 
    draw() {
