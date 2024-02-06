@@ -6,6 +6,7 @@ import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
 import Timer from "@/games/charrom/timer"
 import Button from "@/games/common/button"
+import Clock from "@/games/common/clock"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import EndOverlay from "@/games/charrom/endoverlay"
@@ -31,7 +32,7 @@ export default class Charrom extends BasePhysicsGame {
    wordCount = 0
    endReason = ""
    scoreTxt = null
-   scratchesLeft = 5
+   scratchesLeft = 3
    scratchTxt = null
    scratchAnim = null
    board = null
@@ -43,6 +44,7 @@ export default class Charrom extends BasePhysicsGame {
    shotOverlay = null
    endOverlay = null
    timer = null
+   clock = null
    replayHandler  = null 
    backHandler = null
 
@@ -60,7 +62,6 @@ export default class Charrom extends BasePhysicsGame {
       this.board = new Board(this, this.statsHeight, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
 
-      let statsY = Charrom.BOARD_HEIGHT+this.tileRackHeight+7
       this.scoreTxt = new PIXI.Text("00000", {
          fontFamily: "Arial",
          fontSize: 28,
@@ -71,6 +72,10 @@ export default class Charrom extends BasePhysicsGame {
       this.scoreTxt.x = this.gameWidth-10
       this.scoreTxt.y = 26
       this.addChild(this.scoreTxt )
+
+      this.clock = new Clock(this.gameWidth/2,26, "", 0xF3E9DC)
+      this.addChild(this.clock)
+
 
       this.scratchTxt = new PIXI.Text(`= ${this.scratchesLeft}`, {
          fontFamily: "Arial",
@@ -291,7 +296,7 @@ export default class Charrom extends BasePhysicsGame {
       this.sunkLetters.forEach( sl => {
          if ( sl.selected ) {
             clear.push(sl)
-            sl.fade()
+            sl.setSuccess()
             totalTileValue += sl.value
          }
       })
@@ -302,22 +307,24 @@ export default class Charrom extends BasePhysicsGame {
       this.wordCount++
       this.timer.reset()
 
-      clear.forEach( c => {
-         let idx = this.sunkLetters.findIndex( sl => sl == c)
-         if ( idx > -1 ) {
-            this.removeChild(c)
-            this.sunkLetters.splice(idx,1)
-         }
-      })
+      setTimeout(  () => {
+         clear.forEach( c => {
+            let idx = this.sunkLetters.findIndex( sl => sl == c)
+            if ( idx > -1 ) {
+               this.removeChild(c)
+               this.sunkLetters.splice(idx,1)
+            }
+         })
 
-      // collapse tiles back to left
-      let tgtX = 7
-      this.sunkLetters.forEach( sl => {
-         if ( sl.x != tgtX) {
-            new TWEEDLE.Tween(sl).to({ x: tgtX}, 250).start().easing(TWEEDLE.Easing.Linear.None)
-         }
-         tgtX += (Tile.WIDTH+4)
-      })
+         // collapse tiles back to left
+         let tgtX = 7
+         this.sunkLetters.forEach( sl => {
+            if ( sl.x != tgtX) {
+               new TWEEDLE.Tween(sl).to({ x: tgtX}, 250).start().easing(TWEEDLE.Easing.Linear.None)
+            }
+            tgtX += (Tile.WIDTH+4)
+         })
+      }, 300)
    }
 
    submitFailed() {
@@ -421,6 +428,7 @@ export default class Charrom extends BasePhysicsGame {
       if ( this.gameState == "init" || this.gameState == "over") return 
 
       super.update()
+      this.clock.tick(this.app.ticker.deltaMS)
       this.timer.tick(this.app.ticker.deltaMS)
 
       if ( this.gameState != "shot" ) return 

@@ -7,6 +7,7 @@ export default class Tile extends PIXI.Container {
 
    selected = false
    error = false
+   success = false
    graphics  = null 
    letter = null
    extra = null 
@@ -78,7 +79,10 @@ export default class Tile extends PIXI.Container {
       }
    }
 
-   fade() {
+   setSuccess() {
+      this.success = true 
+      this.selected = false
+      this.draw()
       new TWEEDLE.Tween(this.graphics).to({ alpha: 0}, 250).start().easing(TWEEDLE.Easing.Linear.None)//.onComplete(fadeDone)
    }
 
@@ -125,6 +129,8 @@ export default class Tile extends PIXI.Container {
 
       if ( this.error ) {
          this.graphics.beginFill(0xe0adc1) 
+      } else if ( this.success) {
+         this.graphics.beginFill(0x75c482) 
       } else {
          if (this.selected) {
             this.graphics.beginFill(0x8ecae6)
