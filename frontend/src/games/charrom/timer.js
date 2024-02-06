@@ -1,9 +1,15 @@
 import * as PIXI from "pixi.js"
 export default class Timer extends PIXI.Container {
+   static SPEEDUP_DELAY_MS = 60 * 1000    // how often to get faster
+   static RATE_INCREASE = 0.15            // timer rate increases by this much
+   static MAX_RATE = 5.0                  // 5 second countdown is the fastest
+
    meterW = 0
    meterH = 0 
    percent = 100
    percentPerSec = 1.75 // minute ish
+   speedUpDelayMS = Timer.SPEEDUP_DELAY_MS
+   maxRateHit = false
 
    constructor(x, y, w, h ) {
       super()
@@ -62,6 +68,19 @@ export default class Timer extends PIXI.Container {
             this.timeoutHandler()
          }
          this.draw()
+      }
+
+      if ( this.maxRateHit == false) {
+         this.speedUpDelayMS -= deltaMS 
+         if ( this.speedUpDelayMS <= 0) {
+            this.speedUpDelayMS = Timer.SPEEDUP_DELAY_MS
+            this.percentPerSec += Timer.RATE_INCREASE 
+            if (this.percentPerSec >= Timer.MAX_RATE) {
+               this.maxRateHit = true
+               this.percentPerSec = Timer.MAX_RATE
+            }
+            console.log("SPEED UP TO "+this.percentPerSec)
+         }
       }
    }
 }
