@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js"
 import * as particles from '@pixi/particle-emitter'
-import axios from 'axios'
 import BaseGame from "@/games/common/basegame"
 
 import explode from '@/assets/explode.json'
@@ -14,8 +13,7 @@ import Gauge from "@/games/virus/gauge"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
-
-const API_SERVICE = import.meta.env.VITE_S332_SERVICE
+import Dictionary from "@/games/common/dictionary"
 
 export default class Virus extends BaseGame {
    static ROWS = 6
@@ -25,7 +23,8 @@ export default class Virus extends BaseGame {
    virusExplode = null
    loseExplode = null
    grid = null
-pool = new LetterPool()
+   dictionary = new Dictionary()
+   pool = new LetterPool()
    initGameOverlay = null
    gameEndOverlay = null
    state = new GameState()
@@ -136,10 +135,9 @@ pool = new LetterPool()
       this.clock = new Clock(250, 580, "", 0xCAF0F8, "\"Courier New\", Courier, monospace")
       this.addChild(this.clock)
 
-      this.initGameOverlay = new StartOverlay(API_SERVICE) 
+      this.initGameOverlay = new StartOverlay(this.startGame.bind(this)) 
       this.gameEndOverlay = new EndOverlay(restartHandler, backHandler) 
       this.addChild(this.initGameOverlay)
-      this.initGameOverlay.startGameInit( this.startGame.bind(this) )
    }
 
    startGame( ) {
@@ -231,14 +229,14 @@ if (this.state.isPlaying() == false) return
    async doSubmission() {
       let testWord = ""
       this.word.forEach( l => testWord += l.letter.text)
-      return axios.post( `${API_SERVICE}/virus/check?w=${testWord}` ).then( () => {
+      if (this.dictionary.isValid(testWord)) {
          // letter index is the index of the next letter to add, so it is the word length
          this.lastWordSize = this.letterIndex 
          this.state.submitSuccess( this.lastWordSize )
-      }).catch( _e => {
+      } else {
          this.setWordColor(0xff5555)
          this.state.submitFailed()
-      })
+      }
    }
 
    setWordColor( c ) {

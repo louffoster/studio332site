@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
-import axios from 'axios'
 import StartOverlay from "@/games/letterdrop/startoverlay"
 import EndOverlay from "@/games/letterdrop/endoverlay"
 import BaseGame from "@/games/common/basegame"
+import Dictionary from "@/games/common/dictionary"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
@@ -14,8 +14,6 @@ import DropButton from "@/games/letterdrop/dropbutton"
 import Timer from "@/games/letterdrop/timer"
 
 import trashJson from '@/assets/trash.json'
-
-const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 export default class LetterDrop extends BaseGame {
    pool = new LetterPool()
@@ -38,6 +36,7 @@ export default class LetterDrop extends BaseGame {
    score = 0
    scoreDisplay = null
    endOverlay = null
+   dictionary = null
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 5
@@ -45,6 +44,7 @@ export default class LetterDrop extends BaseGame {
    static TILE_H = 60
 
    initialize(replayHandler, backHandler) { 
+      this.dictionary = new Dictionary()
       this.trashAnim = particles.upgradeConfig(trashJson, ['smoke.png'])
 
       // draw backgrounnd an column buttons
@@ -119,7 +119,7 @@ export default class LetterDrop extends BaseGame {
       this.scoreDisplay.y = this.gameHeight-10
       this.scene.addChild( this.scoreDisplay)
 
-      this.startOverlay = new StartOverlay( API_SERVICE, this.startHandler.bind(this)) 
+      this.startOverlay = new StartOverlay(this.startHandler.bind(this)) 
       this.endOverlay = new EndOverlay( replayHandler, backHandler) 
       this.scene.addChild( this.startOverlay )
       
@@ -432,12 +432,11 @@ export default class LetterDrop extends BaseGame {
 
    submitWord() {
       this.timer.reset()
-      let url = `${API_SERVICE}/letterdrop/check?w=${this.word.text}`
-      axios.post(url).then( () => {
+      if ( this.dictionary.isValid(this.word.text)) {
          this.submitSuccess()
-      }).catch( _e => {
+      } else {
          this.submitFailed()
-      })
+      }
    }
 
    submitSuccess() {

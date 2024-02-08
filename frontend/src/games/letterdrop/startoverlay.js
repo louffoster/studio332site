@@ -1,9 +1,8 @@
 import * as PIXI from "pixi.js"
 import Button from "@/games/common/button"
-import axios from 'axios'
 
 export default class StartOverlay extends PIXI.Container {
-   constructor(apiURL, startHandler) {
+   constructor(startHandler) {
       super()
 
       this.x = 5 
@@ -11,7 +10,6 @@ export default class StartOverlay extends PIXI.Container {
       this.startCallback = startHandler
       this.panelW = 370
       this.panelH = 300
-      this.apiService = apiURL
 
       this.graphics = new PIXI.Graphics()
       this.graphics.lineStyle(5, 0xFCFAFA, 1)
@@ -62,7 +60,7 @@ export default class StartOverlay extends PIXI.Container {
       this.msg.y = 240
       this.addChild(this.msg)
 
-      this.startGameInit() 
+      this.addStartButton() 
    }
 
    addStartButton() {
@@ -72,35 +70,5 @@ export default class StartOverlay extends PIXI.Container {
       startBtn.noShadow()
       this.addChild(startBtn)
       this.removeChild(this.msg)
-   }
-
-   async startGameInit( ) {
-      let url = `${this.apiService}/start?game=letterdrop`
-      let retries = 3 
-      let done = false
-
-      while (retries > 0 && done == false) {
-         await axios.post(url, null, {timeout: 20*1000}).then( response => {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${response.data}` 
-            this.addStartButton()
-            done = true
-         }).catch( (e) => {
-         if (e.message.includes("timeout")) {
-            if (retries == 1) {
-               this.msg.text = "Finaly initialize attempt..."
-            } else {
-               this.msg.text = "Retry initialize..."
-            }
-            retries--
-         } else {
-            this.msg.text = "Initialize failed: "+e.message
-            done = true
-         }
-         })
-      }
-
-      if ( done == false ) {
-         this.msg.text = "Unable to initialize... try again later"
-      }
    }
 }

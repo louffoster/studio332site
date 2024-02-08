@@ -7,19 +7,17 @@ import Tile from "@/games/charrom/tile"
 import Timer from "@/games/charrom/timer"
 import Button from "@/games/common/button"
 import Clock from "@/games/common/clock"
+import Dictionary from "@/games/common/dictionary"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import EndOverlay from "@/games/charrom/endoverlay"
 import * as PIXI from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
-import axios from 'axios'
 import scratchJson from '@/assets/trash.json'
 
-const DICT_URL = import.meta.env.VITE_S332_DICT
-
-
 export default class Charrom extends BasePhysicsGame {
+   dictionary = new Dictionary()
    supply = new Supply()
    striker = null
    offTable = []
@@ -48,18 +46,12 @@ export default class Charrom extends BasePhysicsGame {
    clock = null
    replayHandler  = null 
    backHandler = null
-   dictionary = []
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
    static LETTER_LIMIT = 8
 
    initialize(replayHandler, backHandler) {
-
-      axios.get(DICT_URL).then( (resp) => {
-         this.dictionary = resp.data
-      })
-
       this.scratchAnim = particles.upgradeConfig(scratchJson, ['smoke.png'])
       this.physics.gravity.scale = 0
 
@@ -284,8 +276,7 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    submitWord() {
-      let lcWord = this.word.text.toLowerCase()
-      if ( this.dictionary.includes(lcWord) ) {
+      if ( this.dictionary.isValid(this.word.text) ) {
          this.submitSuccess()
       } else {
          this.submitFailed()

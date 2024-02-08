@@ -6,6 +6,7 @@ import stars from '@/assets/stars.json'
 import bad from '@/assets/bad_word.json'
 import confettiJson from '@/assets/confetti.json'
 
+import Dictionary from "@/games/common/dictionary"
 import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"
 import Letter from "@/games/common/letter"
@@ -16,9 +17,9 @@ import EndOverlay from "@/games/sweep/endoverlay"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
 
-const API_SERVICE = import.meta.env.VITE_S332_SERVICE
 
 export default class Sweep extends BaseGame {
+   dictionary = new Dictionary()
    pool = new LetterPool()
    gameState = "init"
    grid = null
@@ -118,7 +119,7 @@ export default class Sweep extends BaseGame {
 
       this.enableGrid( false )
 
-      this.startOverlay = new StartOverlay(API_SERVICE, this.startHandler.bind(this)) 
+      this.startOverlay = new StartOverlay(this.startHandler.bind(this)) 
       this.addChild(this.startOverlay)
       this.pickOverlay = new PickOverlay( this.helperHandler.bind(this) )
       this.endOverlay = new EndOverlay(replayHandler, backHandler)
@@ -163,8 +164,7 @@ export default class Sweep extends BaseGame {
    }
    
    submitWord() {
-      let url = `${API_SERVICE}/sweep/check?w=${this.word.text}`
-      axios.post(url).then( () => {
+      if ( this.dictionary.isValid(this.word.text) ) {
          this.wordsCreated[ this.word.text.length]++
          this.scoreTiles()
          this.checkForWin()
@@ -172,9 +172,9 @@ export default class Sweep extends BaseGame {
          this.submitButton.disable()
          this.clearButton.disable()
          this.enableGrid(true)
-      }).catch( _e => {
+      } else {
          this.submitFailed()
-      })
+      }
    }
    
    countRemainingLetters() {
