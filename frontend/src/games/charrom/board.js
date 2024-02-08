@@ -73,11 +73,13 @@ export default class Board extends PIXI.Container {
       return {sunk: sunk, trash: trash}
    }
 
-   canPlaceStriker(y, radius) {
-      return (
-         ( y-radius*.5 >= this.bottomShotLineY+this.y && y+radius < this.boardH+this.y) ||
-         ( y+radius*.5 <= this.topShotLineY+this.y && y-radius > this.y )
-      )
+   canPlaceStriker(x,y, radius) {
+      if ( y+radius > this.boardH+this.y) return false
+      if ( y-radius < this.y) return false
+
+      if ( this.lowerShotArea.contains(x,y-this.y-radius) ) return true
+      if ( this.upperShotArea.contains(x,y-this.y-radius)  ) return true
+      return false
    }
 
    draw() {
@@ -90,11 +92,14 @@ export default class Board extends PIXI.Container {
       this.gfx.endFill()
 
       // shot lines
-      this.gfx.lineStyle(1, 0xC17C74,1)
-      this.gfx.moveTo(2, this.topShotLineY)
-      this.gfx.lineTo(this.boardW-2, this.topShotLineY)
-      this.gfx.moveTo(2, this.bottomShotLineY)
-      this.gfx.lineTo(this.boardW-2, this.bottomShotLineY)
+      this.gfx.lineStyle(2, 0xC17C74,1)
+      this.gfx.beginFill(0xC17C74,0.1)
+      this.gfx.drawCircle(this.boardW/2, this.boardH, 150)
+      this.lowerShotArea = new PIXI.Circle(this.boardW/2, this.boardH, 150)
+      this.gfx.drawCircle(this.boardW/2, 0, 150)
+      this.upperShotArea = new PIXI.Circle(this.boardW/2, 0, 150)
+      this.gfx.endFill()
+      
 
       // rack circle
       this.gfx.lineStyle(1, 0x7A6C5D,1)

@@ -1,15 +1,13 @@
 import * as PIXI from "pixi.js"
 import Button from "@/games/common/button"
-import axios from 'axios'
 
 export default class StartOverlay extends PIXI.Container {
-   constructor(apiURL, gameW, gameH, startHandler) {
+   constructor(gameW, gameH, startHandler) {
       super()
 
       this.startCallback = startHandler
       this.panelW = gameW*0.75
       this.panelH = gameH*0.4
-      this.apiService = apiURL
       this.x = (gameW - this.panelW) / 2
       this.y = 150
 
@@ -33,7 +31,7 @@ export default class StartOverlay extends PIXI.Container {
          wordWrapWidth: this.panelW - 50,
       })
 
-      let msg = `Each turn, place your striker behind one of the red shot lines. `
+      let msg = `Each turn, place your striker within one of the red shot circles. `
       msg += "Flick it into the letter pucks to sink them into the pockets. "
       msg += "Red pockets trash the letter, blue add it to your letter supply."
       let note1 = new PIXI.Text(msg, style)
@@ -62,7 +60,7 @@ export default class StartOverlay extends PIXI.Container {
       this.msg.y = 240
       this.addChild(this.msg)
 
-      this.startGameInit() 
+      this.addStartButton() 
    }
 
    addStartButton() {
@@ -72,35 +70,5 @@ export default class StartOverlay extends PIXI.Container {
       startBtn.noShadow()
       this.addChild(startBtn)
       this.removeChild(this.msg)
-   }
-
-   async startGameInit( ) {
-      let url = `${this.apiService}/start?game=letterdrop`
-      let retries = 3 
-      let done = false
-
-      while (retries > 0 && done == false) {
-         await axios.post(url, null, {timeout: 20*1000}).then( response => {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${response.data}` 
-            this.addStartButton()
-            done = true
-         }).catch( (e) => {
-         if (e.message.includes("timeout")) {
-            if (retries == 1) {
-               this.msg.text = "Finaly initialize attempt..."
-            } else {
-               this.msg.text = "Retry initialize..."
-            }
-            retries--
-         } else {
-            this.msg.text = "Initialize failed: "+e.message
-            done = true
-         }
-         })
-      }
-
-      if ( done == false ) {
-         this.msg.text = "Unable to initialize... try again later"
-      }
    }
 }

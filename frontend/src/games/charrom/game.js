@@ -16,7 +16,8 @@ import * as particles from '@pixi/particle-emitter'
 import axios from 'axios'
 import scratchJson from '@/assets/trash.json'
 
-const API_SERVICE = import.meta.env.VITE_S332_SERVICE
+const DICT_URL = import.meta.env.VITE_S332_DICT
+
 
 export default class Charrom extends BasePhysicsGame {
    supply = new Supply()
@@ -47,12 +48,18 @@ export default class Charrom extends BasePhysicsGame {
    clock = null
    replayHandler  = null 
    backHandler = null
+   dictionary = []
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
    static LETTER_LIMIT = 8
 
    initialize(replayHandler, backHandler) {
+
+      axios.get(DICT_URL).then( (resp) => {
+         this.dictionary = resp.data
+      })
+
       this.scratchAnim = particles.upgradeConfig(scratchJson, ['smoke.png'])
       this.physics.gravity.scale = 0
 
@@ -143,7 +150,7 @@ export default class Charrom extends BasePhysicsGame {
 
       this.shotOverlay = new ShotIndicator()
 
-      this.startOverlay = new StartOverlay( API_SERVICE,  this.gameWidth, this.gameHeight, () => {
+      this.startOverlay = new StartOverlay( this.gameWidth, this.gameHeight, () => {
          this.rackLetterPucks()
          this.removeChild(this.startOverlay)
          this.gameState = "place"
@@ -185,7 +192,7 @@ export default class Charrom extends BasePhysicsGame {
       if ( this.gameState == "place") {
          let actualW = this.gameWidth*this.scale
          let scale = (this.gameWidth / actualW )
-         if ( this.board.canPlaceStriker(e.global.y*scale, Striker.RADIUS) ) {
+         if ( this.board.canPlaceStriker(e.global.x*scale, e.global.y*scale, Striker.RADIUS) ) {
             this.placeStriker(e.global.x*scale, e.global.y*scale)
          } 
       }
@@ -277,16 +284,16 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    submitWord() {
-      let url = `${API_SERVICE}/charrom/check?w=${this.word.text}`
-      axios.post(url).then( () => {
+      let lcWord = this.word.text.toLowerCase()
+      if ( this.dictionary.includes(lcWord) ) {
          this.submitSuccess()
-      }).catch( _e => {
+      } else {
          this.submitFailed()
-      }).finally( () => {
-         this.clearBtn.setEnabled( false )
-         this.submitBtn.setEnabled( false )
-         this.clearWord()
-      })
+      }
+
+      this.clearBtn.setEnabled( false )
+      this.submitBtn.setEnabled( false )
+      this.clearWord()
    }
 
    submitSuccess() {
