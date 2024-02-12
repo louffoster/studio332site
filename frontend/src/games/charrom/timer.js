@@ -79,7 +79,6 @@ export default class Timer extends PIXI.Container {
                this.maxRateHit = true
                this.percentPerSec = Timer.MAX_RATE
             }
-            console.log("SPEED UP TO "+this.percentPerSec)
          }
       }
    }

@@ -161,8 +161,9 @@ export default class Charrom extends BasePhysicsGame {
          {x: centerX, y: centerY}, {x: centerX-Puck.DIAMETER, y: centerY}, {x: centerX+Puck.DIAMETER, y: centerY},
          {x: centerX-Puck.DIAMETER/2, y: centerY+45}, {x: centerX+Puck.DIAMETER/2, y: centerY+45}, 
       ]
-      spots.forEach( (pos,idx) => {
-         let puck = new Puck(pos.x, pos.y, rack[idx])
+      this.shuffleArray(rack).forEach( (ltr,idx) => {
+         let pos = spots[idx]
+         let puck = new Puck(pos.x, pos.y, ltr)
          this.addPhysicsItem( puck )
          this.puckCount++
       })
@@ -443,7 +444,6 @@ export default class Charrom extends BasePhysicsGame {
          let sunkResp = this.board.checkSunk( i )
          if ( sunkResp.sunk ) {
             if ( i.tag != "striker") {
-               console.log("sunk puck "+i.tag)
                this.puckSunk( i, sunkResp.trash )
                i.removeFromTable()
                this.offTable.push( i )
@@ -486,7 +486,6 @@ export default class Charrom extends BasePhysicsGame {
                   } 
                })
                this.offTable = [] 
-               console.log(this.items)
             }, 250)
          }
       } else {
