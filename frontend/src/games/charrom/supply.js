@@ -3,7 +3,6 @@ import Letter from "@/games/common/letter"
 
 export default class Supply {
    consonants = []
-   vowels = ["A", "E", "I", "O", "U"]
    static NUM_VOWELS = 2
    static NUM_CONSONANTS = 5
 
@@ -13,10 +12,10 @@ export default class Supply {
 
    getRack() {
       let out = [] 
-      for ( let v = 0; v < Supply.NUM_VOWELS; v++) {
-         let vIdx = Math.floor(Math.random() * this.vowels.length)  
-         let vowel = this.vowels[vIdx]
-         out.push( new Letter(vowel, this.value(vowel)))
+      let vowels = this.shuffle( ["A", "E", "I", "O", "U"] )
+      for ( let v = 0; v< Supply.NUM_VOWELS; v++)  {
+         let newV = vowels.pop()
+         out.push( new Letter(newV, this.value(newV)))
       }
 
       if ( this.consonants.length < Supply.NUM_CONSONANTS) {
@@ -63,11 +62,18 @@ export default class Supply {
          }
       }
 
-      for (i = this.consonants.length; i; i -= 1) {
-         j = Math.floor(Math.random() * i)
-         var x = this.consonants[i - 1]
-         this.consonants[i - 1] = this.consonants[j]
-         this.consonants[j] = x
+      this.consonants = this.shuffle(this.consonants)
+   }
+
+   shuffle( array ) {
+      let currentIndex = array.length,  randomIndex
+      while (currentIndex != 0) {
+         randomIndex = Math.floor(Math.random() * currentIndex)
+         currentIndex--
+         [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]]
       }
+
+      return array;
    }
 }
