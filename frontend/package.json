@@ -11,7 +11,6 @@
     "@pixi/particle-emitter": "^5.0.8",
     "axios": "^1.6.1",
     "matter-js": "^0.19.0",
-    "phaser": "^3.55.2",
     "pinia": "^2.0.14",
     "pixi.js": "^7.2.4",
     "primeicons": "^6.0.1",

@@ -1,10 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import Virus from '../views/Virus.vue'
-import Mosaic from '../views/Mosaic.vue'
-import Sweep from '../views/Sweep.vue'
-import LetterDrop from '../views/LetterDrop.vue'
-import Charrom from '../views/Charrom.vue'
 
 const router = createRouter({
    history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,27 +12,27 @@ const router = createRouter({
       {
          path: '/virus',
          name: 'virus',
-         component: Virus
+         component: () => import('../views/Virus.vue')
       },
       {
          path: '/mosaic',
          name: 'mosaic',
-         component: Mosaic
+         component: () => import('../views/Mosaic.vue')
       },
       {
          path: '/sweep',
          name: 'sweep',
-         component: Sweep
+         component: () => import('../views/Sweep.vue')
       },
       {
          path: '/letterdrop',
          name: 'letterdrop',
-         component: LetterDrop
+         component: () => import('../views/LetterDrop.vue')
       },
       {
          path: '/charrom',
          name: 'charrom',
-         component: Charrom
+         component: () => import('../views/Charrom.vue')
       },
    ]
 })
