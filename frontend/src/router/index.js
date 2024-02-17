@@ -34,6 +34,11 @@ const router = createRouter({
          name: 'charrom',
          component: () => import('../views/Charrom.vue')
       },
+      {
+         path: '/wordmine',
+         name: 'wordmine',
+         component: () => import('../views/WordMine.vue')
+      },
    ]
 })
 

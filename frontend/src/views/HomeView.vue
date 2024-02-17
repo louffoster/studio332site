@@ -8,24 +8,25 @@ const dwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
 const sweephelp = ref()
+const wmhelp = ref()
 
 const toggleDWHelp = ((event) => {
    dwhelp.value.toggle(event)
 })
-
 const toggleVirusHelp = ((event) => {
    vhelp.value.toggle(event)
 })
-
 const toggleSweepHelp = ((event) => {
    sweephelp.value.toggle(event)
 })
-
 const toggleMosiacHelp = ((event) => {
    mosaichelp.value.toggle(event)
 })
 const toggleCharromHelp = ((event) => {
    charromhelp.value.toggle(event)
+})
+const toggleWMHelp = ((event) => {
+   wmhelp.value.toggle(event)
 })
 </script>
 
@@ -33,6 +34,18 @@ const toggleCharromHelp = ((event) => {
    <div class="content">
       <h2>Games</h2>
       <ul>
+         <li>
+            <div class="game-info">
+               <router-link to="/wordmine">WordMine</router-link>
+               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleWMHelp" />
+            </div>
+            <OverlayPanel ref="wmhelp">
+               <div class="rules">
+                  <h3>WordMine</h3>
+                  <p>Its a physics based word game. Maybe.</p>
+               </div>
+            </OverlayPanel>
+         </li>
          <li>
             <div class="game-info">
                <router-link to="/charrom">Charrom</router-link>
