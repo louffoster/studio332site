@@ -8,6 +8,7 @@ import explodeJson from '@/assets/trash.json'
 export default class WordMine extends BasePhysicsGame {
    pool = new LetterPool()
    explodeAnim = null
+   clickMode = "pick" // modes: pick, push, bomb
 
    initialize(replayHandler, backHandler) {
       this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
