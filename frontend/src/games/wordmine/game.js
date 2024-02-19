@@ -2,11 +2,16 @@ import BasePhysicsGame from "@/games/common/basephysicsgame"
 import Rock from "@/games/wordmine/rock"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
+import * as particles from '@pixi/particle-emitter'
+import explodeJson from '@/assets/trash.json'
 
 export default class WordMine extends BasePhysicsGame {
    pool = new LetterPool()
+   explodeAnim = null
 
    initialize(replayHandler, backHandler) {
+      this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
+
       // set bottom aand sides
       let b = Matter.Bodies.rectangle(this.gameWidth/2, this.gameHeight+25, this.gameWidth, 50, { isStatic: true, friction: 0, restitution: 0})
       Matter.Composite.add(this.physics.world, b)
@@ -22,8 +27,7 @@ export default class WordMine extends BasePhysicsGame {
       for ( let c=0; c< 6; c++) {
          for ( let r=0; r< 10; r++) {
             let ltr = this.pool.popScoringLetter()
-            console.log(ltr)
-            let rock = new Rock( x,y, ltr )
+            let rock = new Rock( x,y, ltr, this.rockClicked.bind(this) )
             this.addPhysicsItem( rock )
             y -= Rock.HEIGHT
          }
@@ -32,6 +36,16 @@ export default class WordMine extends BasePhysicsGame {
       }
 
       this.draw()
+   }
+
+   rockClicked( rock ) {
+      var emitter = new particles.Emitter(this.scene, this.explodeAnim )
+      emitter.updateOwnerPos(0,0)
+      emitter.updateSpawnPos(rock.x, rock.y)
+      emitter.playOnceAndDestroy( () => {
+         console.log("remove "+rock.tag)
+      }) 
+      this.removePhysicsItem( rock )
    }
 
    draw() {

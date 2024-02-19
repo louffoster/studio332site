@@ -8,7 +8,7 @@ export default class Rock extends BasePhysicsItem {
    static WIDTH = 55
    static HEIGHT = 55
 
-   constructor( x,y, letter) {
+   constructor( x,y, letter, listener) {
       super(x,y)
       console.log(letter)
 
@@ -72,6 +72,13 @@ export default class Rock extends BasePhysicsItem {
 
       this.update()
       this.draw()
+
+      this.hitArea = this.polygon
+      this.cursor ="pointer"
+      this.eventMode = 'static'
+      this.on('pointerdown', ()=> {
+         listener(this)
+      })
    }
 
    remove() {
