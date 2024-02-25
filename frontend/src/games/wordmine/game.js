@@ -1,5 +1,7 @@
+import * as PIXI from "pixi.js"
 import BasePhysicsGame from "@/games/common/basephysicsgame"
 import Rock from "@/games/wordmine/rock"
+import ToggleButton from "@/games/wordmine/togglebutton"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
 import * as particles from '@pixi/particle-emitter'
@@ -8,6 +10,7 @@ import explodeJson from '@/assets/trash.json'
 export default class WordMine extends BasePhysicsGame {
    pool = new LetterPool()
    explodeAnim = null
+   toggleButtons = []
    clickMode = "pick" // modes: pick, push, bomb
 
    initialize(replayHandler, backHandler) {
@@ -36,17 +39,54 @@ export default class WordMine extends BasePhysicsGame {
          x+= Rock.WIDTH
       }
 
+      let btnsY = 135
+      let pick = PIXI.Sprite.from('/public/pick.png')
+      let pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", pick )
+      pickButton.setSelected(true)
+      pickButton.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( pickButton )
+      this.addChild(pickButton)
+      btnsY += ToggleButton.HEIGHT + 10
+      let bomb = PIXI.Sprite.from('/public/bomb.png')
+      let bombButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "bomb", bomb )
+      bombButton.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( bombButton )
+      this.addChild(bombButton)
+      btnsY += ToggleButton.HEIGHT + 10
+      let push = PIXI.Sprite.from('/public/push.png')
+      let pushButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "push", push )
+      pushButton.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( pushButton )
+      this.addChild(pushButton)
+
       this.draw()
    }
 
+   toggleButtonClicked( name ) {
+      console.log("CLICK "+this.name)
+      this.clickMode = name
+      this.toggleButtons.forEach( b => {
+         console.log(b.name)
+         if (b.name != name ) {
+            b.setSelected(false)
+         }
+      })
+   }
+
    rockClicked( rock ) {
-      var emitter = new particles.Emitter(this.scene, this.explodeAnim )
-      emitter.updateOwnerPos(0,0)
-      emitter.updateSpawnPos(rock.x, rock.y)
-      emitter.playOnceAndDestroy( () => {
-         console.log("remove "+rock.tag)
-      }) 
-      this.removePhysicsItem( rock )
+      if ( this.clickMode == "bomb") {
+         var emitter = new particles.Emitter(this.scene, this.explodeAnim )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(rock.x, rock.y)
+         emitter.playOnceAndDestroy( () => {
+            console.log("remove "+rock.tag)
+         }) 
+         this.removePhysicsItem( rock )
+      } else if ( this.clickMode == "pick") {
+         rock.toggleSelected()
+      } else if ( this.clickMode == "push") {
+         console.log("PUSH")
+      }
    }
 
    draw() {

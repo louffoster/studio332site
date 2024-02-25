@@ -5,30 +5,33 @@ import Matter from 'matter-js'
 export default class Rock extends BasePhysicsItem {
    letter = null 
    extra = null
+   selected = false 
+   letters = []
    static WIDTH = 55
    static HEIGHT = 55
 
    constructor( x,y, letter, listener) {
       super(x,y)
-      console.log(letter)
 
       this.letter = letter
       
-      let letterColor = "#efefef"
+      this.letterColor = "#efefef"
       this.lineColor = new PIXI.Color( 0x582F0E )
       if ( letter.isVowel()) {
          this.fillColor = new PIXI.Color( 0x6F3F14 )
       } else  {
          this.fillColor = new PIXI.Color( 0x7F4F24 )
       }
+      this.selectColor = new PIXI.Color( 0xffd046 )
+      this.selLetterColor = new PIXI.Color(0x414833)
 
       let style = new PIXI.TextStyle({
-         fill: letterColor,
+         fill: this.letterColor,
          fontFamily: "Arial",
          fontSize: 18,
       })
       let smallStyle = new PIXI.TextStyle({
-         fill: letterColor,
+         fill: this.letterColor,
          fontFamily: "Arial",
          fontSize: 15,
       })
@@ -38,6 +41,7 @@ export default class Rock extends BasePhysicsItem {
       txt.x = 0
       txt.y = 0
       this.addChild(txt)
+      this.letters.push( txt )
       if (letter.text == "Q") {
          let uTxt = new PIXI.Text("U", smallStyle)
          uTxt.anchor.set(0.5)
@@ -45,6 +49,7 @@ export default class Rock extends BasePhysicsItem {
          uTxt.y = 4    
          txt.x-= 4
          this.addChild(uTxt)
+         this.letters.push( uTxt )
       }
 
       let polyPts = [ 
@@ -58,17 +63,14 @@ export default class Rock extends BasePhysicsItem {
          {x: -Rock.WIDTH/2, y: +Rock.HEIGHT/4},
       ]
 
-      // let v = Matter.Vertices.fromPath(`0,0, ${this.w},0, 0,${this.h}`)
       let c = Matter.Vertices.centre(polyPts) 
       this.pivot.set(c.x, c.y)  
       this.body = Matter.Bodies.fromVertices(x, y, polyPts, {isStatic: this.isStatic})
-      // Matter.Body.setCentre(this.body, {x:0,y:0}, true)
       this.body.label = "rock-"+letter.text
       this.setAirFriction(0.02)
       this.setRestitution( 0 )
 
       this.polygon = new PIXI.Polygon(polyPts)
-
 
       this.update()
       this.draw()
@@ -81,6 +83,16 @@ export default class Rock extends BasePhysicsItem {
       })
    }
 
+   toggleSelected(  ) {
+      this.selected = !this.selected
+      if ( this.selected ) {
+         this.letters.forEach( l => l.style.fill = this.selLetterColor )
+      } else {
+         this.letters.forEach( l => l.style.fill = this.letterColor )  
+      }
+      this.draw()
+   }
+
    remove() {
       this.body.isSensor = true
       this.gfx.alpha = 0
@@ -91,6 +103,9 @@ export default class Rock extends BasePhysicsItem {
       this.gfx.clear()
       this.gfx.lineStyle(1, this.lineColor, 1)
       this.gfx.beginFill(this.fillColor)
+      if ( this.selected ) {
+         this.gfx.beginFill(this.selectColor)
+      }
       this.gfx.drawPolygon( this.polygon )
       this.gfx.endFill()
    }
