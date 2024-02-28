@@ -40,20 +40,20 @@ export default class WordMine extends BasePhysicsGame {
       }
 
       let btnsY = 135
-      let pick = PIXI.Sprite.from('/public/pick.png')
+      let pick = PIXI.Sprite.from('/images/wordmine/pick.png')
       let pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", pick )
       pickButton.setSelected(true)
       pickButton.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( pickButton )
       this.addChild(pickButton)
       btnsY += ToggleButton.HEIGHT + 10
-      let bomb = PIXI.Sprite.from('/public/bomb.png')
+      let bomb = PIXI.Sprite.from('/images/wordmine/bomb.png')
       let bombButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "bomb", bomb )
       bombButton.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( bombButton )
       this.addChild(bombButton)
       btnsY += ToggleButton.HEIGHT + 10
-      let push = PIXI.Sprite.from('/public/push.png')
+      let push = PIXI.Sprite.from('/images/wordmine/push.png')
       let pushButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "push", push )
       pushButton.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( pushButton )

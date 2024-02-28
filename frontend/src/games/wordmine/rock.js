@@ -67,7 +67,7 @@ export default class Rock extends BasePhysicsItem {
       this.pivot.set(c.x, c.y)  
       this.body = Matter.Bodies.fromVertices(x, y, polyPts, {isStatic: this.isStatic})
       this.body.label = "rock-"+letter.text
-      this.setAirFriction(0.02)
+      this.setAirFriction( 0.02)
       this.setRestitution( 0 )
 
       this.polygon = new PIXI.Polygon(polyPts)

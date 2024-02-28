@@ -1,3 +1,4 @@
 srv
 node_modules
+dist
 *.sh
