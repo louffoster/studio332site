@@ -21,7 +21,7 @@ export default class WordMine extends BasePhysicsGame {
       Matter.Composite.add(this.physics.world, b)
       let l = Matter.Bodies.rectangle(-25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
       Matter.Composite.add(this.physics.world, l)
-      let r = Matter.Bodies.rectangle(this.gameWidth+25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
+      let r = Matter.Bodies.rectangle((Rock.WIDTH*6)+25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
       Matter.Composite.add(this.physics.world, r)
 
       // fill in rocks
@@ -31,7 +31,7 @@ export default class WordMine extends BasePhysicsGame {
       for ( let c=0; c< 6; c++) {
          for ( let r=0; r< 10; r++) {
             let ltr = this.pool.popScoringLetter()
-            let rock = new Rock( x,y, ltr, this.rockClicked.bind(this) )
+            let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
             this.addPhysicsItem( rock )
             y -= Rock.HEIGHT
          }
@@ -53,27 +53,31 @@ export default class WordMine extends BasePhysicsGame {
       this.toggleButtons.push( bombButton )
       this.addChild(bombButton)
       btnsY += ToggleButton.HEIGHT + 10
-      let push = PIXI.Sprite.from('/images/wordmine/push.png')
-      let pushButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "push", push )
-      pushButton.setListener( this.toggleButtonClicked.bind(this) )
-      this.toggleButtons.push( pushButton )
-      this.addChild(pushButton)
+      let left = PIXI.Sprite.from('/images/wordmine/left.png')
+      let pushLeft = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "left", left )
+      pushLeft.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( pushLeft )
+      this.addChild(pushLeft)
+      btnsY += ToggleButton.HEIGHT + 10
+      let right = PIXI.Sprite.from('/images/wordmine/right.png')
+      let pushRight = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "right", right )
+      pushRight.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( pushRight )
+      this.addChild(pushRight)
 
       this.draw()
    }
 
    toggleButtonClicked( name ) {
-      console.log("CLICK "+this.name)
       this.clickMode = name
       this.toggleButtons.forEach( b => {
-         console.log(b.name)
          if (b.name != name ) {
             b.setSelected(false)
          }
       })
    }
 
-   rockClicked( rock ) {
+   rockTouhed( rock ) {
       if ( this.clickMode == "bomb") {
          var emitter = new particles.Emitter(this.scene, this.explodeAnim )
          emitter.updateOwnerPos(0,0)
@@ -84,9 +88,21 @@ export default class WordMine extends BasePhysicsGame {
          this.removePhysicsItem( rock )
       } else if ( this.clickMode == "pick") {
          rock.toggleSelected()
-      } else if ( this.clickMode == "push") {
-         console.log("PUSH")
+      } else if ( this.clickMode == "left") {
+         this.clearSelectedRocks()
+         rock.pushLeft()
+      } else if ( this.clickMode == "right") {
+         this.clearSelectedRocks()
+         rock.pushRight()
       }
+   }
+
+   clearSelectedRocks() {
+      this.items.forEach( i => {
+         if ( i.tag.indexOf("rock") == 0 ) {
+            i.deselect()
+         }
+      })
    }
 
    draw() {

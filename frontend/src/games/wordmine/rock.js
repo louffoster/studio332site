@@ -6,9 +6,11 @@ export default class Rock extends BasePhysicsItem {
    letter = null 
    extra = null
    selected = false 
+   pushTarget = false
    letters = []
    static WIDTH = 55
    static HEIGHT = 55
+   static FRICTION = 0.05
 
    constructor( x,y, letter, listener) {
       super(x,y)
@@ -68,6 +70,7 @@ export default class Rock extends BasePhysicsItem {
       this.body = Matter.Bodies.fromVertices(x, y, polyPts, {isStatic: this.isStatic})
       this.body.label = "rock-"+letter.text
       this.setAirFriction( 0.02)
+      this.setFriction(Rock.FRICTION)
       this.setRestitution( 0 )
 
       this.polygon = new PIXI.Polygon(polyPts)
@@ -83,6 +86,21 @@ export default class Rock extends BasePhysicsItem {
       })
    }
 
+   pushLeft() {
+      this.setFriction(0)
+      this.applyForce(-0.05,0)
+      setTimeout( ()=>{
+         this.setFriction(Rock.FRICTION)
+      }, 100)
+   }
+   pushRight() {
+      this.setFriction(0)
+      this.applyForce(0.05,0)
+      setTimeout( ()=>{
+         this.setFriction(Rock.FRICTION)
+      }, 100)
+   }
+
    toggleSelected(  ) {
       this.selected = !this.selected
       if ( this.selected ) {
@@ -90,6 +108,18 @@ export default class Rock extends BasePhysicsItem {
       } else {
          this.letters.forEach( l => l.style.fill = this.letterColor )  
       }
+      this.draw()
+   }
+
+   deselect() {
+      this.pushTarget = false 
+      this.selected = false   
+      this.letters.forEach( l => l.style.fill = this.letterColor ) 
+      this.draw()
+   }
+
+   setPushTarget(flag) {
+      this.pushTarget = flag
       this.draw()
    }
 
@@ -102,6 +132,9 @@ export default class Rock extends BasePhysicsItem {
       super.draw() 
       this.gfx.clear()
       this.gfx.lineStyle(1, this.lineColor, 1)
+      if ( this.pushTarget ) {
+         this.gfx.lineStyle(5, this.selectColor, 1)      
+      }
       this.gfx.beginFill(this.fillColor)
       if ( this.selected ) {
          this.gfx.beginFill(this.selectColor)
