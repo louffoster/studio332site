@@ -38,6 +38,16 @@ export default class WordMine extends BasePhysicsGame {
          y = this.gameHeight - Rock.HEIGHT/2
          x+= Rock.WIDTH
       }
+      // for ( let c=0; c<13; c++) {
+      //    for ( let r=0; r< 5; r++) {
+      //       let ltr = this.pool.popScoringLetter()
+      //       let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
+      //       this.addPhysicsItem( rock )
+      //       x += (Rock.WIDTH)
+      //    }
+      //    x = Rock.WIDTH/2-1
+      //    y -= Rock.HEIGHT
+      // }
 
       let btnsY = 135
       let pick = PIXI.Sprite.from('/images/wordmine/pick.png')

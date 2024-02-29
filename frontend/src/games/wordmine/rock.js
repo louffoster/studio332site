@@ -6,11 +6,10 @@ export default class Rock extends BasePhysicsItem {
    letter = null 
    extra = null
    selected = false 
-   pushTarget = false
    letters = []
    static WIDTH = 55
    static HEIGHT = 55
-   static FRICTION = 0.05
+   static FRICTION = 0.01
 
    constructor( x,y, letter, listener) {
       super(x,y)
@@ -64,21 +63,23 @@ export default class Rock extends BasePhysicsItem {
          {x: -Rock.WIDTH/4, y: +Rock.HEIGHT/2},
          {x: -Rock.WIDTH/2, y: +Rock.HEIGHT/4},
       ]
-
+      this.polygon = new PIXI.Polygon(polyPts)
       let c = Matter.Vertices.centre(polyPts) 
       this.pivot.set(c.x, c.y)  
       this.body = Matter.Bodies.fromVertices(x, y, polyPts, {isStatic: this.isStatic})
+      this.hitArea = this.polygon
+
+      // this.body = Matter.Bodies.circle(x, y, Rock.WIDTH*0.5)
+      // this.hitArea = new PIXI.Circle(0,0, Rock.WIDTH*0.5)
+
       this.body.label = "rock-"+letter.text
-      this.setAirFriction( 0.02)
+      this.setAirFriction( 0.0)
       this.setFriction(Rock.FRICTION)
       this.setRestitution( 0 )
-
-      this.polygon = new PIXI.Polygon(polyPts)
 
       this.update()
       this.draw()
 
-      this.hitArea = this.polygon
       this.cursor ="pointer"
       this.eventMode = 'static'
       this.on('pointerdown', ()=> {
@@ -88,14 +89,14 @@ export default class Rock extends BasePhysicsItem {
 
    pushLeft() {
       this.setFriction(0)
-      this.applyForce(-0.05,0)
+      this.applyForce(-0.025,0)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)
    }
    pushRight() {
       this.setFriction(0)
-      this.applyForce(0.05,0)
+      this.applyForce(0.025,0)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)
@@ -112,14 +113,8 @@ export default class Rock extends BasePhysicsItem {
    }
 
    deselect() {
-      this.pushTarget = false 
       this.selected = false   
       this.letters.forEach( l => l.style.fill = this.letterColor ) 
-      this.draw()
-   }
-
-   setPushTarget(flag) {
-      this.pushTarget = flag
       this.draw()
    }
 
@@ -132,13 +127,11 @@ export default class Rock extends BasePhysicsItem {
       super.draw() 
       this.gfx.clear()
       this.gfx.lineStyle(1, this.lineColor, 1)
-      if ( this.pushTarget ) {
-         this.gfx.lineStyle(5, this.selectColor, 1)      
-      }
       this.gfx.beginFill(this.fillColor)
       if ( this.selected ) {
          this.gfx.beginFill(this.selectColor)
       }
+      //this.gfx.drawCircle(0,0,(Rock.WIDTH-2)*0.5)
       this.gfx.drawPolygon( this.polygon )
       this.gfx.endFill()
    }
