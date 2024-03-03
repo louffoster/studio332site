@@ -6,6 +6,8 @@ export default class Rock extends BasePhysicsItem {
    letter = null 
    extra = null
    selected = false 
+   target = false
+   enabled = true
    letters = []
    static WIDTH = 55
    static HEIGHT = 55
@@ -25,6 +27,8 @@ export default class Rock extends BasePhysicsItem {
       }
       this.selectColor = new PIXI.Color( 0xffd046 )
       this.selLetterColor = new PIXI.Color(0x414833)
+      this.targetColor = new PIXI.Color(0xe26312)
+      this.dimColor = new PIXI.Color( 0x414833 )
 
       let style = new PIXI.TextStyle({
          fill: this.letterColor,
@@ -69,9 +73,6 @@ export default class Rock extends BasePhysicsItem {
       this.body = Matter.Bodies.fromVertices(x, y, polyPts, {isStatic: this.isStatic})
       this.hitArea = this.polygon
 
-      // this.body = Matter.Bodies.circle(x, y, Rock.WIDTH*0.5)
-      // this.hitArea = new PIXI.Circle(0,0, Rock.WIDTH*0.5)
-
       this.body.label = "rock-"+letter.text
       this.setAirFriction( 0.0)
       this.setFriction(Rock.FRICTION)
@@ -83,6 +84,7 @@ export default class Rock extends BasePhysicsItem {
       this.cursor ="pointer"
       this.eventMode = 'static'
       this.on('pointerdown', ()=> {
+         if ( this.selected && this.target == false ) return
          listener(this)
       })
    }
@@ -111,6 +113,30 @@ export default class Rock extends BasePhysicsItem {
       }
       this.draw()
    }
+   setTarget( flag ) {
+      this.target = flag 
+      if ( this.target ) {
+         this.letters.forEach( l => l.style.fill = this.targetColor )
+      } else {
+         if ( this.selected ) {
+            this.letters.forEach( l => l.style.fill = this.selLetterColor )  
+         } else {
+            this.letters.forEach( l => l.style.fill = this.letterColor )     
+         }
+      }
+      this.draw()
+   }
+   setEnabled( enabled ) {
+      this.enabled = enabled 
+      if (this.enabled == false) {
+         this.eventMode = 'none'
+         this.cursor ="default"
+      } else {
+         this.eventMode = 'static'
+         this.cursor ="pointer"
+      }
+      this.draw()
+   }
 
    deselect() {
       this.selected = false   
@@ -127,11 +153,17 @@ export default class Rock extends BasePhysicsItem {
       super.draw() 
       this.gfx.clear()
       this.gfx.lineStyle(1, this.lineColor, 1)
-      this.gfx.beginFill(this.fillColor)
-      if ( this.selected ) {
-         this.gfx.beginFill(this.selectColor)
+      if ( this.target ) {
+         this.gfx.lineStyle(5, this.targetColor, 1)   
       }
-      //this.gfx.drawCircle(0,0,(Rock.WIDTH-2)*0.5)
+      if (this.enabled == false ) {
+         this.gfx.beginFill(this.dimColor)
+      } else {
+         this.gfx.beginFill(this.fillColor)
+         if ( this.selected ) {
+            this.gfx.beginFill(this.selectColor)
+         }
+      }
       this.gfx.drawPolygon( this.polygon )
       this.gfx.endFill()
    }

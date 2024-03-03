@@ -12,6 +12,8 @@ export default class WordMine extends BasePhysicsGame {
    explodeAnim = null
    toggleButtons = []
    clickMode = "pick" // modes: pick, push, bomb
+   lastPickedRock = null
+   selections = []
 
    initialize(replayHandler, backHandler) {
       this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
@@ -35,19 +37,9 @@ export default class WordMine extends BasePhysicsGame {
             this.addPhysicsItem( rock )
             y -= Rock.HEIGHT
          }
-         y = this.gameHeight - Rock.HEIGHT/2
+         y = this.gameHeight - Rock.HEIGHT/2 - 1
          x+= Rock.WIDTH
       }
-      // for ( let c=0; c<13; c++) {
-      //    for ( let r=0; r< 5; r++) {
-      //       let ltr = this.pool.popScoringLetter()
-      //       let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
-      //       this.addPhysicsItem( rock )
-      //       x += (Rock.WIDTH)
-      //    }
-      //    x = Rock.WIDTH/2-1
-      //    y -= Rock.HEIGHT
-      // }
 
       let btnsY = 135
       let pick = PIXI.Sprite.from('/images/wordmine/pick.png')
@@ -97,20 +89,63 @@ export default class WordMine extends BasePhysicsGame {
          }) 
          this.removePhysicsItem( rock )
       } else if ( this.clickMode == "pick") {
-         rock.toggleSelected()
+         this.rockSelected( rock )
       } else if ( this.clickMode == "left") {
-         this.clearSelectedRocks()
+         this.resetRocks()
          rock.pushLeft()
       } else if ( this.clickMode == "right") {
-         this.clearSelectedRocks()
+         this.resetRocks()
          rock.pushRight()
       }
    }
 
-   clearSelectedRocks() {
+   rockSelected( rock ) {
+      rock.toggleSelected()
+
+      let tgtRock = rock
+      if ( tgtRock.selected ) {
+         if ( this.selections.length > 0 ) {
+            let last = this.selections[ this.selections.length-1]
+            last.setTarget(false)
+         } 
+         this.selections.push( rock )
+         tgtRock.setTarget(true)
+      } else {
+         console.log("POP "+tgtRock.tag)
+         tgtRock.setTarget(false)   
+         this.selections.pop()
+         if ( this.selections.length == 0) {
+            this.resetRocks()
+            return
+         }
+         tgtRock = this.selections[ this.selections.length-1]
+         tgtRock.setTarget(true) 
+      }
+
+      this.items.forEach( i => {
+         if ( i == tgtRock ) return
+
+         if ( i.tag.indexOf("rock") == 0 ) {
+            if ( i.selected == false ) {
+               let dX = tgtRock.x - i.x
+               let dY = tgtRock.y - i.y
+               let dist = Math.sqrt( dX*dX + dY*dY )
+               
+               if ( dist <= (Rock.WIDTH+10)) {
+                  i.setEnabled(true)
+               } else {
+                  i.setEnabled(false)
+               }
+            } 
+         }
+      })
+   }
+
+   resetRocks() {
       this.items.forEach( i => {
          if ( i.tag.indexOf("rock") == 0 ) {
             i.deselect()
+            i.setEnabled(true)
          }
       })
    }
