@@ -14,6 +14,8 @@ export default class WordMine extends BasePhysicsGame {
    clickMode = "pick" // modes: pick, push, bomb
    lastPickedRock = null
    selections = []
+   word = null
+   score = 0
 
    initialize(replayHandler, backHandler) {
       this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
@@ -67,6 +69,25 @@ export default class WordMine extends BasePhysicsGame {
       this.toggleButtons.push( pushRight )
       this.addChild(pushRight)
 
+      let wordStyle = new PIXI.TextStyle({
+         fill: "#FCFAFF",
+         fontFamily: "Arial",
+         fontSize: 28,
+         lineHeight: 28,
+         stroke: "#333333",
+         strokeThickness: 2,
+      })
+      this.word = new PIXI.Text("", wordStyle)
+      this.word.x = 10 
+      this.word.y = 65
+      this.addChild(this.word)
+
+      this.score = new PIXI.Text("00000", wordStyle)
+      this.score.anchor.set(0.5)
+      this.score.x = this.gameWidth/2
+      this.score.y = 20
+      this.addChild(this.score)
+
       this.draw()
    }
 
@@ -100,10 +121,13 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    rockSelected( rock ) {
+      if ( this.word.text.length == 10 && rock.selected == false) return
+
       rock.toggleSelected()
 
       let tgtRock = rock
       if ( tgtRock.selected ) {
+         this.word.text += rock.text
          if ( this.selections.length > 0 ) {
             let last = this.selections[ this.selections.length-1]
             last.setTarget(false)
@@ -111,7 +135,7 @@ export default class WordMine extends BasePhysicsGame {
          this.selections.push( rock )
          tgtRock.setTarget(true)
       } else {
-         console.log("POP "+tgtRock.tag)
+         this.word.text =  this.word.text.slice(0, rock.text.length*-1 )
          tgtRock.setTarget(false)   
          this.selections.pop()
          if ( this.selections.length == 0) {
@@ -132,7 +156,7 @@ export default class WordMine extends BasePhysicsGame {
                let dist = Math.sqrt( dX*dX + dY*dY )
                
                if ( dist <= (Rock.WIDTH+10)) {
-                  i.setEnabled(true)
+                  i.setEnabled( ( this.word.text.length < 10) )
                } else {
                   i.setEnabled(false)
                }
