@@ -1,13 +1,13 @@
 import * as PIXI from "pixi.js"
 
-export default class ToggleButton extends PIXI.Container {
+export default class IconButton extends PIXI.Container {
    static WIDTH = 60
    static HEIGHT = 60
 
    buttonColor = new PIXI.Color(0xe1d9cd)  
    borderColor = new PIXI.Color(0x582F0E) 
    selectColor = new PIXI.Color(0xBBE5ED)  
-   selected = false
+   down = false
    enabled = true
    name = ""
    
@@ -19,7 +19,7 @@ export default class ToggleButton extends PIXI.Container {
       this.y = y
 
       this.eventMode = 'static'
-      this.hitArea = new PIXI.Rectangle(0,0, ToggleButton.WIDTH,ToggleButton.HEIGHT)
+      this.hitArea = new PIXI.Rectangle(0,0, IconButton.WIDTH,IconButton.HEIGHT)
       this.cursor ="pointer"
 
       this.graphics = new PIXI.Graphics()
@@ -27,8 +27,8 @@ export default class ToggleButton extends PIXI.Container {
 
       this.addChild(this.graphics)
       image.anchor.set(0.5,0.5)
-      image.x = ToggleButton.WIDTH/2 
-      image.y = ToggleButton.HEIGHT/2
+      image.x = IconButton.WIDTH/2 
+      image.y = IconButton.HEIGHT/2
       this.graphics.addChild(image)
    }
 
@@ -44,8 +44,14 @@ export default class ToggleButton extends PIXI.Container {
 
    setListener( listener ) {
       this.on('pointerdown', () => {
-         if (this.enabled == true && this.selected == false) {
-            this.selected = !this.selected 
+         if (this.enabled == true && this.down == false) {
+            this.down = true 
+            this.draw()   
+         }
+      })
+      this.on('pointerup', () => {
+         if (this.enabled == true) {
+            this.down = false
             this.draw()   
             listener(this.name)
          }
@@ -60,10 +66,10 @@ export default class ToggleButton extends PIXI.Container {
       }
       this.graphics.lineStyle(2, this.borderColor, alpha)
       this.graphics.beginFill( this.buttonColor, alpha )
-      if ( this.selected ) {
+      if ( this.down ) {
          this.graphics.beginFill( this.selectColor, alpha )   
       }
-      this.graphics.drawRoundedRect(0,0, ToggleButton.WIDTH, ToggleButton.HEIGHT, 5)
+      this.graphics.drawRoundedRect(0,0, IconButton.WIDTH, IconButton.HEIGHT, 5)
       this.graphics.endFill()
    }
 }

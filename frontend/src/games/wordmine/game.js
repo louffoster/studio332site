@@ -1,7 +1,9 @@
 import * as PIXI from "pixi.js"
 import BasePhysicsGame from "@/games/common/basephysicsgame"
+import Dictionary from "@/games/common/dictionary"
 import Rock from "@/games/wordmine/rock"
 import ToggleButton from "@/games/wordmine/togglebutton"
+import IconButton from "@/games/wordmine/iconbutton"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
 import * as particles from '@pixi/particle-emitter'
@@ -11,13 +13,17 @@ export default class WordMine extends BasePhysicsGame {
    pool = new LetterPool()
    explodeAnim = null
    toggleButtons = []
+   clearBtn = null 
+   submitBtn = null
    clickMode = "pick" // modes: pick, push, bomb
    lastPickedRock = null
    selections = []
    word = null
    score = 0
+   dictionary = null
 
    initialize(replayHandler, backHandler) {
+      this.dictionary = new Dictionary()
       this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
 
       // set bottom aand sides
@@ -50,7 +56,22 @@ export default class WordMine extends BasePhysicsGame {
       pickButton.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( pickButton )
       this.addChild(pickButton)
+
       btnsY += ToggleButton.HEIGHT + 10
+      let submit = PIXI.Sprite.from('/images/wordmine/check.png')
+      this.submitBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, "submit", submit )
+      this.submitBtn.setListener( this.submitClicked.bind(this) )
+      this.submitBtn.setEnabled( false )
+      this.addChild(this.submitBtn)
+
+      btnsY += IconButton.HEIGHT + 10
+      let clear = PIXI.Sprite.from('/images/wordmine/clear.png')
+      this.clearBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, "clear", clear )
+      this.clearBtn.setListener( this.clearClicked.bind(this) )
+      this.clearBtn.setEnabled(false)
+      this.addChild(this.clearBtn)
+
+      btnsY += IconButton.HEIGHT + 30
       let bomb = PIXI.Sprite.from('/images/wordmine/bomb.png')
       let bombButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "bomb", bomb )
       bombButton.setListener( this.toggleButtonClicked.bind(this) )
@@ -99,6 +120,45 @@ export default class WordMine extends BasePhysicsGame {
          }
       })
    }
+   clearClicked() {
+      this.word.text = "" 
+      this.selections = [] 
+      this.resetRocks()
+      this.clearBtn.setEnabled(false)
+      this.submitBtn.setEnabled(false)
+   }
+   submitClicked() {
+      if ( this.dictionary.isValid(this.word.text)) {
+         this.submitSuccess()
+      } else {
+         this.submitFailed()
+      }
+   }
+   submitSuccess() {
+      let gone = []
+      this.items.forEach( i => {
+         if ( i.tag.indexOf("rock") == 0 ) {
+            if (i.selected) {
+               var emitter = new particles.Emitter(this.scene, this.explodeAnim )
+               emitter.updateOwnerPos(0,0)
+               emitter.updateSpawnPos(i.x, i.y)
+               emitter.playOnceAndDestroy()
+               gone.push(i)
+            }
+         }
+      })
+      setTimeout( () => {
+         gone.forEach( r => this.removePhysicsItem(r))
+         this.resetRocks()
+         this.clearBtn.setEnabled(false)
+         this.submitBtn.setEnabled(false)
+         this.word.text = "" 
+         this.selections = [] 
+      }, 150)
+   }
+   submitFailed() {
+      
+   }
 
    rockTouhed( rock ) {
       if ( this.clickMode == "bomb") {
@@ -140,11 +200,16 @@ export default class WordMine extends BasePhysicsGame {
          this.selections.pop()
          if ( this.selections.length == 0) {
             this.resetRocks()
+            this.clearBtn.setEnabled(false)
+            this.submitBtn.setEnabled(false)
             return
          }
          tgtRock = this.selections[ this.selections.length-1]
          tgtRock.setTarget(true) 
       }
+
+      this.clearBtn.setEnabled(true)
+      this.submitBtn.setEnabled(this.word.text.length > 3)
 
       this.items.forEach( i => {
          if ( i == tgtRock ) return
@@ -169,6 +234,7 @@ export default class WordMine extends BasePhysicsGame {
       this.items.forEach( i => {
          if ( i.tag.indexOf("rock") == 0 ) {
             i.deselect()
+            i.setTarget(false)
             i.setEnabled(true)
          }
       })
@@ -187,6 +253,10 @@ export default class WordMine extends BasePhysicsGame {
       this.gfx.beginFill(0xA68A64)
       this.gfx.lineStyle(2, 0x582F0E, 1)
       this.gfx.drawRect(330,125, this.gameWidth-330, this.gameHeight-125)
+
+      this.gfx.lineStyle(3, 0x582F0E, 1)
+      this.gfx.moveTo(this.gameWidth-80, 350)
+      this.gfx.lineTo(this.gameWidth, 350)
 
       this.gfx.endFill()
    }
