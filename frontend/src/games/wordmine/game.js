@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js"
 import BasePhysicsGame from "@/games/common/basephysicsgame"
 import Dictionary from "@/games/common/dictionary"
+import PhysicsShape from "@/games/common/physicsshape"
 import Rock from "@/games/wordmine/rock"
 import ToggleButton from "@/games/wordmine/togglebutton"
 import IconButton from "@/games/wordmine/iconbutton"
@@ -21,6 +22,7 @@ export default class WordMine extends BasePhysicsGame {
    word = null
    score = 0
    dictionary = null
+   markers = []
 
    initialize(replayHandler, backHandler) {
       this.dictionary = new Dictionary()
@@ -108,6 +110,16 @@ export default class WordMine extends BasePhysicsGame {
       this.score.x = this.gameWidth/2
       this.score.y = 20
       this.addChild(this.score)
+
+      // add markers
+      let mX = 50
+      for ( let i=0; i < 3; i++) {
+         let m = PhysicsShape.createTriangle(mX, 20, 30,30, 0x662222, 0xcc5533)
+         m.setAngle(3.927)
+         this.addPhysicsItem(m)
+         this.markers.push(m)
+         mX+=(Rock.WIDTH*2)
+      }
 
       this.draw()
    }
