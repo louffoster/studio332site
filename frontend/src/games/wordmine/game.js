@@ -24,7 +24,7 @@ export default class WordMine extends BasePhysicsGame {
    dictionary = null
    markers = []
 
-   initialize(replayHandler, backHandler) {
+   async initialize(replayHandler, backHandler) {
       this.dictionary = new Dictionary()
       this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
 
@@ -33,25 +33,29 @@ export default class WordMine extends BasePhysicsGame {
       Matter.Composite.add(this.physics.world, b)
       let l = Matter.Bodies.rectangle(-25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
       Matter.Composite.add(this.physics.world, l)
-      let r = Matter.Bodies.rectangle((Rock.WIDTH*6)+25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
+      let r = Matter.Bodies.rectangle((Rock.WIDTH*6)+25, (this.gameHeight+250)/2, 50, this.gameHeight-125, { isStatic: true, friction: 0, restitution: 0})
       Matter.Composite.add(this.physics.world, r)
+      let r2 = Matter.Bodies.rectangle(this.gameWidth+25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
+      Matter.Composite.add(this.physics.world, r2)
 
-      // fill in rocks
-      this.pool.refill()
-      let y = this.gameHeight - Rock.HEIGHT/2
-      let x = Rock.WIDTH/2
-      for ( let c=0; c< 6; c++) {
-         for ( let r=0; r< 10; r++) {
-            let ltr = this.pool.popScoringLetter()
-            let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
-            this.addPhysicsItem( rock )
-            y -= Rock.HEIGHT
-         }
-         y = this.gameHeight - Rock.HEIGHT/2 - 1
-         x+= Rock.WIDTH
-      }
+      let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7+0.5,165, 82, 82, 0xA68A64,0xA68A64, true)
+      wedge.setAngle(.785*4)
+      this.addPhysicsItem(wedge)
 
-      let btnsY = 135
+      // let y = this.gameHeight - Rock.HEIGHT/2
+      // let x = Rock.WIDTH/2
+      // for ( let c=0; c< 6; c++) {
+      //    for ( let r=0; r< 10; r++) {
+      //       let ltr = this.pool.popScoringLetter()
+      //       let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
+      //       this.addPhysicsItem( rock )
+      //       y -= Rock.HEIGHT
+      //    }
+      //    y = this.gameHeight - Rock.HEIGHT/2 - 1
+      //    x+= Rock.WIDTH
+      // }
+
+      let btnsY = 205
       let pick = PIXI.Sprite.from('/images/wordmine/pick.png')
       let pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", pick )
       pickButton.setSelected(true)
@@ -111,17 +115,37 @@ export default class WordMine extends BasePhysicsGame {
       this.score.y = 20
       this.addChild(this.score)
 
-      // add markers
-      let mX = 50
-      for ( let i=0; i < 3; i++) {
-         let m = PhysicsShape.createTriangle(mX, 20, 30,30, 0x662222, 0xcc5533)
-         m.setAngle(3.927)
-         this.addPhysicsItem(m)
-         this.markers.push(m)
-         mX+=(Rock.WIDTH*2)
+      this.draw()
+
+      // fill in rocks
+      this.pool.refill()
+      let y = 0
+      let x = this.gameWidth - Rock.WIDTH*0.5
+
+      for ( let c=0; c< 65; c++) {
+         x = this.gameWidth - Rock.WIDTH
+         if ( c % 2) {
+            x = this.gameWidth - Rock.WIDTH*0.5   
+         }
+         let ltr = this.pool.popScoringLetter()
+         let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
+         this.addPhysicsItem( rock )
+         await new Promise(r => setTimeout(r, 50))
       }
 
-      this.draw()
+
+      // add markers
+      setTimeout( () => {
+         let mX = 50
+         let xPos = [ 30, this.gameWidth/2, this.gameWidth-30]
+         for ( let i=0; i < 3; i++) {
+            let m = PhysicsShape.createTriangle(xPos[i], 20, 30,30, 0x662222, 0xcc5533)
+            m.setAngle(3.927)
+            this.addPhysicsItem(m)
+            this.markers.push(m)
+            mX+=(Rock.WIDTH*2)
+         }
+      }, 4000)
    }
 
    toggleButtonClicked( name ) {
@@ -250,6 +274,10 @@ export default class WordMine extends BasePhysicsGame {
             i.setEnabled(true)
          }
       })
+      this.submitBtn.setEnabled( false )
+      this.clearBtn.setEnabled(false)
+      this.word.text = "" 
+      this.selections = [] 
    }
 
    draw() {
@@ -266,9 +294,16 @@ export default class WordMine extends BasePhysicsGame {
       this.gfx.lineStyle(2, 0x582F0E, 1)
       this.gfx.drawRect(330,125, this.gameWidth-330, this.gameHeight-125)
 
+      // black box for drop chute
+      this.gfx.beginFill(0x333D29)
+      this.gfx.lineStyle(0,0x333D29)
+      this.gfx.drawRect(this.gameWidth-110,105, this.gameWidth, 85)
+      
+
+      // buttons divider
       this.gfx.lineStyle(3, 0x582F0E, 1)
-      this.gfx.moveTo(this.gameWidth-80, 350)
-      this.gfx.lineTo(this.gameWidth, 350)
+      this.gfx.moveTo(this.gameWidth-110, 420)
+      this.gfx.lineTo(this.gameWidth, 420)
 
       this.gfx.endFill()
    }
