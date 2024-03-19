@@ -20,11 +20,38 @@ export default class Rock extends BasePhysicsItem {
       
       this.letterColor = "#efefef"
       this.lineColor = new PIXI.Color( 0x582F0E )
+
+      let tgtW = Rock.WIDTH 
+      let tgtH = Rock.HEIGHT
+      let polyPts = []
       if ( letter.isVowel()) {
          this.fillColor = new PIXI.Color( 0x6F3F14 )
+         tgtW -= 3 
+         tgtH -= 3
+         polyPts = [ 
+            {x: -tgtW/2-5, y: 0}, 
+            {x: -tgtW/4, y: -tgtH/2},
+            {x: +tgtW/4, y: -tgtH/2},
+            {x: +tgtW/2+5, y: 0},
+            {x: +tgtW/4, y: +tgtH/2}, 
+            {x: -tgtW/4, y: +tgtH/2},
+         ]
       } else  {
          this.fillColor = new PIXI.Color( 0x7F4F24 )
+         tgtW += 2 
+         tgtH += 2
+         polyPts = [ 
+            {x: -tgtW/2, y: -tgtH/4}, 
+            {x: -tgtW/4, y: -tgtH/2},
+            {x: +tgtW/4, y: -tgtH/2},
+            {x: +tgtW/2, y: -tgtH/4},
+            {x: +tgtW/2, y: +tgtH/4}, 
+            {x: +tgtW/4, y: +tgtH/2},
+            {x: -tgtW/4, y: +tgtH/2},
+            {x: -tgtW/2, y: +tgtH/4},
+         ]
       }
+
       this.selectColor = new PIXI.Color( 0xffd046 )
       this.selLetterColor = new PIXI.Color(0x414833)
       this.targetColor = new PIXI.Color(0xe26312)
@@ -57,16 +84,6 @@ export default class Rock extends BasePhysicsItem {
          this.letters.push( uTxt )
       }
 
-      let polyPts = [ 
-         {x: -Rock.WIDTH/2, y: -Rock.HEIGHT/4}, 
-         {x: -Rock.WIDTH/4, y: -Rock.HEIGHT/2},
-         {x: +Rock.WIDTH/4, y: -Rock.HEIGHT/2},
-         {x: +Rock.WIDTH/2, y: -Rock.HEIGHT/4},
-         {x: +Rock.WIDTH/2, y: +Rock.HEIGHT/4}, 
-         {x: +Rock.WIDTH/4, y: +Rock.HEIGHT/2},
-         {x: -Rock.WIDTH/4, y: +Rock.HEIGHT/2},
-         {x: -Rock.WIDTH/2, y: +Rock.HEIGHT/4},
-      ]
       this.polygon = new PIXI.Polygon(polyPts)
       let c = Matter.Vertices.centre(polyPts) 
       this.pivot.set(c.x, c.y)  

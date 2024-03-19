@@ -139,8 +139,9 @@ export default class WordMine extends BasePhysicsGame {
          let mX = 50
          let xPos = [ 30, this.gameWidth/2, this.gameWidth-30]
          for ( let i=0; i < 3; i++) {
-            let m = PhysicsShape.createTriangle(xPos[i], 20, 30,30, 0x662222, 0xcc5533)
-            m.setAngle(3.927)
+            // let m = PhysicsShape.createTriangle(xPos[i], 20, 30,30, 0x662222, 0xcc5533)
+            // m.setAngle(3.927)
+            let m = PhysicsShape.createCircle(xPos[i], 20,15, 0x662222, 0xcc5533)
             this.addPhysicsItem(m)
             this.markers.push(m)
             mX+=(Rock.WIDTH*2)
@@ -193,7 +194,9 @@ export default class WordMine extends BasePhysicsGame {
       }, 150)
    }
    submitFailed() {
-      
+      // FIXME maybe blow up one of the markers.
+      // Game ends when no markers, or they reach the bottom of the screen
+      console.log("LOSER")    
    }
 
    rockTouhed( rock ) {
