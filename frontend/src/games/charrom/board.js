@@ -86,14 +86,14 @@ export default class Board extends PIXI.Container {
       // board sides and face
       this.gfx.beginFill(0x7A6C5D)
       this.gfx.drawRect(0,0, this.boardW, this.boardH)
-      this.gfx.beginFill(0xDDC9B4)
+      this.gfx.beginFill(0xcDb9a4)
       this.gfx.lineStyle( 3, 0x7A6C5D, 1 )
       this.gfx.drawRoundedRect(0,0, this.boardW, this.boardH, 50)
       this.gfx.endFill()
 
       // shot lines
-      this.gfx.lineStyle(2, 0xC17C74,1)
-      this.gfx.beginFill(0xC17C74,0.1)
+      this.gfx.lineStyle(2, 0x5574bd,1)
+      this.gfx.beginFill(0x5574bd,0.1)
       this.gfx.drawCircle(this.boardW/2, this.boardH, 150)
       this.lowerShotArea = new PIXI.Circle(this.boardW/2, this.boardH, 150)
       this.gfx.drawCircle(this.boardW/2, 0, 150)

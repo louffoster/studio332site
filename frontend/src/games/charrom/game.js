@@ -6,7 +6,6 @@ import Striker from "@/games/charrom/striker"
 import Tile from "@/games/charrom/tile"
 import Timer from "@/games/charrom/timer"
 import Button from "@/games/common/button"
-import Clock from "@/games/common/clock"
 import Dictionary from "@/games/common/dictionary"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
@@ -43,7 +42,6 @@ export default class Charrom extends BasePhysicsGame {
    shotOverlay = null
    endOverlay = null
    timer = null
-   clock = null
    replayHandler  = null 
    backHandler = null
 
@@ -68,13 +66,10 @@ export default class Charrom extends BasePhysicsGame {
          fill: 0xF3E9DC
       })
       this.scoreTxt.anchor.set(1,0.5)
-      this.scoreTxt.x = this.gameWidth-10
+      this.scoreTxt.x = this.gameWidth/2
       this.scoreTxt.y = 26
+      this.scoreTxt.anchor.set(0.5)
       this.addChild(this.scoreTxt )
-
-      this.clock = new Clock(this.gameWidth/2,26, "", 0xF3E9DC)
-      this.addChild(this.clock)
-
 
       this.scratchTxt = new PIXI.Text(`= ${this.scratchesLeft}`, {
          fontFamily: "Arial",
@@ -87,8 +82,7 @@ export default class Charrom extends BasePhysicsGame {
       this.scratchTxt.y = 26
       this.addChild(this.scratchTxt )
 
-      this.timer = new Timer(this.gameWidth-113, Charrom.BOARD_HEIGHT+this.statsHeight+10, 
-         101, this.tileRackHeight-20 )
+      this.timer = new Timer(this.gameWidth-110, 5, 103, 45)
       this.timer.setTimeoutHandler( this.timeExpired.bind(this) )
       this.addChild(this.timer)
 
@@ -113,17 +107,7 @@ export default class Charrom extends BasePhysicsGame {
       this.addChild(this.word)
 
       let buttonsY = this.gameHeight - 50
-      let btnX = 230
-      this.clearBtn = new Button( btnX, buttonsY, "Clear", () => {
-         this.clearWord()
-      }, 0xFCFAFA,0x9c5060,0x7c3040)
-      this.clearBtn.alignTopLeft()
-      this.clearBtn.noShadow()
-      this.clearBtn.setEnabled( false )
-      this.addChild(this.clearBtn )
-
-      btnX += this.clearBtn.btnWidth+10
-      this.submitBtn = new Button( btnX, buttonsY, "Submit", () => {
+      this.submitBtn = new Button( this.gameWidth-110, buttonsY, "Submit", () => {
          this.submitWord()
       }, 0xFCFAFA,0x2f6690,0x5482bc)
       this.submitBtn.alignTopLeft()
@@ -131,8 +115,15 @@ export default class Charrom extends BasePhysicsGame {
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn )
 
-      btnX += this.submitBtn.btnWidth+35
-      this.rackBtn = new Button( btnX, buttonsY, "New Rack", () => {
+      this.clearBtn = new Button( this.gameWidth-205, buttonsY, "Clear", () => {
+         this.clearWord()
+      }, 0xFCFAFA,0x9c5060,0x7c3040)
+      this.clearBtn.alignTopLeft()
+      this.clearBtn.noShadow()
+      this.clearBtn.setEnabled( false )
+      this.addChild(this.clearBtn )
+
+      this.rackBtn = new Button( 7, buttonsY, "New Rack", () => {
          this.rackLetterPucks()
       }, 0xFCFAFA,0x1b998b,0x3bb9ab)
       this.rackBtn.alignTopLeft()
@@ -385,18 +376,12 @@ export default class Charrom extends BasePhysicsGame {
       // empty letters
       this.gfx.lineStyle( 1, 0x5E3023)
       this.gfx.beginFill(0xF3E9DC)
-      let x = 7
+      let x = 65
       let y = rackY+7
       for (let i=0; i< Charrom.LETTER_LIMIT; i++) {
          this.gfx.drawRect(x,y, Tile.WIDTH, Tile.HEIGHT)
          x += Tile.WIDTH+4
       }
-
-      // background for timer
-      x+= 5
-      this.gfx.beginFill(0x2E4347)
-      this.gfx.drawRect(x,y, this.gameWidth-x-8, this.tileRackHeight-14)
-      this.gfx.endFill()
    }
 
    drawTopBar() {
@@ -415,6 +400,12 @@ export default class Charrom extends BasePhysicsGame {
       this.gfx.beginFill( 0x895737 )
       this.gfx.drawCircle(25,25,10)
       this.gfx.endFill()
+
+       // background for timer
+       //this.gameWidth-113, 10, 101, 32 
+       this.gfx.beginFill(0x2E4347)
+       this.gfx.drawRect(this.gameWidth-115, 2, 115, this.statsHeight-4 )
+       this.gfx.endFill()
    }
 
    draw() {
@@ -427,7 +418,6 @@ export default class Charrom extends BasePhysicsGame {
       if ( this.gameState == "init" || this.gameState == "over") return 
 
       super.update()
-      this.clock.tick(this.app.ticker.deltaMS)
       this.timer.tick(this.app.ticker.deltaMS)
 
       if ( this.gameState != "shot" ) return 

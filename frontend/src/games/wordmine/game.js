@@ -40,6 +40,7 @@ export default class WordMine extends BasePhysicsGame {
 
       let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7+0.5,165, 82, 82, 0xA68A64,0xA68A64, true)
       wedge.setAngle(.785*4)
+      wedge.setFriction(0)
       this.addPhysicsItem(wedge)
 
       // let y = this.gameHeight - Rock.HEIGHT/2
@@ -142,6 +143,7 @@ export default class WordMine extends BasePhysicsGame {
             // let m = PhysicsShape.createTriangle(xPos[i], 20, 30,30, 0x662222, 0xcc5533)
             // m.setAngle(3.927)
             let m = PhysicsShape.createCircle(xPos[i], 20,15, 0x662222, 0xcc5533)
+            m.setFriction(0)
             this.addPhysicsItem(m)
             this.markers.push(m)
             mX+=(Rock.WIDTH*2)
