@@ -73,7 +73,7 @@ export default class EndOverlay extends PIXI.Container {
       let note2 = new PIXI.Text(`${score}`.padStart(5,"0"), this.style)
       note2.anchor.set(0.5,0)
       note2.x = this.panelW/2
-      note2.y = 150
+      note2.y = 115
       this.addChild(note2)
 
       let statsX = this.panelW / 2 + 50
