@@ -21,21 +21,28 @@ export default class WordMine extends BasePhysicsGame {
    selections = []
    word = null
    score = 0
+   scoreDisplay = null
    dictionary = null
    markers = []
+   gameState = "init"
+   mineFloor = null
 
    async initialize(replayHandler, backHandler) {
       this.dictionary = new Dictionary()
       this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
 
       // set bottom aand sides
-      let b = Matter.Bodies.rectangle(this.gameWidth/2, this.gameHeight+25, this.gameWidth, 50, { isStatic: true, friction: 0, restitution: 0})
-      Matter.Composite.add(this.physics.world, b)
+      this.mineFloor = Matter.Bodies.rectangle(this.gameWidth/2, this.gameHeight+25, this.gameWidth, 50, { isStatic: true, friction: 0, restitution: 0})
+      this.mineFloor.friction = 0
+      Matter.Composite.add(this.physics.world, this.mineFloor)
       let l = Matter.Bodies.rectangle(-25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
+      l.friction = 0
       Matter.Composite.add(this.physics.world, l)
       let r = Matter.Bodies.rectangle((Rock.WIDTH*6)+25, (this.gameHeight+250)/2, 50, this.gameHeight-125, { isStatic: true, friction: 0, restitution: 0})
+      r.friction = 0
       Matter.Composite.add(this.physics.world, r)
       let r2 = Matter.Bodies.rectangle(this.gameWidth+25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
+      r2.friction = 0   
       Matter.Composite.add(this.physics.world, r2)
 
       let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7+0.5,165, 82, 82, 0xA68A64,0xA68A64, true)
@@ -43,19 +50,7 @@ export default class WordMine extends BasePhysicsGame {
       wedge.setFriction(0)
       this.addPhysicsItem(wedge)
 
-      // let y = this.gameHeight - Rock.HEIGHT/2
-      // let x = Rock.WIDTH/2
-      // for ( let c=0; c< 6; c++) {
-      //    for ( let r=0; r< 10; r++) {
-      //       let ltr = this.pool.popScoringLetter()
-      //       let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
-      //       this.addPhysicsItem( rock )
-      //       y -= Rock.HEIGHT
-      //    }
-      //    y = this.gameHeight - Rock.HEIGHT/2 - 1
-      //    x+= Rock.WIDTH
-      // }
-
+      // control buttons -----
       let btnsY = 205
       let pick = PIXI.Sprite.from('/images/wordmine/pick.png')
       let pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", pick )
@@ -110,11 +105,12 @@ export default class WordMine extends BasePhysicsGame {
       this.word.y = 65
       this.addChild(this.word)
 
-      this.score = new PIXI.Text("00000", wordStyle)
-      this.score.anchor.set(0.5)
-      this.score.x = this.gameWidth/2
-      this.score.y = 20
-      this.addChild(this.score)
+      this.score = 0
+      this.scoreDisplay = new PIXI.Text("00000", wordStyle)
+      this.scoreDisplay.anchor.set(0.5)
+      this.scoreDisplay.x = this.gameWidth/2
+      this.scoreDisplay.y = 20
+      this.addChild(this.scoreDisplay)
 
       this.draw()
 
@@ -148,10 +144,13 @@ export default class WordMine extends BasePhysicsGame {
             this.markers.push(m)
             mX+=(Rock.WIDTH*2)
          }
-      }, 4000)
+         this.gameState = "play"
+      }, 3500)
    }
 
    toggleButtonClicked( name ) {
+      if (this.gameState != "play") return 
+
       this.clickMode = name
       this.toggleButtons.forEach( b => {
          if (b.name != name ) {
@@ -159,6 +158,7 @@ export default class WordMine extends BasePhysicsGame {
          }
       })
    }
+
    clearClicked() {
       this.word.text = "" 
       this.selections = [] 
@@ -166,6 +166,7 @@ export default class WordMine extends BasePhysicsGame {
       this.clearBtn.setEnabled(false)
       this.submitBtn.setEnabled(false)
    }
+
    submitClicked() {
       if ( this.dictionary.isValid(this.word.text)) {
          this.submitSuccess()
@@ -186,6 +187,15 @@ export default class WordMine extends BasePhysicsGame {
             }
          }
       })
+
+      let tileCnt = this.word.text.length
+      let totalTileValue = 0
+      this.selections.forEach( s=> {
+         totalTileValue += s.value  
+      })
+      this.score += (totalTileValue * tileCnt) 
+      this.renderScore()
+
       setTimeout( () => {
          gone.forEach( r => this.removePhysicsItem(r))
          this.resetRocks()
@@ -196,19 +206,32 @@ export default class WordMine extends BasePhysicsGame {
       }, 150)
    }
    submitFailed() {
-      // FIXME maybe blow up one of the markers.
-      // Game ends when no markers, or they reach the bottom of the screen
-      console.log("LOSER")    
+      this.selections.forEach( s => {
+         s.setError()
+      })
+      setTimeout( () => {
+         this.resetRocks()
+      }, 500) 
+
+      let m = this.markers.pop() 
+      var emitter = new particles.Emitter(this.scene, this.explodeAnim )
+      emitter.updateOwnerPos(0,0)
+      emitter.updateSpawnPos(m.x, m.y)
+      emitter.playOnceAndDestroy()
+      this.removePhysicsItem( m )
+      if ( this.markers.length == 0) {
+         this.gameOver()
+      }
    }
 
    rockTouhed( rock ) {
+      if (this.gameState != "play") return 
+
       if ( this.clickMode == "bomb") {
          var emitter = new particles.Emitter(this.scene, this.explodeAnim )
          emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(rock.x, rock.y)
-         emitter.playOnceAndDestroy( () => {
-            console.log("remove "+rock.tag)
-         }) 
+         emitter.playOnceAndDestroy()
          this.removePhysicsItem( rock )
       } else if ( this.clickMode == "pick") {
          this.rockSelected( rock )
@@ -285,26 +308,49 @@ export default class WordMine extends BasePhysicsGame {
       this.selections = [] 
    }
 
+   renderScore() {
+      this.scoreDisplay.text = `${this.score}`.padStart(5,"0")
+   }
+
+   gameOver() {
+      for ( let i=0; i<5; i++) {
+         var emitter = new particles.Emitter(this.scene, this.explodeAnim )
+         emitter.updateOwnerPos(0,0)
+         emitter.updateSpawnPos(10+(this.gameWidth/5)*i, this.gameHeight-10)
+         emitter.playOnceAndDestroy()
+      }
+      Matter.Composite.remove(this.physics.world, this.mineFloor)
+      this.gameState = "over"
+      this.toggleButtons.forEach( tb => {
+         tb.setEnabled(false)
+      })
+      this.resetRocks()
+   }
+
    draw() {
       this.gfx.clear() 
+
+      // sky
       this.gfx.beginFill(0x86BBD8)
       this.gfx.lineStyle(1, 0x86BBD8, 1)
       this.gfx.drawRect(0,0, this.gameWidth, 105)
-      this.gfx.beginFill(0x73a942)
 
-      this.gfx.lineStyle(3, 0x656D4A, 1)
-      this.gfx.drawRect(0,105, this.gameWidth, 20)
-
+      // buttons container
       this.gfx.beginFill(0xA68A64)
       this.gfx.lineStyle(2, 0x582F0E, 1)
       this.gfx.drawRect(330,125, this.gameWidth-330, this.gameHeight-125)
+
 
       // black box for drop chute
       this.gfx.beginFill(0x333D29)
       this.gfx.lineStyle(0,0x333D29)
       this.gfx.drawRect(this.gameWidth-110,105, this.gameWidth, 85)
-      
 
+       // grass
+       this.gfx.beginFill(0x73a942)
+       this.gfx.lineStyle(2, 0x538922, 1)
+       this.gfx.drawRoundedRect(-20,105, this.gameWidth-100, 20, 20)
+      
       // buttons divider
       this.gfx.lineStyle(3, 0x582F0E, 1)
       this.gfx.moveTo(this.gameWidth-110, 420)
@@ -315,5 +361,6 @@ export default class WordMine extends BasePhysicsGame {
 
    update() {
       super.update()
+      // TODO check to see if all markers are at bottom
    }
 }

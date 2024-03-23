@@ -9,6 +9,7 @@ export default class Rock extends BasePhysicsItem {
    target = false
    enabled = true
    letters = []
+   error = false
    static WIDTH = 55
    static HEIGHT = 55
    static FRICTION = 0.01
@@ -55,7 +56,7 @@ export default class Rock extends BasePhysicsItem {
       this.selectColor = new PIXI.Color( 0xffd046 )
       this.selLetterColor = new PIXI.Color(0x414833)
       this.targetColor = new PIXI.Color(0xe26312)
-      this.dimColor = new PIXI.Color( 0x414833 )
+      this.dimColor = new PIXI.Color( 0x616853 )
 
       let style = new PIXI.TextStyle({
          fill: this.letterColor,
@@ -108,14 +109,14 @@ export default class Rock extends BasePhysicsItem {
 
    pushLeft() {
       this.setFriction(0)
-      this.applyForce(-0.025,0)
+      this.applyForce(-0.05,0)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)
    }
    pushRight() {
       this.setFriction(0)
-      this.applyForce(0.025,0)
+      this.applyForce(0.05,0)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)
@@ -155,6 +156,17 @@ export default class Rock extends BasePhysicsItem {
       this.draw()
    }
 
+   setError() {
+      if (this.error == false ) {
+         this.error = true 
+         this.draw() 
+         setTimeout( () => {
+            this.error = false 
+            this.draw()
+         }, 500)
+      }
+   }
+
    deselect() {
       this.selected = false   
       this.letters.forEach( l => l.style.fill = this.letterColor ) 
@@ -177,9 +189,11 @@ export default class Rock extends BasePhysicsItem {
          this.gfx.beginFill(this.dimColor)
       } else {
          this.gfx.beginFill(this.fillColor)
-         if ( this.selected ) {
+         if ( this.error ) {
+            this.gfx.beginFill(0xa20c01) 
+         } else if ( this.selected ) {
             this.gfx.beginFill(this.selectColor)
-         }
+         } 
       }
       this.gfx.drawPolygon( this.polygon )
       this.gfx.endFill()
