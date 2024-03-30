@@ -116,7 +116,8 @@ export default class Rock extends BasePhysicsItem {
    }
    pushRight() {
       this.setFriction(0)
-      this.applyForce(0.05,0)
+      // this.applyForce(0.05,0)
+      this.applyForce(0,-0.05)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)
