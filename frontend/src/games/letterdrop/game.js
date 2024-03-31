@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import { Text }  from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
 import StartOverlay from "@/games/letterdrop/startoverlay"
@@ -13,8 +13,6 @@ import TrashMeter from "@/games/letterdrop/trashmeter"
 import DropButton from "@/games/letterdrop/dropbutton"
 import Timer from "@/games/letterdrop/timer"
 
-import trashJson from '@/assets/trash.json'
-
 export default class LetterDrop extends BaseGame {
    pool = new LetterPool()
    clock = null
@@ -28,7 +26,6 @@ export default class LetterDrop extends BaseGame {
    submitBtn = null
    choices = []
    timer = null
-   trashAnim = null
    startOverlay = null 
    gameState = "init"
    word = null
@@ -43,9 +40,10 @@ export default class LetterDrop extends BaseGame {
    static TILE_W = 60 
    static TILE_H = 60
 
-   initialize(replayHandler, backHandler) { 
+   async initialize(replayHandler, backHandler) { 
+      await super.initialize()
+
       this.dictionary = new Dictionary()
-      this.trashAnim = particles.upgradeConfig(trashJson, ['smoke.png'])
 
       // draw backgrounnd an column buttons
       this.drawBoard()
@@ -75,13 +73,11 @@ export default class LetterDrop extends BaseGame {
       }
 
       // entered word
-      let wordStyle = new PIXI.TextStyle({
+      this.word = new Text({text: "", style: {
          fill: "#FCFAFA",
          fontFamily: "Arial",
          fontSize: 20,
-         lineHeight: 20
-      })
-      this.word = new PIXI.Text("", wordStyle)
+      }})
       this.word.x = 15 
       this.word.y = boardBottom+18
       this.addChild(this.word)
@@ -92,7 +88,6 @@ export default class LetterDrop extends BaseGame {
       }, 0xFCFAFA,0x2f6690,0x5482bc)
       this.submitBtn.small()
       this.submitBtn.alignTopLeft()
-      this.submitBtn.noShadow()
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn )
 
@@ -101,34 +96,33 @@ export default class LetterDrop extends BaseGame {
       }, 0xFCFAFA,0x9c5060,0x5482bc)
       this.clearBtn.small()
       this.clearBtn.alignTopLeft()
-      this.clearBtn.noShadow()
       this.clearBtn.setEnabled( false )
       this.addChild(this.clearBtn )
 
       this.clock = new Clock(345, this.gameHeight-15, "", 0xFCFAFA)
       this.addChild(this.clock)
 
-      this.scoreDisplay = new PIXI.Text("00000", {
+      this.scoreDisplay = new Text({text: "00000", style: {
          fill:0xFCFAFA,
          fontFamily: "Arial",
          fontSize: 20,
          lineHeight: 20,
-      })
+      }})
       this.scoreDisplay.anchor.set(0,1)
       this.scoreDisplay.x = 10 
       this.scoreDisplay.y = this.gameHeight-10
-      this.scene.addChild( this.scoreDisplay)
+      this.addChild( this.scoreDisplay)
 
       this.startOverlay = new StartOverlay(this.startHandler.bind(this)) 
-      this.endOverlay = new EndOverlay( replayHandler, backHandler) 
-      this.scene.addChild( this.startOverlay )
+      // this.endOverlay = new EndOverlay( replayHandler, backHandler) 
+      this.addChild( this.startOverlay )
       
       // start the eicker last so everything is created / initialized
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
 
    startHandler() {
-      this.scene.removeChild( this.startOverlay)
+      this.removeChild( this.startOverlay)
       this.gameState = "playing"
       this.fillChoices()
    }
@@ -194,24 +188,23 @@ export default class LetterDrop extends BaseGame {
       y = this.gridTop
       x = this.gridLeft
       this.gfx.clear()
-      this.gfx.beginFill(0xA4B8C4)
-      this.gfx.lineStyle(1, 0x2E4347, 1)
-
+   
       for ( let r = 0; r < LetterDrop.MAX_HEIGHT; r++) {
          for (let c = 0; c < LetterDrop.COLUMNS; c++) {
-            this.gfx.drawRect(x,y, LetterDrop.TILE_W, LetterDrop.TILE_H)
+            this.gfx.rect(x,y, LetterDrop.TILE_W, LetterDrop.TILE_H).
+               stroke({width:1, color: 0x2E4347}).fill(0xA4B8C4)
             x+= LetterDrop.TILE_W
          }
          y+= LetterDrop.TILE_H 
          x = 10
       }
-      this.gfx.endFill()
 
       // backhgrounnd for trash meter
-      this.gfx.beginFill(0x90a3a3)
-      this.gfx.drawRect(this.gridLeft+LetterDrop.TILE_W*LetterDrop.COLUMNS,
-         this.gridTop, LetterDrop.TILE_W, LetterDrop.TILE_H*LetterDrop.MAX_HEIGHT)
-      this.gfx.endFill()
+      this.gfx.rect(
+         this.gridLeft+LetterDrop.TILE_W*LetterDrop.COLUMNS,
+         this.gridTop, 
+         LetterDrop.TILE_W, 
+         LetterDrop.TILE_H*LetterDrop.MAX_HEIGHT).fill(0x90a3a3)
    }
 
    trashSelectedTiles() {
@@ -250,7 +243,7 @@ export default class LetterDrop extends BaseGame {
    }
 
    trashTile( tgtTile, trashedCallback ) {
-      var emitter = new particles.Emitter(this.scene, this.trashAnim )
+      var emitter = new particles.Emitter(this. this.trashAnim )
       emitter.updateOwnerPos(0,0)
       emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
       emitter.playOnceAndDestroy() 
@@ -294,7 +287,7 @@ export default class LetterDrop extends BaseGame {
          this.setTilesEnabled( false, true )
          this.columns[colNum].forEach( t => t.setError(true) )
    
-         var emitter = new particles.Emitter(this.scene, this.trashAnim )
+         var emitter = new particles.Emitter(this. this.trashAnim )
          emitter.updateOwnerPos(0,0)
          emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
          emitter.playOnceAndDestroy( () => { 
@@ -340,7 +333,7 @@ export default class LetterDrop extends BaseGame {
       })
       this.endOverlay.setStats(this.score, this.clock.gameTimeFormatted() )
 
-      setTimeout( () => this.scene.addChild( this.endOverlay ), 1500)
+      setTimeout( () => this.addChild( this.endOverlay ), 1500)
    }
 
    updateTrashButtonState() {
@@ -447,7 +440,7 @@ export default class LetterDrop extends BaseGame {
             if ( t.selected ) {
                totalTileValue += t.score 
 
-               var emitter = new particles.Emitter(this.scene, this.trashAnim )
+               var emitter = new particles.Emitter(this. this.trashAnim )
                emitter.updateOwnerPos(0,0)
                emitter.updateSpawnPos(t.x+LetterDrop.TILE_W/2, t.y+LetterDrop.TILE_H/2)
                emitter.playOnceAndDestroy()

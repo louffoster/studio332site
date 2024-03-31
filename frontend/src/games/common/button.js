@@ -71,11 +71,6 @@ export default class Button extends Container {
       this.drawButton()
    }
 
-   noShadow() {
-      this.btnTxt.style.fontWeight = "normal"
-      this.btnTxt.style.dropShadow = false
-   }
-
    alignTopLeft() {
       this.x += this.btnWidth / 2.0
       this.y += this.btnHeight / 2.0
