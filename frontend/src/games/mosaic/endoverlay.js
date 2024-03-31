@@ -1,52 +1,41 @@
-import * as PIXI from "pixi.js"
+import { Container, Text, Graphics } from "pixi.js"
 import Button from "@/games/common/button"
 
 
-export default class EndOverlay extends PIXI.Container {
+export default class EndOverlay extends Container {
    constructor(replayHandler, backHandler) {
       super()
 
       this.x = 10 
       this.y = 100
-      this.popupW = 340
-      this.popupH = 200
+      const popupW = 340
+      const popupH = 200
 
-      this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(6, 0x80D3E1, 1)
-      this.graphics.beginFill(0x34565c)
-      this.graphics.drawRect(0,0, this.popupW, this.popupH )
-      this.graphics.endFill()
-      this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawRect(0,0, this.popupW, this.popupH )
+      const graphics = new Graphics()
+      graphics.rect(5,5, popupW-10, popupH-10).stroke({width:10,color:0x80D3E1}).fill(0x34565c)
+      graphics.rect(0,0, popupW, popupH).stroke({width: 2, color: 0x000000})
+      this.addChild( graphics )
 
-      let style = new PIXI.TextStyle({
+      let style = {
          fill: "#f0f0ff",
          fontFamily: "Arial",
          fontSize: 20,
          wordWrap: true,
          fontWeight: 'bold',
-         wordWrapWidth: 330,
-         dropShadow: true,
-         dropShadowColor: '#000000',
-         dropShadowBlur: 2,
-         dropShadowDistance: 1,
+         wordWrapWidth: popupW-40,
          align: "center"
-      })
+      }
 
 
-      this.heading = new PIXI.Text(`GAME OVER`, style)
-      this.heading.anchor.set(0.5, 0.5)
-      this.heading.x = this.popupW / 2
-      this.heading.y = 40
-
-      this.addChild( this.graphics )
-      this.addChild( this.heading )
+      const heading = new Text({text: `GAME OVER`, style: style})
+      heading.anchor.set(0.5, 0.5)
+      heading.x = popupW / 2
+      heading.y = 50
+      this.addChild( heading )
       
-      let againBtn = new Button( this.popupW / 2, 105, "Play Again", replayHandler)
+      let againBtn = new Button( popupW / 2, 105, "Play Again", replayHandler)
       this.addChild(againBtn)
-      let backBtn = new Button( this.popupW / 2, 160, "Back to Studio332 Site", backHandler)
+      let backBtn = new Button( popupW / 2, 160, "Back to Studio332 Site", backHandler)
       this.addChild(backBtn)
    }
 }
-// LIGHT: #514c49
-// DARK: #464340

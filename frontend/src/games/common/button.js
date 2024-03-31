@@ -1,7 +1,7 @@
 import {Color, Text, Graphics, Container, Rectangle} from "pixi.js"
 
 export default class Button extends Container {
-   constructor( x,y, txt, listener, txtColor="white", btnColor=0x33aabf, highlight=0x44bbcf) {
+   constructor( x,y, txt, listener, txtColor="0x003344", btnColor=0x33aabf, highlight=0x44bbcf) {
       super()
 
       this.disabled = false
@@ -16,8 +16,8 @@ export default class Button extends Container {
             fill: this.txtColor,
             fontFamily: "Arial",
             fontSize: 18,
-            align: "center"
-         }
+            align: "center",
+         },
       })
       this.btnWidth = this.btnTxt.width + 40
       this.btnHeight = this.btnTxt.height + 20

@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import { Text, Container, ColorMatrixFilter } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import BaseGame from "@/games/common/basegame"
 import Tile from "@/games/mosaic/tile"
@@ -9,6 +9,9 @@ import Button from "@/games/common/button"
 import Clock from "@/games/common/clock"
 
 export default class Mosaic extends BaseGame {
+   static ROWS = 5
+   static COLS = 5
+
    tileContainer = null
    tileFilter = null
    tiles = null
@@ -17,7 +20,7 @@ export default class Mosaic extends BaseGame {
    targetTiles = null
    spinners = null
    clock = null
-   gameDurationMS = 300.0 * 1000.0
+   gameDurationMS = 3.0 * 1000.0
    matchCount = 0
    matchDisplay = null
    gameState = "start"
@@ -30,64 +33,60 @@ export default class Mosaic extends BaseGame {
    hueDir = 1
    advanced = false
 
-   initialize(replayHandler, backHandler) {   
+   async initialize(replayHandler, backHandler) {   
+      await super.initialize()
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
-      this.app.ticker.add( this.gameTick.bind(this) )
+   
+      this.gfx.rect(0,0, this.gameWidth, this.gameHeight).
+         fill(0x44444a).stroke({width: 1, color: 0x44444a, alpha: 1})
+   
+      this.clock = new Clock(270, 390, "Time Remaining\n", 0xffffff)
+      this.clock.setCountdownMode( this.gameDurationMS,  
+         this.timeExpired.bind(this), this.timerWarning.bind(this))
+      this.addChild( this.clock)
 
       let style = {
-         fill: "0x80D3E1",
+         fill: "white",
          fontFamily: "Arial",
          fontSize: 18,
       }
    
-      this.gfx.beginFill(0x44444a)
-      this.gfx.lineStyle(1, 0x44444a, 1)
-      this.gfx.drawRect(0,0, this.gameWidth, this.gameHeight)
-      this.gfx.endFill()
-   
-      this.clock = new Clock(270, 390, "Time Remaining\n")
-      this.clock.setCountdownMode( this.gameDurationMS,  
-         this.timeExpired.bind(this), this.timerWarning.bind(this))
-      this.scene.addChild( this.clock)
-   
-      let patternLabel = new PIXI.Text("Patterns Matched", style)
+      let patternLabel = new Text({text: "Patterns Matched", style: style})
       patternLabel.x = 270
       patternLabel.y = 435
       patternLabel.anchor.set(0.5, 0.5)
-      this.scene.addChild(patternLabel)
+      this.addChild(patternLabel)
       
-      this.matchDisplay = new PIXI.Text("0", style)
+      this.matchDisplay = new Text({text: "0", style:style})
       this.matchDisplay.x = 270
       this.matchDisplay.y = 460
       this.matchDisplay.anchor.set(0.5, 0.5)
-      this.scene.addChild(this.matchDisplay)
+      this.addChild(this.matchDisplay)
    
       this.resetButton = new Button(203, 480, "Reset Tiles",  this.initTiles.bind(this) )
       this.resetButton.alignTopLeft()
-      this.scene.addChild(this.resetButton)
+      this.addChild(this.resetButton)
    
-      this.tileContainer = new PIXI.Container()
+      this.tileContainer = new Container()
       this.tileContainer.x = 5 
       this.tileContainer.y = 5 
-      this.scene.addChild(this.tileContainer)
-      this.tileFilter = new PIXI.ColorMatrixFilter()
+      this.addChild(this.tileContainer)
+      this.tileFilter = new ColorMatrixFilter()
       this.tileContainer.filters = [this.tileFilter]
       this.initTiles()
    
-      this.gfx.beginFill(0x34565c)
-      this.gfx.drawRect(185,360, this.gameWidth-190, this.gameHeight-360)
-      this.gfx.endFill()
+      this.gfx.rect(185,360, this.gameWidth-190, this.gameHeight-360).fill(0x34565c)
    
-      this.targetContainer = new PIXI.Container() 
+      this.targetContainer = new Container() 
       this.targetContainer.x =  6
       this.targetContainer.y = 360
-      this.scene.addChild(this.targetContainer)
-      this.targetFilter = new PIXI.ColorMatrixFilter()
+      this.addChild(this.targetContainer)
+      this.targetFilter = new ColorMatrixFilter()
       this.targetContainer.filters = [this.targetFilter]
       this.generateTargetPuzzle()
       
       this.startOverlay = new StartOverlay( this.gameDurationMS, this.startHandler.bind(this)) 
-      this.scene.addChild( this.startOverlay)
+      this.addChild( this.startOverlay)
       this.endOverlay = new EndOverlay(replayHandler, backHandler) 
    }
 
@@ -101,7 +100,7 @@ export default class Mosaic extends BaseGame {
       this.initTiles()
       this.generateTargetPuzzle()
 
-      this.scene.removeChild(this.startOverlay)
+      this.removeChild(this.startOverlay)
    }
 
    initTiles() {
@@ -111,7 +110,7 @@ export default class Mosaic extends BaseGame {
       let color = 1
       for (let r = 0; r < Mosaic.ROWS; r++) {
          for (let c = 0; c < Mosaic.COLS; c++) {
-            if ( this.advanced == 1) {
+            if ( this.advanced ) {
                if ( r == 2 && c == 2) {
                   color = 2
                } else {
@@ -142,24 +141,24 @@ export default class Mosaic extends BaseGame {
                }
             }
             
-            x+= Tile.width
+            x+= Tile.WIDTH
          }
          x = 0
-         y += Tile.height
+         y += Tile.HEIGHT
       }
 
       this.spinners = Array(Mosaic.ROWS-1).fill().map(() => Array(Mosaic.COLS-1))
-      x = Tile.width
-      y = Tile.height
+      x = Tile.WIDTH
+      y = Tile.HEIGHT
       for (let r = 0; r < Mosaic.ROWS-1; r++) {
          for (let c = 0; c < Mosaic.COLS-1; c++) {
             let s = new Spinner(x,y, r,c, this.spinnerCallback.bind(this))
             this.tileContainer.addChild(s)
             this.spinners[r][c] = s
-            x+= Tile.width
+            x+= Tile.WIDTH
          }
-         y+= Tile.height
-         x = Tile.width
+         y+= Tile.HEIGHT
+         x = Tile.WIDTH
       }
    }
 
@@ -187,29 +186,29 @@ export default class Mosaic extends BaseGame {
          let t = new Tile(colorIndex,x,y,r,x,true) // true makes the tile small 
          this.targetContainer.addChild(t)
          this.targetTiles[r][c] = t
-         x += t.tileW 
+         x += t.width
          c++
          if (c == (Mosaic.COLS)) {
             c = 0
             x = 0
             r++
-            y+= t.tileH
+            y+= t.height
          }
       }) 
    }
 
    spinnerCallback( tgtTiles ) {
       let tl = this.tiles[ tgtTiles[0].row ][ tgtTiles[0].col ]
-      new TWEEDLE.Tween(tl).to({ x: tl.x+Tile.width}, 100).start()
+      new TWEEDLE.Tween(tl).to({ x: tl.x+Tile.WIDTH}, 100).start()
 
       let tr = this.tiles[ tgtTiles[1].row ][ tgtTiles[1].col ]
-      new TWEEDLE.Tween(tr).to({ y: tr.y+Tile.height}, 100).start()
+      new TWEEDLE.Tween(tr).to({ y: tr.y+Tile.HEIGHT}, 100).start()
 
       let br = this.tiles[ tgtTiles[2].row ][ tgtTiles[2].col ]
-      new TWEEDLE.Tween(br).to({ x: br.x-Tile.width}, 100).start()
+      new TWEEDLE.Tween(br).to({ x: br.x-Tile.WIDTH}, 100).start()
 
       let bl = this.tiles[ tgtTiles[3].row ][ tgtTiles[3].col ]
-      new TWEEDLE.Tween(bl).to({ y: bl.y-Tile.height}, 100).start()
+      new TWEEDLE.Tween(bl).to({ y: bl.y-Tile.HEIGHT}, 100).start()
 
       setTimeout( () => {
          this.tiles[ tgtTiles[0].row ][ tgtTiles[0].col ] = bl
@@ -234,7 +233,7 @@ export default class Mosaic extends BaseGame {
          }
       }
 
-      if ( match == true ) {
+      if ( match == true ) { 
          this.matchCount++
          this.matchDisplay.text = `${this.matchCount}`
          this.matching = true 
@@ -249,21 +248,23 @@ export default class Mosaic extends BaseGame {
             this.tileContainer.removeChild( this.spinners[r][c] )
          }
       }
-      this.scene.removeChild(this.resetButton)
-      this.scene.addChild(this.endOverlay)
+      this.removeChild(this.resetButton)
+      this.addChild(this.endOverlay)
       this.gameState = "gameOver"
    }
    
    timerWarning(flash) {
+      this.gfx.rect(1,1,356,356) 
       if ( flash ) {
-         this.gfx.lineStyle(5, 0xcc2222, 1)
+         this.gfx.stroke({width: 5, color: 0xcc2222, alpha: 1})
       } else {
-         this.gfx.lineStyle(5, 0x44444a, 1)
+         this.gfx.stroke({width: 5, color: 0x44444a, alpha: 1})
       }
-      this.gfx.drawRect(1,1,356,356) 
    }
 
-   gameTick() {
+   update() {
+      super.update()
+
       if ( this.gameState != "play") return
    
       this.clock.tick( this.app.ticker.deltaMS )
@@ -285,7 +286,4 @@ export default class Mosaic extends BaseGame {
          }
       }
    }
-
-   static ROWS = 5
-   static COLS = 5
 }
