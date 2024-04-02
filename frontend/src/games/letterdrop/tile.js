@@ -76,6 +76,13 @@ export default class Tile extends Container {
       }
    }
 
+   get center() {
+      return {
+         x: this.x + Tile.WIDTH/2 ,
+         y: this.y + Tile.HEIGHT/2
+      }
+   }
+
    get score() {
       return this.tileValue
    }
@@ -131,6 +138,7 @@ export default class Tile extends Container {
    }
 
    setEnabled( enabled ) {
+      console.log("ENABLE "+enabled+" "+this.letter.text)
       this.enabled = enabled 
       if (this.enabled == false) {
          this.eventMode = 'none'
@@ -144,21 +152,21 @@ export default class Tile extends Container {
 
    draw() {
       this.graphics.clear()
-      let alpha = 1 
-      if ( this.enabled == false ) {
-         this.alpha  = 0.3
-      }
-  
-      this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT)
+
       if ( this.error ) {
-         this.graphics.stroke({width:1, color: 0x03045E})
-         this.graphics.fill(0xd36582)
+         this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT).fill(0xd36582)
       } else {
-         this.graphics.stroke({width: 1, color: 0x03045E, alpha: alpha})   
          if (this.selected) {
-            this.graphics.fill({color: 0x6bbce8, alpha: alpha})
-         } else {
-            this.graphics.fill({color: 0xFAFAFF, alpha: alpha})
+            this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT). 
+               stroke({width: 1, color: 0x03045E, alpha: 1}).fill(0x6bbce8)
+         } else  {
+            let alpha = 1
+            if ( this.enabled == false ) {
+               alpha = 0.3
+            }
+            this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT). 
+               stroke({width: 1, color: 0x03045E, alpha: alpha}).
+               fill({color:0xFAFAFF, alpha: alpha})
          }
       }
    }

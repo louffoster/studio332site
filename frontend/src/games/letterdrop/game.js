@@ -1,4 +1,4 @@
-import { Text }  from "pixi.js"
+import { Text, Assets }  from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import * as particles from '@pixi/particle-emitter'
 import StartOverlay from "@/games/letterdrop/startoverlay"
@@ -12,6 +12,7 @@ import Tile from "@/games/letterdrop/tile"
 import TrashMeter from "@/games/letterdrop/trashmeter"
 import DropButton from "@/games/letterdrop/dropbutton"
 import Timer from "@/games/letterdrop/timer"
+import TrashAnim from "@/games/letterdrop/trashanim"
 
 export default class LetterDrop extends BaseGame {
    pool = new LetterPool()
@@ -34,6 +35,8 @@ export default class LetterDrop extends BaseGame {
    scoreDisplay = null
    endOverlay = null
    dictionary = null
+   smoke = null
+   
 
    static COLUMNS = 5 
    static MAX_HEIGHT = 5
@@ -42,6 +45,7 @@ export default class LetterDrop extends BaseGame {
 
    async initialize(replayHandler, backHandler) { 
       await super.initialize()
+      this.smoke = await Assets.load('/smoke.png')
 
       this.dictionary = new Dictionary()
 
@@ -179,7 +183,7 @@ export default class LetterDrop extends BaseGame {
       }
 
       // trash drop button
-      this.trashBtn = new DropButton(x, y, this.trashSelectedTiles.bind(this) )
+      this.trashBtn = new DropButton(x, y, this.trashSelectedTile.bind(this) )
       this.trashBtn.useTrashIcon() 
       this.trashBtn.setEnabled( false )
       this.addChild( this.trashBtn )
@@ -207,52 +211,19 @@ export default class LetterDrop extends BaseGame {
          LetterDrop.TILE_H*LetterDrop.MAX_HEIGHT).fill(0x90a3a3)
    }
 
-   trashSelectedTiles() {
+   trashSelectedTile() {
       let choiceNum = this.choices.findIndex( t => t.selected)
       if ( choiceNum > -1) {
-         let tgtTile = this.choices[choiceNum]
-         this.choices[choiceNum] = null
-         this.trashTile( tgtTile, () => {
-            this.fillChoices()  
-         })
          this.toggleTileButtons( false )
-      }
-
-      let gridTileTrashed = false
-      this.columns.forEach( c => {
-         c.forEach( t => {
-            if ( t.selected ) {
-               gridTileTrashed = true
-               this.trashTile( t, () => {
-                  let tgtIdx = c.findIndex( testT => testT == t)
-                  if (tgtIdx > -1) {
-                     t.destroy()
-                     c.splice(tgtIdx,1)
-                  }
-               })
-            }
+         let tgtTile = this.choices[choiceNum]
+         new TrashAnim(this.app.stage, this.smoke, tgtTile.center.x, tgtTile.center.y, () => {
+            this.removeChild( tgtTile )
+            tgtTile.destroy()
+            this.choices[choiceNum] = null
+            this.fillChoices()  
+            this.trashMeter.increaseValue()
          })
-      })
-
-      if ( gridTileTrashed ) {
-         this.clearWord()
-         this.dropGridTiles()
-         this.trashBtn.setEnabled( false )
-         this.setTilesEnabled(true, true)
       }
-   }
-
-   trashTile( tgtTile, trashedCallback ) {
-      var emitter = new particles.Emitter(this. this.trashAnim )
-      emitter.updateOwnerPos(0,0)
-      emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
-      emitter.playOnceAndDestroy() 
-      this.trashMeter.increaseValue()
-      setTimeout( () => {
-         this.removeChild( tgtTile )
-         tgtTile.destroy()
-         trashedCallback()
-      }, 450)
    }
 
    toggleTileButtons( enabled ) {
@@ -266,7 +237,7 @@ export default class LetterDrop extends BaseGame {
       if ( this.trashMeter.isFull() ) {
          this.trashBtn.setEnabled( false )
       } else {
-         this.updateTrashButtonState()
+         this.trashBtn.setEnabled( enabled )
       }
    }
 
@@ -319,7 +290,7 @@ export default class LetterDrop extends BaseGame {
             }
          })
       }
-      this.updateTrashButtonState()
+      this.trashBtn.setEnabled( false )
    }
 
    gameOver() {
@@ -337,26 +308,14 @@ export default class LetterDrop extends BaseGame {
    }
 
    updateTrashButtonState() {
-      let selectCnt = 0 
+      this.trashBtn.setEnabled( false )
       this.choices.forEach( c => {
          if (c.selected) {
-            selectCnt++
-         }
-      })
-      this.columns.forEach( c => {
-         c.forEach( t => {
-            if ( t.selected) {
-               selectCnt++
+            if ( this.trashMeter.canTrash(1) ) {
+               this.trashBtn.setEnabled( true )
             }
-         })
-      })
-      let enabled = false
-      if ( selectCnt > 0) {
-         if ( this.trashMeter.canTrash(selectCnt) ) {
-            enabled = true
          }
-      }
-      this.trashBtn.setEnabled( enabled )
+      })
    }
 
    gridTileClicked( tile ) {
@@ -370,7 +329,6 @@ export default class LetterDrop extends BaseGame {
       this.currWordTile.setActive(true)
 
       this.getAdjacentTiles(tile).forEach( t => t.setEnabled(true) )
-      this.updateTrashButtonState()
 
       this.clearBtn.setEnabled(true)
       if ( this.word.text.length > 3) {
@@ -398,6 +356,7 @@ export default class LetterDrop extends BaseGame {
             selectedRow = rowIdx
          }
       })  
+
       let adjacent = []
       if ( selectedRow > 0) {
          adjacent.push(this.columns[selectedCol][selectedRow-1])
@@ -440,10 +399,11 @@ export default class LetterDrop extends BaseGame {
             if ( t.selected ) {
                totalTileValue += t.score 
 
-               var emitter = new particles.Emitter(this. this.trashAnim )
-               emitter.updateOwnerPos(0,0)
-               emitter.updateSpawnPos(t.x+LetterDrop.TILE_W/2, t.y+LetterDrop.TILE_H/2)
-               emitter.playOnceAndDestroy()
+               // FIXME
+               // var emitter = new particles.Emitter(this. this.trashAnim )
+               // emitter.updateOwnerPos(0,0)
+               // emitter.updateSpawnPos(t.x+LetterDrop.TILE_W/2, t.y+LetterDrop.TILE_H/2)
+               // emitter.playOnceAndDestroy()
 
                // add a slight delay so explosion covers the tile when it is removed from the board
                setTimeout( () => {
