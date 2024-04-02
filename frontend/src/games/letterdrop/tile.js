@@ -138,7 +138,6 @@ export default class Tile extends Container {
    }
 
    setEnabled( enabled ) {
-      console.log("ENABLE "+enabled+" "+this.letter.text)
       this.enabled = enabled 
       if (this.enabled == false) {
          this.eventMode = 'none'
