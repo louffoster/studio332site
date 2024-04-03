@@ -1,6 +1,5 @@
 import { Text, Assets }  from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
-import * as particles from '@pixi/particle-emitter'
 import StartOverlay from "@/games/letterdrop/startoverlay"
 import EndOverlay from "@/games/letterdrop/endoverlay"
 import BaseGame from "@/games/common/basegame"
@@ -13,6 +12,7 @@ import TrashMeter from "@/games/letterdrop/trashmeter"
 import DropButton from "@/games/letterdrop/dropbutton"
 import Timer from "@/games/letterdrop/timer"
 import TrashAnim from "@/games/letterdrop/trashanim"
+import ClearAnim from "@/games/letterdrop/clearanim"
 
 export default class LetterDrop extends BaseGame {
    pool = new LetterPool()
@@ -46,6 +46,7 @@ export default class LetterDrop extends BaseGame {
    async initialize(replayHandler, backHandler) { 
       await super.initialize()
       this.smoke = await Assets.load('/smoke.png')
+      this.bit = await Assets.load('/particle.png')
 
       this.dictionary = new Dictionary()
 
@@ -118,7 +119,7 @@ export default class LetterDrop extends BaseGame {
       this.addChild( this.scoreDisplay)
 
       this.startOverlay = new StartOverlay(this.startHandler.bind(this)) 
-      // this.endOverlay = new EndOverlay( replayHandler, backHandler) 
+      this.endOverlay = new EndOverlay( replayHandler, backHandler) 
       this.addChild( this.startOverlay )
       
       // start the eicker last so everything is created / initialized
@@ -256,16 +257,14 @@ export default class LetterDrop extends BaseGame {
       if ( this.columns[colNum].length == LetterDrop.MAX_HEIGHT) {
          this.gameState = "over"
          this.setTilesEnabled( false, true )
-         this.columns[colNum].forEach( t => t.setError(true) )
-   
-         var emitter = new particles.Emitter(this. this.trashAnim )
-         emitter.updateOwnerPos(0,0)
-         emitter.updateSpawnPos(tgtTile.x+LetterDrop.TILE_W/2, tgtTile.y+LetterDrop.TILE_H/2)
-         emitter.playOnceAndDestroy( () => { 
-            this.removeChild( tgtTile )
-            tgtTile.destroy
-            this.gameOver()
+         this.columns[colNum].forEach( t => {
+            t.setError(true) 
+            new TrashAnim(this.app.stage, this.smoke, t.center.x, t.center.y)
          })
+
+         setTimeout( () => {
+            this.gameOver()
+         }, 500)
          return
       }
 
@@ -399,16 +398,10 @@ export default class LetterDrop extends BaseGame {
             if ( t.selected ) {
                totalTileValue += t.score 
 
-               // FIXME
-               // var emitter = new particles.Emitter(this. this.trashAnim )
-               // emitter.updateOwnerPos(0,0)
-               // emitter.updateSpawnPos(t.x+LetterDrop.TILE_W/2, t.y+LetterDrop.TILE_H/2)
-               // emitter.playOnceAndDestroy()
-
-               // add a slight delay so explosion covers the tile when it is removed from the board
-               setTimeout( () => {
+               let boom = new ClearAnim(this.app.stage, this.bit, t.center.x, t.center.y)
+               boom.start( () => {
                   this.removeChild(t)
-
+                  
                   //  lookup the index of the destroyed tile as a previous clear may have shifted the array position
                   let tgtIdx = c.findIndex( testT => testT == t)
                   if (tgtIdx > -1) {
@@ -421,7 +414,7 @@ export default class LetterDrop extends BaseGame {
                   if (tileCnt == 0 ){
                      this.dropGridTiles()      
                   }
-               }, 300)
+               })
             }
          })
       })

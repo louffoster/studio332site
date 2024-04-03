@@ -23,9 +23,11 @@ export default class TrashAnim extends Container {
          this.group.add( anim )
       }
       this.group.getAll().forEach( a => a.start())
-      setTimeout( () => {
-         listener()
-      }, 400)
+      if (listener ) {
+         setTimeout( () => {
+            listener()
+         }, 400)
+      }
    }
 
    randomRange(min, max) {

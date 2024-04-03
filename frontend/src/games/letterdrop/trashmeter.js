@@ -8,7 +8,7 @@ export default class TrashMeter extends Container {
       this.meterW = w 
       this.meterH = h
       this.value = 0
-      this.maxValue = 5
+      this.maxValue = 8
 
       this.gfx = new Graphics() 
       this.addChild( this.gfx )
