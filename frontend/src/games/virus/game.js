@@ -10,6 +10,8 @@ import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
 import Dictionary from "@/games/common/dictionary"
+import Boom from "@/games/virus/boom"
+import * as TWEEDLE from "tweedle.js"
 
 export default class Virus extends BaseGame {
    static ROWS = 6
@@ -41,6 +43,8 @@ export default class Virus extends BaseGame {
 
    async initialize(restartHandler, backHandler) {
       await super.initialize() 
+
+      this.app.ticker.add(() => TWEEDLE.Group.shared.update())
       this.particle = await Assets.load('/particle.png')
 
       let y = 40
@@ -192,7 +196,8 @@ export default class Virus extends BaseGame {
    }
 
    shuffleGrid() {
-if (this.state.isPlaying() == false) return 
+      if (this.state.isPlaying() == false) return 
+      
       this.clearWord()
       let newLetters = this.pickNewLetters(Virus.ROWS*Virus.COLS) 
       for (let r = 0; r < Virus.ROWS; r++) {
@@ -233,10 +238,11 @@ if (this.state.isPlaying() == false) return
       this.letterIndex--
       let selR = this.word[this.letterIndex].fromRow
       let selC = this.word[this.letterIndex].fromCol 
-      let isSelectedInfected = this.grid[selR][selC].infected
+      let letter = this.grid[selR][selC]
+      let isSelectedInfected = letter.infected
    
       // reset this.grid letter and clear word letter
-      this.grid[selR][selC].reset( this.pickNewLetter() )   
+      letter.reset( this.pickNewLetter() )   
       this.word[this.letterIndex].letter.text = ""
       this.word[this.letterIndex].fromCol = -1
       this.word[this.letterIndex].fromRow = -1   
@@ -248,12 +254,14 @@ if (this.state.isPlaying() == false) return
       }
          
       if ( isSelectedInfected ) {
-         this.startVirusExplode( selR, selC)
+         new Boom( this.app.stage, this.particle, letter.x, letter.y, true)
          clearCnt-- 
          if (clearCnt == 0) {
             return
          }
-      } 
+      } else {
+         new Boom( this.app.stage, this.particle, letter.x, letter.y, false)   
+      }
    
       // start with restoring lost tiles. when there are none, reset infected
       let pass = 0
@@ -261,9 +269,10 @@ if (this.state.isPlaying() == false) return
          for (let r = (Virus.ROWS-1); r >= 0; r--) {
             for (let c = (Virus.COLS-1); c  >= 0; c--) {
                if ( (pass == 0 && this.grid[r][c].isLost()) || 
-                    (pass == 1 && this.grid[r][c].infected) )  {       
-                  this.grid[r][c].reset( this.pickNewLetter() )
-                  this.startVirusExplode( r, c )
+                    (pass == 1 && this.grid[r][c].infected) )  {   
+                  const letter = this.grid[r][c]   
+                  letter.reset( this.pickNewLetter() )
+                  new Boom( this.app.stage, this.particle, letter.x, letter.y)
                   clearCnt-- 
                   if (clearCnt == 0) {
                      break
@@ -330,18 +339,12 @@ if (this.state.isPlaying() == false) return
       this.deleteKey.setEnabled( true )
    }
 
-   startVirusExplode(row, col) {
-      // var emitter = new particles.Emitter(this.scene, this.virusExplode )
-      // let x = 40 + (col*55)
-      // let y = 40 + (row*55)
-      // emitter.updateOwnerPos(0,0)
-      // emitter.updateSpawnPos(x,y)
-      // emitter.playOnceAndDestroy()
-   }
-
-
    beginGameOver() {
       this.state.gameLost()
+
+      this.enterKey.disable()
+      this.shuffleKey.disable()
+      this.deleteKey.disable()
 
       // wipe out any started word and take over all remaining letters
       this.clearWord()
@@ -351,16 +354,13 @@ if (this.state.isPlaying() == false) return
          }
       }
 
-      // blow up submit and shuffle
-      this.startLossExplode( 200,385 )
-      this.startLossExplode( 260,385 )
-
       // blow up all gauges
       let y = 430
       let x = 60
       for (let i=0; i<=4; i++) {
          for (let j=0; j<=4; j++) {
-            this.startLossExplode( x,y )
+            // this.startLossExplode( x,y )
+            new Boom( this.app.stage, this.particle, x,y, true)
             x+= 55
          }
          x= 60
@@ -371,25 +371,16 @@ if (this.state.isPlaying() == false) return
          this.gauges.forEach( g => {
             g.reset() 
          })
-         this.removeChild(this.enterKey)
-         this.removeChild(this.shuffleKey)
-         this.removeChild(this.deleteKey)
       }, 500)
-   }
-
-   startLossExplode(x,y) {
-      // var emitter = new particles.Emitter(this.scene, this.loseExplode )
-      // emitter.updateOwnerPos(0,0)
-      // emitter.updateSpawnPos(x,y)
-      // emitter.playOnceAndDestroy()
    }
 
    clearAllInfections() {   
       for (let r = (Virus.ROWS-1); r >= 0; r--) {
          for (let c = (Virus.COLS-1); c  >= 0; c--) {
-            if ( this.grid[r][c].isLost()  || this.grid[r][c].infected ) {
-               this.grid[r][c].reset( this.pickNewLetter() )
-               this.startVirusExplode( r, c )
+            let letter = this.grid[r][c]
+            if ( letter.isLost() || letter.infected ) {
+               letter.reset( this.pickNewLetter() )
+               new Boom( this.app.stage, this.particle, letter.x, letter.y)
             } 
          }
       }
