@@ -135,11 +135,11 @@ export default class Letter extends Container {
    drawVirus() {
       this.virusGfx.clear()
       let radius = 25.0 * (this.virusPercent/100.0)
-      let color = 0x990099
+      let color = 0x995599
       if ( this.virusPercent == 100) {
          color = 0x550044
       }
-      this.virusGfx.circle(0,0,radius).stroke({width: 1, color: 0x885588}).fill(color)
+      this.virusGfx.circle(0,0,radius).fill(color)
    }
 
    update(deltaMS, infectedCallback) {

@@ -100,28 +100,28 @@ export default class Virus extends BaseGame {
       this.shuffleKey.alignTopLeft()
       this.addChild(this.shuffleKey)
    
-      // this.gauges = []
-      // let maxValues = [7,6,5,4] 
-      // let gaugeY = 430
-      // for (let i=0; i<4; i++) {
-      //    let label = `${i+3}`
-      //    if (i == 3) {
-      //       label += "+"
-      //    }
-      //    let g = new Gauge(10,gaugeY,label, maxValues[i])
-      //    this.gauges.push( g )
-      //    this.addChild( g )
-      //    gaugeY+=28
-      // }
+      this.gauges = []
+      let maxValues = [7,6,5,4] 
+      let gaugeY = 430
+      for (let i=0; i<4; i++) {
+         let label = `${i+3}`
+         if (i == 3) {
+            label += "+"
+         }
+         let g = new Gauge(10,gaugeY,label, maxValues[i])
+         this.gauges.push( g )
+         this.addChild( g )
+         gaugeY+=28
+      }
    
       this.gfx.moveTo(0, 550).lineTo(this.gameWidth, 550).stroke({width: 1, color: 0x888899})
 
       this.clock = new Clock(250, 580, "", 0xCAF0F8, "\"Courier New\", Courier, monospace")
       this.addChild(this.clock)
 
-      // this.initGameOverlay = new StartOverlay(this.startGame.bind(this)) 
-      // this.gameEndOverlay = new EndOverlay(restartHandler, backHandler) 
-      // this.addChild(this.initGameOverlay)
+      this.initGameOverlay = new StartOverlay(this.startGame.bind(this)) 
+      this.gameEndOverlay = new EndOverlay(restartHandler, backHandler) 
+      this.addChild(this.initGameOverlay)
    }
 
    startGame( ) {
@@ -193,7 +193,6 @@ export default class Virus extends BaseGame {
 
    shuffleGrid() {
 if (this.state.isPlaying() == false) return 
-      
       this.clearWord()
       let newLetters = this.pickNewLetters(Virus.ROWS*Virus.COLS) 
       for (let r = 0; r < Virus.ROWS; r++) {
@@ -332,12 +331,12 @@ if (this.state.isPlaying() == false) return
    }
 
    startVirusExplode(row, col) {
-      var emitter = new particles.Emitter(this.scene, this.virusExplode )
-      let x = 40 + (col*55)
-      let y = 40 + (row*55)
-      emitter.updateOwnerPos(0,0)
-      emitter.updateSpawnPos(x,y)
-      emitter.playOnceAndDestroy()
+      // var emitter = new particles.Emitter(this.scene, this.virusExplode )
+      // let x = 40 + (col*55)
+      // let y = 40 + (row*55)
+      // emitter.updateOwnerPos(0,0)
+      // emitter.updateSpawnPos(x,y)
+      // emitter.playOnceAndDestroy()
    }
 
 
@@ -379,10 +378,10 @@ if (this.state.isPlaying() == false) return
    }
 
    startLossExplode(x,y) {
-      var emitter = new particles.Emitter(this.scene, this.loseExplode )
-      emitter.updateOwnerPos(0,0)
-      emitter.updateSpawnPos(x,y)
-      emitter.playOnceAndDestroy()
+      // var emitter = new particles.Emitter(this.scene, this.loseExplode )
+      // emitter.updateOwnerPos(0,0)
+      // emitter.updateSpawnPos(x,y)
+      // emitter.playOnceAndDestroy()
    }
 
    clearAllInfections() {   
