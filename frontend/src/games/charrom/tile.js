@@ -1,7 +1,7 @@
-import * as PIXI from "pixi.js"
+import { Container, Graphics, Text, Rectangle } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
-export default class Tile extends PIXI.Container {
+export default class Tile extends Container {
    static WIDTH = 55 
    static HEIGHT = 55 
 
@@ -19,38 +19,36 @@ export default class Tile extends PIXI.Container {
       this.y = y
       this.letter = letter
 
-      let style = new PIXI.TextStyle({
+      this.graphics = new Graphics()
+      this.addChild(this.graphics)
+      
+      let txt  = new Text({text: letter.text, style: {
          fill: "#4E6367",
          fontFamily: "Arial",
          fontSize: 36,
-      })
-      let smallStyle = new PIXI.TextStyle({
-         fill: "#4E6367",
-         fontFamily: "Arial",
-         fontSize: 18,
-      })
-      let scoreStyle = new PIXI.TextStyle({
-         fill: "#4E6367",
-         fontFamily: "Arial",
-         fontSize: 14,
-      })
-
-      this.graphics = new PIXI.Graphics()
-      let txt  = new PIXI.Text(letter.text, style)
+      }})
       txt.anchor.set(0.5)
       txt.x = Tile.WIDTH / 2.0 
       txt.y = Tile.HEIGHT / 2.0
 
       let uTxt = null
       if ( letter.text == "Q") {
-         uTxt = new PIXI.Text("U", smallStyle)
+         uTxt = new Text({text: "U", style: {
+            fill: "#4E6367",
+            fontFamily: "Arial",
+            fontSize: 18,
+         }})
          uTxt.anchor.set(0.5)
          uTxt.x = Tile.WIDTH / 2.0 + 14
          uTxt.y = Tile.HEIGHT / 2.0 + 12    
          txt.x-=8
       }
 
-      let valTxt = new PIXI.Text(`${letter.value}`, scoreStyle)
+      let valTxt = new Text({text: `${letter.value}`, style: {
+         fill: "#4E6367",
+         fontFamily: "Arial",
+         fontSize: 14,
+      }})
       valTxt.anchor.set(0,1)
       valTxt.x = 4
       valTxt.y = Tile.HEIGHT - 3  
@@ -58,7 +56,7 @@ export default class Tile extends PIXI.Container {
       this.draw()
 
       this.eventMode = 'static'
-      this.hitArea =  new PIXI.Rectangle(0,0,Tile.WIDTH,Tile.HEIGHT)
+      this.hitArea =  new Rectangle(0,0,Tile.WIDTH,Tile.HEIGHT)
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', () => {
@@ -71,7 +69,7 @@ export default class Tile extends PIXI.Container {
          }
       })
 
-      this.addChild(this.graphics)
+      
       this.addChild(txt)
       this.addChild(valTxt)
       if (uTxt ) {
@@ -124,19 +122,18 @@ export default class Tile extends PIXI.Container {
    draw() {
       this.graphics.clear()
  
-      this.graphics.beginFill(0xF3E9DC, 1.0)
-      this.graphics.lineStyle(1, 0x5E3023, 1)
 
+      this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT).stroke({width:1, color: 0x5E3023})
       if ( this.error ) {
-         this.graphics.beginFill(0xe0adc1) 
+         this.graphics.fill(0xe0adc1) 
       } else if ( this.success) {
-         this.graphics.beginFill(0x75c482) 
+         this.graphics.fill(0x75c482) 
       } else {
          if (this.selected) {
-            this.graphics.beginFill(0x8ecae6)
-         } 
+            this.graphics.fill(0x8ecae6)
+         } else {
+            this.graphics.fill(0xF3E9DC)
+         }
       }
-      this.graphics.drawRect(0,0, Tile.WIDTH, Tile.HEIGHT)
-      this.graphics.endFill()
    }
 }

@@ -1,5 +1,5 @@
 import BasePhysicsItem from "@/games/common/basephysicsitem"
-import * as PIXI from "pixi.js"
+import { Circle, Rectangle } from "pixi.js"
 import Matter from 'matter-js'
 
 export default class PhysicsShape extends BasePhysicsItem {
@@ -36,8 +36,8 @@ export default class PhysicsShape extends BasePhysicsItem {
          this.shape = "box"
       }
 
-      this.lineColor = new PIXI.Color( params.lineColor )
-      this.fillColor = new PIXI.Color( params.fillColor )
+      this.lineColor = params.lineColor
+      this.fillColor = params.fillColor
 
       if (params.type == "circle") {
          this.w = params.radius*2
@@ -45,7 +45,7 @@ export default class PhysicsShape extends BasePhysicsItem {
          this.radius = params.radius
          this.pivot.set(0,0)
          this.body = Matter.Bodies.circle(x, y, params.radius, {isStatic: this.isStatic})
-         this.hitArea = new PIXI.Circle(0,0, params.radius)
+         this.hitArea = new Circle(0,0, params.radius)
       } else if ( params.type == "triangle") {
          this.w = params.w 
          this.h = params.h
@@ -59,11 +59,10 @@ export default class PhysicsShape extends BasePhysicsItem {
          this.h = params.h
          this.pivot.set(this.w/2, this.h/2)   
          this.body = Matter.Bodies.rectangle(x, y, this.w, this.h, { isStatic: this.isStatic})
-         this.hitArea = new PIXI.Rectangle(0,0, this.w, this.h)
+         this.hitArea = new Rectangle(0,0, this.w, this.h)
       }
 
       this.update()
-
       this.draw() 
    }
 
@@ -84,18 +83,14 @@ export default class PhysicsShape extends BasePhysicsItem {
       if ( this.outlined == false) {
          line = 0
       }
-      this.gfx.lineStyle(line, this.lineColor, 1)
-      this.gfx.beginFill( this.fillColor )
+      
       if (this.shape == "circle") {
-         this.gfx.drawCircle(0,0,this.radius)
+         this.gfx.circle(0,0,this.radius).fill(this.fillColor).stroke({width:line, color: this.lineColor})
       } else if ( this.shape == "triangle") {
-         this.gfx.moveTo(0,0)
-         this.gfx.lineTo(this.w, 0)
-         this.gfx.lineTo(0, this.h)
-         this.gfx.closePath()
+         const pts = [ {x: 0, y: 0 }, {x: this.w, y: 0}, {x: 0, y: this.h} ]
+         this.gfx.poly(pts).fill(this.fillColor).stroke({width:line, color: this.fillColor})
       } else {
-         this.gfx.drawRect(0,0,this.w, this.h)
+         this.gfx.rect(0,0,this.w, this.h).fill(this.fillColor).stroke({width:line, color: this.fillColor})
       }
-      this.gfx.endFill()
    }
 }

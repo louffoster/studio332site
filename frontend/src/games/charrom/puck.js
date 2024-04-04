@@ -1,6 +1,5 @@
 import PhysicsShape from "@/games/common/physicsshape"
-import * as PIXI from "pixi.js"
-import Matter from 'matter-js'
+import {Text} from "pixi.js"
 
 export default class Puck extends PhysicsShape {
    letter = null 
@@ -8,7 +7,7 @@ export default class Puck extends PhysicsShape {
    static DIAMETER = 50
 
    constructor( x,y, letter) {
-      super( x,y, {type: "circle", radius: Puck.DIAMETER/2})
+      super( x,y, {type: "circle", radius: Puck.DIAMETER/2, lineColor: 0x222222, fillColor: 0x895737})
 
       this.body.label = "puck-"+letter.text
       this.setAirFriction(0.02)
@@ -16,32 +15,26 @@ export default class Puck extends PhysicsShape {
       this.setMass(2.75)
       this.letter = letter
       
-      let letterColor = "#333333"
-      this.lineColor = new PIXI.Color( 0x600000 )
       if ( letter.isVowel()) {
-         this.fillColor = new PIXI.Color( 0xC08552 )
-      } else  {
-         this.fillColor = new PIXI.Color( 0x895737 )
-      }
+         this.fillColor = 0xC08552
+      } 
 
-      let style = new PIXI.TextStyle({
-         fill: letterColor,
+      let txt = new Text({text: letter.text, style: {
+         fill: 0x333333,
          fontFamily: "Arial",
-         fontSize: 18,
-      })
-      let smallStyle = new PIXI.TextStyle({
-         fill: letterColor,
-         fontFamily: "Arial",
-         fontSize: 15,
-      })
-
-      let txt = new PIXI.Text(letter.text, style)
+         fontSize: 18,     
+      }})
       txt.anchor.set(0.5)
       txt.x = 0
       txt.y = 0
       this.addChild(txt)
+
       if (letter.text == "Q") {
-         let uTxt = new PIXI.Text("U", smallStyle)
+         let uTxt = new Text({text: "U", style: {
+            fill: 0x333333,
+            fontFamily: "Arial",
+            fontSize: 15,  
+         }})
          uTxt.anchor.set(0.5)
          uTxt.x = 8
          uTxt.y = 4    
@@ -57,11 +50,8 @@ export default class Puck extends PhysicsShape {
    }
 
    draw() {
-      super.draw() 
-      this.gfx.lineStyle(1, this.lineColor, 1)
-      this.gfx.beginFill(0xF3E9DC)
-      this.gfx.drawCircle(0,0,this.radius-6)
-      this.gfx.endFill()
+      super.draw()
+      this.gfx.circle(0,0,this.radius-6).fill(0xF3E9DC).stroke({width:1, color: this.lineColor})
    }
 
    get text() {

@@ -10,7 +10,8 @@ import Dictionary from "@/games/common/dictionary"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import EndOverlay from "@/games/charrom/endoverlay"
-import { Text } from "pixi.js"
+import TrashAnim from "@/games/letterdrop/trashanim"
+import { Text, Assets } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
 export default class Charrom extends BasePhysicsGame {
@@ -41,6 +42,7 @@ export default class Charrom extends BasePhysicsGame {
    timer = null
    replayHandler  = null 
    backHandler = null
+   smoke = null
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
@@ -48,6 +50,7 @@ export default class Charrom extends BasePhysicsGame {
 
    async initialize(replayHandler, backHandler) {
       await super.initialize()
+      this.smoke = await Assets.load('/smoke.png')
 
       this.physics.gravity.scale = 0
       this.replayHandler = replayHandler 
@@ -125,14 +128,14 @@ export default class Charrom extends BasePhysicsGame {
       this.rackBtn.setEnabled( false )
       this.addChild(this.rackBtn )
 
-      // this.shotOverlay = new ShotIndicator()
+      this.shotOverlay = new ShotIndicator()
 
-      // this.startOverlay = new StartOverlay( this.gameWidth, this.gameHeight, () => {
-      //    this.rackLetterPucks()
-      //    this.removeChild(this.startOverlay)
-      //    this.gameState = "place"
-      // }) 
-      // this.addChild(this.startOverlay)
+      this.startOverlay = new StartOverlay( this.gameWidth, this.gameHeight, () => {
+         this.rackLetterPucks()
+         this.removeChild(this.startOverlay)
+         this.gameState = "place"
+      }) 
+      this.addChild(this.startOverlay)
 
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
@@ -227,10 +230,7 @@ export default class Charrom extends BasePhysicsGame {
 
       let sunkLetter = puck.letter
       if ( trash ) {
-         var emitter = new particles.Emitter(this.scene, this.scratchAnim )
-         emitter.updateOwnerPos(0,0)
-         emitter.updateSpawnPos(puck.x, puck.y)
-         emitter.playOnceAndDestroy() 
+         new TrashAnim(this.app.stage, this.smoke, puck.x, puck.y)
       } else {
          if ( this.sunkLetters.length < Charrom.LETTER_LIMIT) {
             let x = 7
@@ -337,10 +337,7 @@ export default class Charrom extends BasePhysicsGame {
       this.gameState = "over"
       if ( this.endReason == "overflow") {
          this.sunkLetters.forEach( sl => {
-            var emitter = new particles.Emitter(this.scene, this.scratchAnim )
-            emitter.updateOwnerPos(0,0)
-            emitter.updateSpawnPos(sl.x+Puck.DIAMETER/2, sl.y+Puck.DIAMETER/2)
-            emitter.playOnceAndDestroy() 
+            new TrashAnim(this.app.stage, this.smoke, sl.x+Puck.DIAMETER/2, sl.y+Puck.DIAMETER/2)
          })
       }
 
@@ -421,10 +418,7 @@ export default class Charrom extends BasePhysicsGame {
                scratched = true
                this.scratchesLeft--
                this.scratchTxt.text = `= ${this.scratchesLeft}`
-               var emitter = new particles.Emitter(this.scene, this.scratchAnim )
-               emitter.updateOwnerPos(0,0)
-               emitter.updateSpawnPos(this.striker.x, this.striker.y)
-               emitter.playOnceAndDestroy()
+               new TrashAnim(this.app.stage, this.smoke, this.striker.x, this.striker.y)
                this.striker.removeFromTable()
                this.offTable.push( this.striker )
             }
