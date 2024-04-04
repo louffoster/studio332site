@@ -1,9 +1,9 @@
-import * as PIXI from "pixi.js"
+import { Container, Graphics, Circle } from "pixi.js"
 import Matter from 'matter-js'
 
 
 // PALETTE: https://coolors.co/palette/7a6c5d-2a3d45-ddc9b4-bcac9b-c17c74
-export default class Board extends PIXI.Container {
+export default class Board extends Container {
    boardW = 0 
    boardH = 0 
    gfx = null
@@ -14,7 +14,7 @@ export default class Board extends PIXI.Container {
 
    constructor( game, top, w, h ) {
       super()
-      this.gfx = new PIXI.Graphics()
+      this.gfx = new Graphics()
       this.addChild( this.gfx )
       this.boardW = w 
       this.boardH = h
@@ -51,10 +51,8 @@ export default class Board extends PIXI.Container {
       let r = Matter.Bodies.rectangle(this.boardW+25, this.y+this.boardH/2, 50, this.boardH, { isStatic: true, friction: 0, restitution: 1})
       Matter.Composite.add(game.physics.world, r)
 
-      let m = new PIXI.Graphics() 
-      m.beginFill(0x000000)
-      m.drawRect(0, 0, this.boardW, this.boardH);
-      m.endFill()
+      let m = new Graphics() 
+      m.rect(0, 0, this.boardW, this.boardH).fill(0x000000)
       this.addChild(m)
       this.mask = m
 
@@ -84,43 +82,33 @@ export default class Board extends PIXI.Container {
 
    draw() {
       // board sides and face
-      this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawRect(0,0, this.boardW, this.boardH)
-      this.gfx.beginFill(0xcDb9a4)
-      this.gfx.lineStyle( 3, 0x7A6C5D, 1 )
-      this.gfx.drawRoundedRect(0,0, this.boardW, this.boardH, 50)
-      this.gfx.endFill()
+      this.gfx.rect(0,0, this.boardW, this.boardH).fill(0x7A6C5D)
+      this.gfx.roundRect(0,0, this.boardW, this.boardH, 50).
+         fill(0xcDb9a4).stroke({width:3, color: 0x7A6C5D})
 
       // shot lines
-      this.gfx.lineStyle(2, 0x5574bd,1)
-      this.gfx.beginFill(0x5574bd,0.1)
-      this.gfx.drawCircle(this.boardW/2, this.boardH, 150)
-      this.lowerShotArea = new PIXI.Circle(this.boardW/2, this.boardH, 150)
-      this.gfx.drawCircle(this.boardW/2, 0, 150)
-      this.upperShotArea = new PIXI.Circle(this.boardW/2, 0, 150)
-      this.gfx.endFill()
+      this.gfx.circle(this.boardW/2, this.boardH, 150).
+         fill({color: 0x5574bd, alpha: 0.1}).stroke({width:2, color: 0x5574bd})
+      this.gfx.circle(this.boardW/2, 0, 150).
+         fill({color: 0x5574bd, alpha: 0.1}).stroke({width:2, color: 0x5574bd})
+      this.upperShotArea = new Circle(this.boardW/2, 0, 150)
+      this.lowerShotArea = new Circle(this.boardW/2, this.boardH, 150)
       
-
       // rack circle
-      this.gfx.lineStyle(1, 0x7A6C5D,1)
-      this.gfx.drawCircle(this.boardW/2, this.boardH/2, 85)
-      this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawCircle(this.boardW/2, this.boardH/2, 10)
-      this.gfx.endFill()
+      this.gfx.circle(this.boardW/2, this.boardH/2, 85).stroke({width: 1, color: 0x7A6C5D})
+      this.gfx.circle(this.boardW/2, this.boardH/2, 10).fill(0x7A6C5D)
 
-      // trash marker
-      this.gfx.lineStyle(10, 0xC17C74,1)
-      this.gfx.drawCircle(35, this.boardH-35, 60)
-      this.gfx.drawCircle(this.boardW-35, this.boardH-35, 60)
+      // trash markers
+      this.gfx.circle(35, this.boardH-35, 60).stroke({width:10, color: 0xC17C74})
+      this.gfx.circle(this.boardW-35, this.boardH-35, 60).stroke({width:10, color: 0xC17C74})
 
-      // score marker
-      this.gfx.lineStyle(10, 0x5574bd,1)
-      this.gfx.drawCircle(35, 35, 60)
-      this.gfx.drawCircle(this.boardW-35, 35, 60)
+      // score markers
+      this.gfx.circle(35, 35, 60).stroke({width:10, color: 0x5574bd})
+      this.gfx.circle(this.boardW-35, 35, 60).stroke({width:10, color: 0x5574bd})
    }
 }
 
-class Hole extends PIXI.Container {
+class Hole extends Container {
    gfx = null
    trashPucks = false
 
@@ -131,7 +119,7 @@ class Hole extends PIXI.Container {
       this.y = y 
       this.radius = radius
       this.pivot.set(0,0)
-      this.gfx = new PIXI.Graphics()
+      this.gfx = new Graphics()
       this.addChild(this.gfx)
       this.draw()
    }
@@ -157,9 +145,6 @@ class Hole extends PIXI.Container {
 
    draw() {
       this.gfx.clear() 
-      this.gfx.lineStyle(1, 0x7A6C5D, 1)
-      this.gfx.beginFill( 0x020202 )
-      this.gfx.drawCircle(0,0,this.radius)
-      this.gfx.endFill()   
+      this.gfx.circle(0,0,this.radius).fill(0x020202)
    }
 }

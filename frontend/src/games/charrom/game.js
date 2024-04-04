@@ -10,10 +10,8 @@ import Dictionary from "@/games/common/dictionary"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import EndOverlay from "@/games/charrom/endoverlay"
-import * as PIXI from "pixi.js"
+import { Text } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
-import * as particles from '@pixi/particle-emitter'
-import scratchJson from '@/assets/trash.json'
 
 export default class Charrom extends BasePhysicsGame {
    dictionary = new Dictionary()
@@ -32,7 +30,6 @@ export default class Charrom extends BasePhysicsGame {
    scoreTxt = null
    scratchesLeft = 3
    scratchTxt = null
-   scratchAnim = null
    board = null
    clearBtn = null 
    submitBtn = null
@@ -49,34 +46,34 @@ export default class Charrom extends BasePhysicsGame {
    static BOARD_HEIGHT = 600
    static LETTER_LIMIT = 8
 
-   initialize(replayHandler, backHandler) {
-      this.scratchAnim = particles.upgradeConfig(scratchJson, ['smoke.png'])
-      this.physics.gravity.scale = 0
+   async initialize(replayHandler, backHandler) {
+      await super.initialize()
 
+      this.physics.gravity.scale = 0
       this.replayHandler = replayHandler 
       this.backHandler = backHandler
 
       this.board = new Board(this, this.statsHeight, Charrom.BOARD_WIDTH, Charrom.BOARD_HEIGHT)
       this.addChild(this.board)
 
-      this.scoreTxt = new PIXI.Text("00000", {
+      this.scoreTxt = new Text({text: "00000", style: {
          fontFamily: "Arial",
          fontSize: 28,
          lineHeight: 28,
          fill: 0xF3E9DC
-      })
+      }})
       this.scoreTxt.anchor.set(1,0.5)
       this.scoreTxt.x = this.gameWidth/2
       this.scoreTxt.y = 26
       this.scoreTxt.anchor.set(0.5)
       this.addChild(this.scoreTxt )
 
-      this.scratchTxt = new PIXI.Text(`= ${this.scratchesLeft}`, {
+      this.scratchTxt = new Text({ text: `= ${this.scratchesLeft}`, style: {
          fontFamily: "Arial",
          fontSize: 18,
          lineHeight: 18,
          fill: 0xF3E9DC
-      })
+      }})
       this.scratchTxt.anchor.set(0,0.5)
       this.scratchTxt.x = 52
       this.scratchTxt.y = 26
@@ -95,12 +92,12 @@ export default class Charrom extends BasePhysicsGame {
 
       this.draw()
 
-      this.word = new PIXI.Text("", {
+      this.word = new Text({text: "", style: {
          fontFamily: "Arial",
          fontSize: 28,
          lineHeight: 28,
          fill: 0xBDD5EA
-      })
+      }})
       this.word.anchor.set(0,1)
       this.word.x = 25
       this.word.y =  this.gameHeight - 16
@@ -111,7 +108,6 @@ export default class Charrom extends BasePhysicsGame {
          this.submitWord()
       }, 0xFCFAFA,0x2f6690,0x5482bc)
       this.submitBtn.alignTopLeft()
-      this.submitBtn.noShadow()
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn )
 
@@ -119,7 +115,6 @@ export default class Charrom extends BasePhysicsGame {
          this.clearWord()
       }, 0xFCFAFA,0x9c5060,0x7c3040)
       this.clearBtn.alignTopLeft()
-      this.clearBtn.noShadow()
       this.clearBtn.setEnabled( false )
       this.addChild(this.clearBtn )
 
@@ -127,18 +122,17 @@ export default class Charrom extends BasePhysicsGame {
          this.rackLetterPucks()
       }, 0xFCFAFA,0x1b998b,0x3bb9ab)
       this.rackBtn.alignTopLeft()
-      this.rackBtn.noShadow()
       this.rackBtn.setEnabled( false )
       this.addChild(this.rackBtn )
 
-      this.shotOverlay = new ShotIndicator()
+      // this.shotOverlay = new ShotIndicator()
 
-      this.startOverlay = new StartOverlay( this.gameWidth, this.gameHeight, () => {
-         this.rackLetterPucks()
-         this.removeChild(this.startOverlay)
-         this.gameState = "place"
-      }) 
-      this.addChild(this.startOverlay)
+      // this.startOverlay = new StartOverlay( this.gameWidth, this.gameHeight, () => {
+      //    this.rackLetterPucks()
+      //    this.removeChild(this.startOverlay)
+      //    this.gameState = "place"
+      // }) 
+      // this.addChild(this.startOverlay)
 
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
@@ -366,46 +360,32 @@ export default class Charrom extends BasePhysicsGame {
    drawLetterRack() {
       // background and border
       let rackY = Charrom.BOARD_HEIGHT+this.statsHeight
-      this.gfx.lineStyle( 0, 0x5E3023, 1 )
-      this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawRect(0,rackY, this.gameWidth, this.tileRackHeight)
-      this.gfx.lineStyle( 5, 0x5E3023, 1 )
+      this.gfx.rect(0,rackY, this.gameWidth, this.tileRackHeight).fill(0x7A6C5D)
       this.gfx.moveTo(0, rackY)
-      this.gfx.lineTo(this.gameWidth, rackY)
+      this.gfx.lineTo(this.gameWidth, rackY).stroke({width: 5, color: 0x5E3023})
 
       // empty letters
-      this.gfx.lineStyle( 1, 0x5E3023)
-      this.gfx.beginFill(0xF3E9DC)
       let x = 65
       let y = rackY+7
       for (let i=0; i< Charrom.LETTER_LIMIT; i++) {
-         this.gfx.drawRect(x,y, Tile.WIDTH, Tile.HEIGHT)
+         this.gfx.rect(x,y, Tile.WIDTH, Tile.HEIGHT).fill(0xF3E9DC).stroke({width:1, color: 0x5E3023})
          x += Tile.WIDTH+4
       }
    }
 
    drawTopBar() {
       // background and board sep
-      this.gfx.lineStyle( 0, 0x5E3023, 1 )
-      this.gfx.beginFill(0x7A6C5D)
-      this.gfx.drawRect(0,0, this.gameWidth, this.statsHeight)
-      this.gfx.lineStyle( 5, 0x5E3023, 1 )
+      this.gfx.rect(0,0, this.gameWidth, this.statsHeight).fill(0x7A6C5D)
       this.gfx.moveTo(0,this.statsHeight)
       this.gfx.lineTo(this.gameWidth,this.statsHeight)
+      this.gfx.stroke({ width: 5, color: 0x5E3023} )
 
       // draw striker for scratch count marker
-      this.gfx.lineStyle(1, 0x000066, 1)
-      this.gfx.beginFill( 0x5E3023 )
-      this.gfx.drawCircle(25,25,20)
-      this.gfx.beginFill( 0x895737 )
-      this.gfx.drawCircle(25,25,10)
-      this.gfx.endFill()
+      this.gfx.circle(25,25,20).fill(0x5E3023).stroke({width: 1, color: 0x000066})
+      this.gfx.circle(25,25,10).fill(0x895737).stroke({width: 1, color: 0x000066})
 
        // background for timer
-       //this.gameWidth-113, 10, 101, 32 
-       this.gfx.beginFill(0x2E4347)
-       this.gfx.drawRect(this.gameWidth-115, 2, 115, this.statsHeight-4 )
-       this.gfx.endFill()
+       this.gfx.rect(this.gameWidth-115, 2, 115, this.statsHeight-4 ).fill(0x2E4347)
    }
 
    draw() {
