@@ -1,29 +1,24 @@
-import * as PIXI from "pixi.js"
+import {Color, Text, Graphics, Container, Rectangle} from "pixi.js"
 
-export default class Button extends PIXI.Container {
-   constructor( x,y, txt, listener, txtColor="white", btnColor=0x33aabf, highlight=0x44bbcf) {
+export default class Button extends Container {
+   constructor( x,y, txt, listener, txtColor="0x003344", btnColor=0x33aabf, highlight=0x44bbcf) {
       super()
 
       this.disabled = false
       this.round = false
-      this.btnColor = new PIXI.Color(btnColor)
-      this.highlight = new PIXI.Color(highlight)
-      this.txtColor = new PIXI.Color(txtColor)
+      this.btnColor = new Color(btnColor)
+      this.highlight = new Color(highlight)
+      this.txtColor = new Color(txtColor)
 
-      let style = new PIXI.TextStyle({
-         fill: this.txtColor,
-         fontFamily: "Arial",
-         fontSize: 18,
-         lineHeight: 18,
-         fontWeight: "bold",
-         dropShadow: true,
-         dropShadowColor: '#000000',
-         dropShadowBlur: 2,
-         dropShadowDistance: 1,
-         align: "center"
+      this.btnTxt = new Text({
+         text: txt, 
+         style: {
+            fill: this.txtColor,
+            fontFamily: "Arial",
+            fontSize: 18,
+            align: "center",
+         },
       })
-
-      this.btnTxt = new PIXI.Text(txt, style)
       this.btnWidth = this.btnTxt.width + 40
       this.btnHeight = this.btnTxt.height + 20
 
@@ -49,15 +44,15 @@ export default class Button extends PIXI.Container {
             this.clickListener()
          }
       })
-      this.hitArea = new PIXI.Rectangle(0,0, this.btnWidth, this.btnHeight)
+      this.hitArea = new Rectangle(0,0, this.btnWidth, this.btnHeight)
       this.cursor ="pointer"
       this.clickListener = listener
 
-      this.graphics = new PIXI.Graphics()
+      this.graphics = new Graphics()
       this.drawButton()
 
       this.addChild(this.graphics)
-      this.graphics.addChild(this.btnTxt)
+      this.addChild(this.btnTxt)
    }
 
    roundButton() {
@@ -76,11 +71,6 @@ export default class Button extends PIXI.Container {
       this.drawButton()
    }
 
-   noShadow() {
-      this.btnTxt.style.fontWeight = "normal"
-      this.btnTxt.style.dropShadow = false
-   }
-
    alignTopLeft() {
       this.x += this.btnWidth / 2.0
       this.y += this.btnHeight / 2.0
@@ -97,19 +87,18 @@ export default class Button extends PIXI.Container {
       if ( this.disabled) {
          alpha = 0.3
       }
-      this.graphics.lineStyle(1, this.txtColor, alpha)
-      if ( this.pointerDown) {
-         this.graphics.beginFill( this.highlight)
-      } else {
-         this.graphics.beginFill( this.btnColor, alpha )
-      }
       if ( this.round ) {
-         // this.graphics.drawRoundedRect(0,0, this.btnWidth, this.btnHeight, this.btnWidth)
-         this.graphics.drawCircle(this.btnWidth/2,this.btnHeight/2, this.btnWidth/2)
+         this.graphics.circle(this.btnWidth/2,this.btnHeight/2, this.btnWidth/2).
+            stroke({width: 1, color: this.txtColor, alpha: alpha})
       } else {
-         this.graphics.drawRect(0,0, this.btnWidth, this.btnHeight)
+         this.graphics.rect(0,0, this.btnWidth, this.btnHeight). 
+            stroke({width: 1, color: this.txtColor, alpha: alpha})
       }
-      this.graphics.endFill()
+      if ( this.pointerDown) {
+         this.graphics.fill( this.highlight)
+      } else {
+         this.graphics.fill( {color: this.btnColor, alpha: alpha} )
+      }
    }
 
    setEnabled( flag) {

@@ -1,81 +1,79 @@
-import * as PIXI from "pixi.js"
+import {Application, Graphics} from "pixi.js"
 
 export default class BaseGame {
    gameElement = null
    gameWidth = 0 
    gameHeight = 0
    app = null 
-   scene = null
    gfx = null
 
    constructor(gameW, gameH, backgroundColor) {
       this.gameWidth = gameW 
       this.gameHeight = gameH
+      this.backgroundColor = backgroundColor
+   }
 
+   async initialize() {
       let hdr = document.getElementById("header")
       let hdrH = hdr.getBoundingClientRect().height
       let windowH = window.innerHeight-hdrH
 
-      PIXI.settings.RESOLUTION = window.devicePixelRatio || 1
-      this.app = new PIXI.Application({
+      this.app = new Application()
+      await this.app.init({
          autoDensity: true, // Handles high DPI screens
          antialias: true,
-         backgroundColor: backgroundColor,
+         background: this.backgroundColor,
          width: this.gameWidth,
          height: this.gameHeight,
       })
-
+      
       if (window.innerWidth <= this.gameWidth || windowH <= this.gameHeight   ) {
          this.gameElement = document.body
-         this.gameElement.appendChild( this.app.view )
-         this.scene = new PIXI.Container()
-         this.app.stage.addChild( this.scene )
+         this.gameElement.appendChild( this.app.canvas )
          this.resize()
       } else {
          this.gameElement = document.getElementById("game")
-         this.gameElement.appendChild( this.app.view )
-         this.scene = new PIXI.Container()
-         this.app.stage.addChild( this.scene )
+         this.gameElement.appendChild( this.app.canvas )
       }
 
-      this.gfx = new PIXI.Graphics() 
-      this.scene.addChild(this.gfx)
+      this.gfx = new Graphics() 
+      this.app.stage.addChild(this.gfx)
+      
+      // this.gfx.rect(5, 5, this.gameWidth-10, 100).fill(0xde3249)
 
       // add a mask to crop the screen to game dimensions
-      let m = new PIXI.Graphics() 
-      m.beginFill(0x000000)
-      m.drawRect(0, 0, this.gameWidth, this.gameHeight);
-      m.endFill()
-      this.scene.addChild(m)
-      this.scene.mask = m
+      // let m = new Graphics() 
+      // m.fill(0x000000)
+      // m.rect(0, 0, this.gameWidth, this.gameHeight);
+      // this.app.stage.addChild(m)
+      // this.app.stage.mask = m
 
       this.app.ticker.add( this.update.bind(this) )
    }
 
    resize() {
       // Determine which screen dimension is most constrained
-
       let hdr = document.getElementById("header")
       let hdrH = hdr.getBoundingClientRect().height
       let windowH = window.innerHeight-hdrH
 
       var ratio = Math.min(window.innerWidth / this.gameWidth, windowH / this.gameHeight)
-      this.scene.scale.x = this.scene.scale.y = ratio 
+      this.app.stage.scale.x = this.app.stage.scale.y = ratio 
       this.app.renderer.resize( window.innerWidth, windowH)
       if ( this.gameWidth * ratio < window.innerWidth ) {
-         this.scene.position.x = ((window.innerWidth - this.gameWidth*ratio) / 2.0) 
+         this.app.stage.position.x = ((window.innerWidth - this.gameWidth*ratio) / 2.0) 
       }
    }
 
    get scale() {
-      return this.scene.scale.x
+      return this.app.stage.scale.x
    }
 
    addChild( child ) {
-      this.scene.addChild(child)
+      this.app.stage.addChild(child)
    }
    removeChild( child, destroy = true ) {
-      this.scene.removeChild(child)
+      this.app.stage.removeChild(child)
       if ( destroy ) {
          child.destroy()
       }
@@ -103,15 +101,8 @@ export default class BaseGame {
    }
 
    destroy() {
-      this.app.ticker.stop()
-   
-      this.scene.destroy({
-         children: true,
-         texture: true,
-         baseTexture: true
-      })
-      
+      // this.app.ticker.stop()
       this.app.stage.removeChildren()
-      this.gameElement.removeChild(this.app.view)
+      this.gameElement.removeChild(this.app.canvas)
    }
 }

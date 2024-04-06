@@ -1,13 +1,13 @@
-import * as PIXI from "pixi.js"
+import { Container, Graphics} from "pixi.js"
 
-export default class ShotIndicator extends PIXI.Container {
+export default class ShotIndicator extends Container {
    gfx = null
    arrowLength = 150
    pointWidth = 20
 
    constructor() {
       super() 
-      this.gfx = new PIXI.Graphics() 
+      this.gfx = new Graphics() 
       this.pivot.set(this.pointWidth/2.0, 0)
       this.addChild(this.gfx)
       this.draw()
@@ -36,22 +36,20 @@ export default class ShotIndicator extends PIXI.Container {
    draw() {
       this.gfx.clear() 
       this.gfx.alpha = 0.6
-      this.gfx.lineStyle(1, 0x2A3D45, 1)
-      this.gfx.beginFill( 0xF3E9DC )
-      this.gfx.drawCircle(this.pointWidth/2.0, 0, 10)
 
-      this.gfx.beginFill( 0xF3E9DC )
-      this.gfx.drawRect(this.pointWidth/2.0-3, 0, 6, this.arrowLength)
+      // start circle and box for pwer meter
+      this.gfx.circle(this.pointWidth/2.0, 0, 10).
+         fill(0xF3E9DC).stroke({width:1, color: 0x2A3D45 })
+      this.gfx.rect(this.pointWidth/2.0-3, 0, 6, this.arrowLength). 
+         fill(0xF3E9DC).stroke({width:1, color: 0x2A3D45 })
 
-      this.gfx.lineStyle(0, 0x2A3D45, 1)
-      this.gfx.beginFill( 0x0e9594 )
-      this.gfx.drawRect(this.pointWidth/2.0-2, 0, 4, this.arrowLength* this.power)
+      this.gfx.rect(this.pointWidth/2.0-2, 0, 4, this.arrowLength* this.power).fill(0x0e9594)
       
-      this.gfx.beginFill( 0x2A3D45 )
-      this.gfx.moveTo(this.pointWidth/2.0, this.arrowLength+10)
-      this.gfx.lineTo(this.pointWidth, this.arrowLength)
-      this.gfx.lineTo(0, this.arrowLength)
-      this.gfx.closePath()
-      this.gfx.endFill()
+      const pts = [
+         {x: this.pointWidth/2.0, y:this.arrowLength+10 }, 
+         {x: this.pointWidth, y: this.arrowLength}, 
+         {x: 0, y: this.arrowLength}
+      ]
+      this.gfx.poly(pts).fill(0x2A3D45)
    }
 }

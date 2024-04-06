@@ -1,12 +1,12 @@
-import * as PIXI from "pixi.js"
+import { Container, Rectangle, Graphics } from "pixi.js"
 
-export default class IconButton extends PIXI.Container {
+export default class IconButton extends Container {
    static WIDTH = 60
    static HEIGHT = 60
 
-   buttonColor = new PIXI.Color(0xe1d9cd)  
-   borderColor = new PIXI.Color(0x582F0E) 
-   selectColor = new PIXI.Color(0xBBE5ED)  
+   buttonColor = 0xe1d9cd 
+   borderColor = 0x582F0E 
+   selectColor = 0xBBE5ED  
    down = false
    enabled = true
    name = ""
@@ -19,17 +19,17 @@ export default class IconButton extends PIXI.Container {
       this.y = y
 
       this.eventMode = 'static'
-      this.hitArea = new PIXI.Rectangle(0,0, IconButton.WIDTH,IconButton.HEIGHT)
+      this.hitArea = new Rectangle(0,0, IconButton.WIDTH,IconButton.HEIGHT)
       this.cursor ="pointer"
 
-      this.graphics = new PIXI.Graphics()
+      this.graphics = new Graphics()
       this.draw()
 
       this.addChild(this.graphics)
       image.anchor.set(0.5,0.5)
       image.x = IconButton.WIDTH/2 
       image.y = IconButton.HEIGHT/2
-      this.graphics.addChild(image)
+      this.addChild(image)
    }
 
    setSelected( flag ) {
@@ -64,12 +64,12 @@ export default class IconButton extends PIXI.Container {
       if ( this.enabled == false) {
          alpha = 0.3
       }
-      this.graphics.lineStyle(2, this.borderColor, alpha)
-      this.graphics.beginFill( this.buttonColor, alpha )
+      this.graphics.roundRect(0,0, IconButton.WIDTH, IconButton.HEIGHT, 5). 
+         stroke({width: 2, color: this.borderColor, alpha: alpha})
       if ( this.down ) {
-         this.graphics.beginFill( this.selectColor, alpha )   
-      }
-      this.graphics.drawRoundedRect(0,0, IconButton.WIDTH, IconButton.HEIGHT, 5)
-      this.graphics.endFill()
+         this.graphics.fill( {color: this.selectColor, alpha: alpha} )   
+      } else {
+         this.graphics.fill( {color: this.buttonColor, alpha: alpha} )
+      }   
    }
 }

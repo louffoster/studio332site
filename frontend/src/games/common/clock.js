@@ -1,17 +1,17 @@
-import * as PIXI from "pixi.js"
+import { Container, Text, Color} from "pixi.js"
 
-export default class Clock extends PIXI.Container {
+export default class Clock extends Container {
    constructor( x,y, label="",color=0x80D3E1, fontFamily="Arial") {
       super()
       this.x = x
       this.y = y
 
-      this.clockColor = new PIXI.Color(color)
-      let style = {
+      this.clockColor = new Color(color)
+      
+      let textStyle = {
          fill: this.clockColor,
          fontFamily: fontFamily,
          fontSize: 18,
-         lineHeight: 18,
       }
 
       let labelWidth = 0
@@ -25,7 +25,7 @@ export default class Clock extends PIXI.Container {
             label = label.replace("\n", ":")
          }
       
-         let timeLabel = new PIXI.Text(label, style)
+         let timeLabel = new Text({text:label, style: textStyle})
          timeLabel.x = 0
          timeLabel.y = 0
          this.addChild(timeLabel)
@@ -37,7 +37,7 @@ export default class Clock extends PIXI.Container {
             timerY = 0
          }
       }
-      this.timerDisplay = new PIXI.Text("00:00", style)
+      this.timerDisplay = new Text({text: "00:00", style: textStyle})
       this.timerDisplay.x = labelWidth
       this.timerDisplay.y = timerY
       if ( timerY != 0) {

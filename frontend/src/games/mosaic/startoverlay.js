@@ -1,37 +1,28 @@
-import * as PIXI from "pixi.js"
+import { Container, Graphics, Text } from "pixi.js"
 import Button from "@/games/common/button"
 
-export default class StartOverlay extends PIXI.Container {
+export default class StartOverlay extends Container {
    constructor(startTimeMS, startHandler) {
       super()
 
       this.x = 10 
       this.y = 55
-      this.startCallback = startHandler
-      this.panelW = 340
-      this.panelH = 250
+      const panelW = 340
+      const panelH = 250
 
-      this.graphics = new PIXI.Graphics()
-      this.graphics.lineStyle(6, 0x80D3E1, 1)
-      this.graphics.beginFill(0x34565c)
-      this.graphics.drawRect(0,0, this.panelW, this.panelH)
-      this.graphics.endFill()
-      this.graphics.lineStyle(2, 0x333333, 1)
-      this.graphics.drawRect(0,0, this.panelW, this.panelH)
+      const graphics = new Graphics()
+      graphics.rect(5,5, panelW-10, panelH-10).stroke({width:10,color:0x80D3E1}).fill(0x34565c)
+      graphics.rect(0,0, panelW, panelH).stroke({width: 2, color: 0x000000})
+      this.addChild( graphics )
 
-      let style = new PIXI.TextStyle({
+      let style = {
          fill: "#f0f0ff",
          fontFamily: "Arial",
          fontSize: 20,
          wordWrap: true,
-         fontWeight: 'bold',
-         wordWrapWidth: this.panelW - 20,
-         dropShadow: true,
-         dropShadowColor: '#000000',
-         dropShadowBlur: 2,
-         dropShadowDistance: 1,
+         wordWrapWidth: panelW - 40,
          align: "center"
-      })
+      }
 
       let secs = startTimeMS / 1000
       let mins = Math.floor(secs / 60)
@@ -40,24 +31,22 @@ export default class StartOverlay extends PIXI.Container {
       }
       let timeStr = `${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
 
-      this.msg = new PIXI.Text(`Match as many patterns as possible in ${timeStr}`, style)
-      this.msg.anchor.set(0.5,0.5)
-      this.msg.x = this.panelW/2
-      this.msg.y = 40
+      const msg = new Text({text:`Match as many patterns as possible in ${timeStr}`, style:style})
+      msg.anchor.set(0.5,0.5)
+      msg.x = panelW/2
+      msg.y = 40
+      this.addChild(msg)
 
-      this.addChild(this.graphics)
-      this.graphics.addChild(this.msg)
-
-      let note1 = new PIXI.Text(`Standard mode uses two colors`, style)
+      const note1 = new Text({text: `Standard mode uses two colors`, style: style})
       note1.anchor.set(0.5,0.5)
-      note1.x = this.panelW/2
+      note1.x = panelW/2
       note1.y = 100
-      this.graphics.addChild(note1)
-      let note2 = new PIXI.Text(`Advanced mode uses three`, style)
+      this.addChild(note1)
+      const note2 = new Text({text: `Advanced mode uses three`, style: style})
       note2.anchor.set(0.5,0.5)
-      note2.x = this.panelW/2
+      note2.x = panelW/2
       note2.y = 130
-      this.graphics.addChild(note2)
+      this.addChild(note2)
 
       let stdButton = new Button( 50, 180, "Standard", () => {
          startHandler("standard")

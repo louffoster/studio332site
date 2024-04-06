@@ -1,5 +1,5 @@
 import BasePhysicsItem from "@/games/common/basephysicsitem"
-import * as PIXI from "pixi.js"
+import { Text, Polygon } from "pixi.js"
 import Matter from 'matter-js'
 
 export default class Rock extends BasePhysicsItem {
@@ -10,6 +10,7 @@ export default class Rock extends BasePhysicsItem {
    enabled = true
    letters = []
    error = false
+   polyPts = []
    static WIDTH = 55
    static HEIGHT = 55
    static FRICTION = 0.01
@@ -20,16 +21,15 @@ export default class Rock extends BasePhysicsItem {
       this.letter = letter
       
       this.letterColor = "#efefef"
-      this.lineColor = new PIXI.Color( 0x582F0E )
+      this.lineColor = 0x582F0E
 
       let tgtW = Rock.WIDTH 
       let tgtH = Rock.HEIGHT
-      let polyPts = []
       if ( letter.isVowel()) {
-         this.fillColor = new PIXI.Color( 0x6F3F14 )
+         this.fillColor = 0x6F3F14
          tgtW -= 3 
          tgtH -= 3
-         polyPts = [ 
+         this.polyPts = [ 
             {x: -tgtW/2-5, y: 0}, 
             {x: -tgtW/4, y: -tgtH/2},
             {x: +tgtW/4, y: -tgtH/2},
@@ -38,10 +38,10 @@ export default class Rock extends BasePhysicsItem {
             {x: -tgtW/4, y: +tgtH/2},
          ]
       } else  {
-         this.fillColor = new PIXI.Color( 0x7F4F24 )
+         this.fillColor = 0x7F4F24
          tgtW += 2 
          tgtH += 2
-         polyPts = [ 
+         this.polyPts = [ 
             {x: -tgtW/2, y: -tgtH/4}, 
             {x: -tgtW/4, y: -tgtH/2},
             {x: +tgtW/4, y: -tgtH/2},
@@ -53,30 +53,27 @@ export default class Rock extends BasePhysicsItem {
          ]
       }
 
-      this.selectColor = new PIXI.Color( 0xffd046 )
-      this.selLetterColor = new PIXI.Color(0x414833)
-      this.targetColor = new PIXI.Color(0xe26312)
-      this.dimColor = new PIXI.Color( 0x616853 )
+      this.selectColor = 0xffd046
+      this.selLetterColor = 0x414833
+      this.targetColor = 0xe26312
+      this.dimColor = 0x616853
 
-      let style = new PIXI.TextStyle({
+      let txt = new Text({text: letter.text, style: {
          fill: this.letterColor,
          fontFamily: "Arial",
          fontSize: 18,
-      })
-      let smallStyle = new PIXI.TextStyle({
-         fill: this.letterColor,
-         fontFamily: "Arial",
-         fontSize: 15,
-      })
-
-      let txt = new PIXI.Text(letter.text, style)
+      }})
       txt.anchor.set(0.5)
       txt.x = 0
       txt.y = 0
       this.addChild(txt)
       this.letters.push( txt )
       if (letter.text == "Q") {
-         let uTxt = new PIXI.Text("U", smallStyle)
+         let uTxt = new Text({text: "U", style: {
+            fill: this.letterColor,
+            fontFamily: "Arial",
+            fontSize: 15,
+         }})
          uTxt.anchor.set(0.5)
          uTxt.x = 8
          uTxt.y = 4    
@@ -85,11 +82,11 @@ export default class Rock extends BasePhysicsItem {
          this.letters.push( uTxt )
       }
 
-      this.polygon = new PIXI.Polygon(polyPts)
-      let c = Matter.Vertices.centre(polyPts) 
+      const polygon = new Polygon(this.polyPts)
+      let c = Matter.Vertices.centre(this.polyPts) 
       this.pivot.set(c.x, c.y)  
-      this.body = Matter.Bodies.fromVertices(x, y, polyPts, {isStatic: this.isStatic})
-      this.hitArea = this.polygon
+      this.body = Matter.Bodies.fromVertices(x, y, this.polyPts, {isStatic: this.isStatic})
+      this.hitArea = polygon
 
       this.body.label = "rock-"+letter.text
       this.setAirFriction( 0.0)
@@ -180,24 +177,25 @@ export default class Rock extends BasePhysicsItem {
    }
 
    draw() {
-      super.draw() 
       this.gfx.clear()
-      this.gfx.lineStyle(1, this.lineColor, 1)
+
+      this.gfx.poly( this.polyPts )
       if ( this.target ) {
-         this.gfx.lineStyle(5, this.targetColor, 1)   
+         this.gfx.stroke({width: 5, color: this.targetColor} )   
+      } else {
+         this.gfx.stroke({width: 1, color: this.lineColor})
       }
       if (this.enabled == false ) {
-         this.gfx.beginFill(this.dimColor)
+         this.gfx.fill(this.dimColor)
       } else {
-         this.gfx.beginFill(this.fillColor)
          if ( this.error ) {
-            this.gfx.beginFill(0xa20c01) 
+            this.gfx.fill(0xa20c01) 
          } else if ( this.selected ) {
-            this.gfx.beginFill(this.selectColor)
-         } 
+            this.gfx.fill(this.selectColor)
+         } else {
+            this.gfx.fill(this.fillColor)
+         }
       }
-      this.gfx.drawPolygon( this.polygon )
-      this.gfx.endFill()
    }
 
    get text() {

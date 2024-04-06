@@ -1,6 +1,6 @@
-import * as PIXI from "pixi.js"
+import { Graphics, Circle } from "pixi.js"
 
-export default class Spinner extends PIXI.Graphics {
+export default class Spinner extends Graphics {
    constructor(x,y, r,c, clickCallback) {
       super()
 
@@ -11,7 +11,7 @@ export default class Spinner extends PIXI.Graphics {
          {row: r+1, col: c+1},{row: r+1, col: c}]
 
       this.eventMode = 'static'
-      this.hitArea =  new PIXI.Circle(0,0,24)
+      this.hitArea =  new Circle(0,0,24)
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', this.handlePointerDown)
@@ -41,12 +41,7 @@ export default class Spinner extends PIXI.Graphics {
       if (this.pointerDown ) {
          this.alpha = 0.8
       }
-      this.beginFill( 0x55ccdd)
-      this.lineStyle(2, 0x333333, 1)
-      this.drawCircle(0,0, 24)
-      this.endFill()
-      this.beginFill( 0x333333)
-      this.lineStyle(2, 0x333333, 1)
-      this.drawCircle(0,0, 5)
+      this.circle(0,0, 24).fill(0x55ccdd).stroke({width: 2, color: 0x333333})
+      this.circle(0,0, 5).stroke({width:2, color:0x333333}).fill(0x333333)
    }
 }

@@ -1,14 +1,14 @@
-import * as PIXI from "pixi.js"
+import { Sprite, Text, Assets } from "pixi.js"
 import BasePhysicsGame from "@/games/common/basephysicsgame"
 import Dictionary from "@/games/common/dictionary"
 import PhysicsShape from "@/games/common/physicsshape"
 import Rock from "@/games/wordmine/rock"
 import ToggleButton from "@/games/wordmine/togglebutton"
 import IconButton from "@/games/wordmine/iconbutton"
+import Boom from "@/games/wordmine/boom"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
-import * as particles from '@pixi/particle-emitter'
-import explodeJson from '@/assets/trash.json'
+import * as TWEEDLE from "tweedle.js"
 
 export default class WordMine extends BasePhysicsGame {
    pool = new LetterPool()
@@ -26,10 +26,22 @@ export default class WordMine extends BasePhysicsGame {
    markers = []
    gameState = "init"
    mineFloor = null
+   smoke = null
+   bit = null
 
    async initialize(replayHandler, backHandler) {
+      await super.initialize()
+      this.app.ticker.add(() => TWEEDLE.Group.shared.update())
+      const pickImg = await Assets.load('/images/wordmine/pick.png')
+      const checkImg = await Assets.load('/images/wordmine/check.png')
+      const clearImg = await Assets.load('/images/wordmine/clear.png')
+      const bombImg = await Assets.load('/images/wordmine/bomb.png')
+      const leftImg = await Assets.load('/images/wordmine/left.png')
+      const rightImg = await Assets.load('/images/wordmine/right.png')
+      this.smoke = await Assets.load('/smoke.png')
+      this.bit = await Assets.load('/particle.png')
+
       this.dictionary = new Dictionary()
-      this.explodeAnim = particles.upgradeConfig(explodeJson, ['smoke.png'])
 
       // set bottom aand sides
       this.mineFloor = Matter.Bodies.rectangle(this.gameWidth/2, this.gameHeight+25, this.gameWidth, 50, { isStatic: true, friction: 0, restitution: 0})
@@ -52,7 +64,7 @@ export default class WordMine extends BasePhysicsGame {
 
       // control buttons -----
       let btnsY = 205
-      let pick = PIXI.Sprite.from('/images/wordmine/pick.png')
+      let pick = Sprite.from(pickImg)
       let pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", pick )
       pickButton.setSelected(true)
       pickButton.setListener( this.toggleButtonClicked.bind(this) )
@@ -60,53 +72,51 @@ export default class WordMine extends BasePhysicsGame {
       this.addChild(pickButton)
 
       btnsY += ToggleButton.HEIGHT + 10
-      let submit = PIXI.Sprite.from('/images/wordmine/check.png')
+      let submit = Sprite.from(checkImg)
       this.submitBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, "submit", submit )
       this.submitBtn.setListener( this.submitClicked.bind(this) )
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn)
 
       btnsY += IconButton.HEIGHT + 10
-      let clear = PIXI.Sprite.from('/images/wordmine/clear.png')
+      let clear = Sprite.from(clearImg)
       this.clearBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, "clear", clear )
       this.clearBtn.setListener( this.clearClicked.bind(this) )
       this.clearBtn.setEnabled(false)
       this.addChild(this.clearBtn)
 
       btnsY += IconButton.HEIGHT + 30
-      let bomb = PIXI.Sprite.from('/images/wordmine/bomb.png')
+      let bomb = Sprite.from(bombImg)
       let bombButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "bomb", bomb )
       bombButton.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( bombButton )
       this.addChild(bombButton)
       btnsY += ToggleButton.HEIGHT + 10
-      let left = PIXI.Sprite.from('/images/wordmine/left.png')
+      let left = Sprite.from(leftImg)
       let pushLeft = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "left", left )
       pushLeft.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( pushLeft )
       this.addChild(pushLeft)
       btnsY += ToggleButton.HEIGHT + 10
-      let right = PIXI.Sprite.from('/images/wordmine/right.png')
+      let right = Sprite.from(rightImg)
       let pushRight = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "right", right )
       pushRight.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( pushRight )
       this.addChild(pushRight)
 
-      let wordStyle = new PIXI.TextStyle({
+      let wordStyle = {
          fill: "#FCFAFF",
          fontFamily: "Arial",
          fontSize: 28,
-         lineHeight: 28,
-         stroke: "#333333",
-         strokeThickness: 2,
-      })
-      this.word = new PIXI.Text("", wordStyle)
+         stroke: {color: "#333333", width: 2},
+      }
+      this.word = new Text({text: "", style: wordStyle})
       this.word.x = 10 
       this.word.y = 65
       this.addChild(this.word)
 
       this.score = 0
-      this.scoreDisplay = new PIXI.Text("00000", wordStyle)
+      this.scoreDisplay = new Text({text: "00000", style: wordStyle})
       this.scoreDisplay.anchor.set(0.5)
       this.scoreDisplay.x = this.gameWidth/2
       this.scoreDisplay.y = 20
@@ -179,10 +189,7 @@ export default class WordMine extends BasePhysicsGame {
       this.items.forEach( i => {
          if ( i.tag.indexOf("rock") == 0 ) {
             if (i.selected) {
-               var emitter = new particles.Emitter(this.scene, this.explodeAnim )
-               emitter.updateOwnerPos(0,0)
-               emitter.updateSpawnPos(i.x, i.y)
-               emitter.playOnceAndDestroy()
+               new Boom(this.app.stage, this.smoke, this.bit, i.x, i.y)
                gone.push(i)
             }
          }
@@ -214,25 +221,21 @@ export default class WordMine extends BasePhysicsGame {
       }, 500) 
 
       let m = this.markers.pop() 
-      var emitter = new particles.Emitter(this.scene, this.explodeAnim )
-      emitter.updateOwnerPos(0,0)
-      emitter.updateSpawnPos(m.x, m.y)
-      emitter.playOnceAndDestroy()
-      this.removePhysicsItem( m )
-      if ( this.markers.length == 0) {
-         this.gameOver()
-      }
+      new Boom(this.app.stage, this.smoke, this.bit, m.x,m.y, () => {
+         this.removePhysicsItem( m )
+         if ( this.markers.length == 0) {
+            this.gameOver()
+         }
+      })
    }
 
    rockTouhed( rock ) {
       if (this.gameState != "play") return 
 
       if ( this.clickMode == "bomb") {
-         var emitter = new particles.Emitter(this.scene, this.explodeAnim )
-         emitter.updateOwnerPos(0,0)
-         emitter.updateSpawnPos(rock.x, rock.y)
-         emitter.playOnceAndDestroy()
-         this.removePhysicsItem( rock )
+         new Boom(this.app.stage, this.smoke, this.bit, rock.x, rock.y, () => {
+            this.removePhysicsItem( rock )
+         })
       } else if ( this.clickMode == "pick") {
          this.rockSelected( rock )
       } else if ( this.clickMode == "left") {
@@ -314,10 +317,7 @@ export default class WordMine extends BasePhysicsGame {
 
    gameOver() {
       for ( let i=0; i<5; i++) {
-         var emitter = new particles.Emitter(this.scene, this.explodeAnim )
-         emitter.updateOwnerPos(0,0)
-         emitter.updateSpawnPos(10+(this.gameWidth/5)*i, this.gameHeight-10)
-         emitter.playOnceAndDestroy()
+         new Boom(this.app.stage, this.smoke, this.bit, 10+(this.gameWidth/5)*i, this.gameHeight-10)
       }
       Matter.Composite.remove(this.physics.world, this.mineFloor)
       this.gameState = "over"
@@ -331,32 +331,24 @@ export default class WordMine extends BasePhysicsGame {
       this.gfx.clear() 
 
       // sky
-      this.gfx.beginFill(0x86BBD8)
-      this.gfx.lineStyle(1, 0x86BBD8, 1)
-      this.gfx.drawRect(0,0, this.gameWidth, 105)
+      this.gfx.rect(0,0, this.gameWidth, 105).
+         fill(0x86BBD8).stroke({width: 1, color: 0x86BBD8})
 
       // buttons container
-      this.gfx.beginFill(0xA68A64)
-      this.gfx.lineStyle(2, 0x582F0E, 1)
-      this.gfx.drawRect(330,125, this.gameWidth-330, this.gameHeight-125)
-
+      this.gfx.rect(330,125, this.gameWidth-330, this.gameHeight-125).
+         fill(0xA68A64).stroke({width: 2, color: 0x582F0E} )
 
       // black box for drop chute
-      this.gfx.beginFill(0x333D29)
-      this.gfx.lineStyle(0,0x333D29)
-      this.gfx.drawRect(this.gameWidth-110,105, this.gameWidth, 85)
+      this.gfx.rect(this.gameWidth-110,105, this.gameWidth, 85).fill(0x333D29)
 
        // grass
-       this.gfx.beginFill(0x73a942)
-       this.gfx.lineStyle(2, 0x538922, 1)
-       this.gfx.drawRoundedRect(-20,105, this.gameWidth-100, 20, 20)
+       this.gfx.roundRect(-20,105, this.gameWidth-100, 20, 20).
+         fill(0x73a942).stroke({width: 2, color: 0x538922})
       
       // buttons divider
-      this.gfx.lineStyle(3, 0x582F0E, 1)
       this.gfx.moveTo(this.gameWidth-110, 420)
       this.gfx.lineTo(this.gameWidth, 420)
-
-      this.gfx.endFill()
+      this.gfx.stroke({width: 3, color: 0x582F0E})
    }
 
    update() {

@@ -1,5 +1,6 @@
-import * as PIXI from "pixi.js"
-export default class Timer extends PIXI.Container {
+import { Container, Graphics } from "pixi.js"
+
+export default class Timer extends Container {
    static SPEEDUP_DELAY_MS = 60 * 1000    // how often to get faster
    static RATE_INCREASE = 0.15            // timer rate increases by this much
    static MAX_RATE = 5.0                  // 5 second countdown is the fastest
@@ -18,7 +19,7 @@ export default class Timer extends PIXI.Container {
       this.meterW = w 
       this.meterH = h
    
-      this.gfx = new PIXI.Graphics() 
+      this.gfx = new Graphics() 
       this.addChild( this.gfx )
 
       this.draw()
@@ -38,24 +39,19 @@ export default class Timer extends PIXI.Container {
 
    draw() {
       this.gfx.clear()
-      this.gfx.lineStyle( 2, 0x5E3023, 1 )
-      this.gfx.beginFill(0x2A3D45)
-      this.gfx.drawRect(0,0, this.meterW, this.meterH)
-      this.gfx.endFill()
+      this.gfx.rect(0,0, this.meterW, this.meterH).stroke({width: 2, color: 0x5E3023}).fill(0x2A3D45)
 
       if ( this.percent > 0) {
          let emptyW = this.percent/100.0*this.meterW
-         this.gfx.beginFill(0x75c482)
-         this.gfx.lineStyle(1, 0x75c482, 1)
+         this.gfx.rect(this.meterW-emptyW+1,1, emptyW-1, this.meterH-2)
+
          if ( this.percent < 25) {
-            this.gfx.beginFill(0xc68da3)
-            this.gfx.lineStyle(1, 0xc68da3, 1)
+            this.gfx.fill(0xc68da3).stroke({width: 1, color: 0xc68da3})
          } else if ( this.percent < 50 ) {
-            this.gfx.beginFill(0xdfd689)
-            this.gfx.lineStyle(1, 0xdfd689, 1)
+            this.gfx.fill(0xdfd689).stroke({width: 1, color: 0xdfd689})
+         } else {
+            this.gfx.fill(0x75c482).stroke({width: 1, color: 0x75c482})
          }
-         this.gfx.drawRect(this.meterW-emptyW+1,1, emptyW-1, this.meterH-2)
-         this.gfx.endFill()
       }
    }
 

@@ -1,6 +1,6 @@
 import BasePhysicsItem from "@/games/common/basephysicsitem"
 import Matter from 'matter-js'
-import * as PIXI from "pixi.js"
+import { Circle } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
 
@@ -16,16 +16,15 @@ export default class Striker extends BasePhysicsItem {
    constructor( x,y) {
       super(x,y)
      
-      this.lineColor = new PIXI.Color( 0x000066 )
-      this.fillColor = new PIXI.Color( 0x5E3023 )
+      this.lineColor =  0x000066
+      this.fillColor = 0x5E3023
       this.radius = Striker.RADIUS
       this.pivot.set(0,0)
       this.body = Matter.Bodies.circle(x, y, this.radius, {restitution: 1, frictionAir: 0.02, frictiion: 0, label: "striker"})
-      this.hitArea = new PIXI.Circle(0,0, this.radius)
+      this.hitArea = new Circle(0,0, this.radius)
       this.setMass(3.5)
       
       this.update()
-
       this.draw() 
 
       this.cursor ="pointer"
@@ -58,11 +57,7 @@ export default class Striker extends BasePhysicsItem {
 
    draw() {
       this.gfx.clear() 
-      this.gfx.lineStyle(1, this.lineColor, 1)
-      this.gfx.beginFill( this.fillColor )
-      this.gfx.drawCircle(0,0,this.radius)
-      this.gfx.beginFill( 0x895737 )
-      this.gfx.drawCircle(0,0,this.radius-10)
-      this.gfx.endFill()
+      this.gfx.circle(0,0,this.radius).fill(this.fillColor).stroke({width: 1, color: this.lineColor})
+      this.gfx.circle(0,0,this.radius-10).fill(0x895737)
    }
 }
