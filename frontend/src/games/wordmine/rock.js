@@ -27,8 +27,8 @@ export default class Rock extends BasePhysicsItem {
       let tgtH = Rock.HEIGHT
       if ( letter.isVowel()) {
          this.fillColor = 0x6F3F14
-         tgtW -= 3 
-         tgtH -= 3
+         tgtW -= 5 
+         tgtH -= 5
          this.polyPts = [ 
             {x: -tgtW/2-5, y: 0}, 
             {x: -tgtW/4, y: -tgtH/2},
@@ -39,8 +39,8 @@ export default class Rock extends BasePhysicsItem {
          ]
       } else  {
          this.fillColor = 0x7F4F24
-         tgtW += 2 
-         tgtH += 2
+         tgtW += 5
+         tgtH += 5
          this.polyPts = [ 
             {x: -tgtW/2, y: -tgtH/4}, 
             {x: -tgtW/4, y: -tgtH/2},
@@ -104,17 +104,29 @@ export default class Rock extends BasePhysicsItem {
       })
    }
 
+   pushUp() {
+      let fx = this.randomRange(-0.025, 0.025)
+      this.setFriction(0)
+      this.applyForce(fx,-0.07)
+      setTimeout( ()=>{
+         this.setFriction(Rock.FRICTION)
+      }, 100)
+   }
+   randomRange(min, max) {
+      const a = Math.min(min, max)
+      const b = Math.max(min, max)
+      return (a + (b - a) * Math.random())
+  }
    pushLeft() {
       this.setFriction(0)
-      this.applyForce(-0.05,0)
+      this.applyForce(-0.06,-0.01)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)
    }
    pushRight() {
       this.setFriction(0)
-      // this.applyForce(0.05,0)
-      this.applyForce(0,-0.05)
+      this.applyForce(0.06,-0.01)
       setTimeout( ()=>{
          this.setFriction(Rock.FRICTION)
       }, 100)

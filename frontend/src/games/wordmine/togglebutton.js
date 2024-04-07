@@ -10,6 +10,7 @@ export default class ToggleButton extends Container {
    selected = false
    enabled = true
    name = ""
+   btnImage = null
    
    constructor( x,y, name, image) {
       super()
@@ -17,6 +18,7 @@ export default class ToggleButton extends Container {
       this.name = name
       this.x = x
       this.y = y
+      this.btnImage = image
 
       this.eventMode = 'static'
       this.hitArea = new Rectangle(0,0, ToggleButton.WIDTH,ToggleButton.HEIGHT)
@@ -29,7 +31,9 @@ export default class ToggleButton extends Container {
       image.anchor.set(0.5,0.5)
       image.x = ToggleButton.WIDTH/2 
       image.y = ToggleButton.HEIGHT/2
-      this.addChild(image)
+
+      this.btnImage.angle = 0
+      this.addChild(this.btnImage)
    }
 
    setSelected( flag ) {
