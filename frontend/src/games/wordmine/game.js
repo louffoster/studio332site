@@ -6,6 +6,7 @@ import Rock from "@/games/wordmine/rock"
 import ToggleButton from "@/games/wordmine/togglebutton"
 import RotateButton from "@/games/wordmine/rotatebutton"
 import IconButton from "@/games/wordmine/iconbutton"
+import ShoveIndicator from "@/games/wordmine/shoveindicator"
 import Boom from "@/games/wordmine/boom"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
@@ -29,7 +30,10 @@ export default class WordMine extends BasePhysicsGame {
    mineFloor = null
    smoke = null
    bit = null
+   shoveRock = null
+   aiming = false
    shoveBtn = null
+   shoveOverlay = null
 
    async initialize(replayHandler, backHandler) {
       await super.initialize()
@@ -137,7 +141,7 @@ export default class WordMine extends BasePhysicsGame {
       let y = 0
       let x = this.gameWidth - Rock.WIDTH*0.5
 
-      for ( let c=0; c< 14; c++) {
+      for ( let c=0; c< 64; c++) {
          x = this.gameWidth - Rock.WIDTH
          if ( c % 2) {
             x = this.gameWidth - Rock.WIDTH*0.5   
@@ -161,6 +165,69 @@ export default class WordMine extends BasePhysicsGame {
          }
          this.gameState = "play"
       }, 3000)
+
+      // setup drag to set shove angle
+      this.app.stage.eventMode = 'static'
+      this.app.stage.hitArea = this.app.screen
+      this.shoveOverlay = new ShoveIndicator()
+      this.app.stage.on('pointermove', this.pointerMove.bind(this))
+      this.app.stage.on('pointerup', this.dragEnd.bind(this))
+      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+   }
+
+   pointerMove(e) {
+      if (this.aiming) {
+         let actualW = this.gameWidth*this.scale
+         let scale = (this.gameWidth / actualW )
+         let ptX = e.global.x*scale
+         let ptY = e.global.y*scale
+         let dX =  ptX - this.shoveRock.x
+         let dY =  ptY - this.shoveRock.y
+         let pullDist = Math.sqrt( dX*dX + dY*dY)
+         let angle = Math.atan2(dY, dX)
+         this.shoveAngle = angle + Math.PI
+         this.shoveOverlay.setRotation(this.shoveAngle* 180.0 / Math.PI)
+         this.shoveOverlay.setPullbackDistance( pullDist )
+      }
+   }
+   dragEnd() {
+      if ( this.aiming ) {
+         if ( this.shoveOverlay.power > 0.01) {
+            let fX = Math.cos(this.shoveAngle) * 0.08 * this.shoveOverlay.power
+            let fY = Math.sin(this.shoveAngle) * 0.08 * this.shoveOverlay.power
+            this.shoveRock.applyForce(fX,fY)
+         } 
+         this.aiming = false
+         this.shoveRock = null
+         this.removeChild(this.shoveOverlay, false)
+      }
+   }
+
+   rockTouhed( rock ) {
+      if (this.gameState != "play") return 
+
+      if ( this.clickMode == "bomb") {
+         new Boom(this.app.stage, this.smoke, this.bit, rock.x, rock.y, () => {
+            this.removePhysicsItem( rock )
+         })
+      } else if ( this.clickMode == "pick") {
+         this.rockSelected( rock )
+      } else if ( this.clickMode == "shove") {
+         this.resetRocks()
+
+         this.shoveOverlay.place( rock.x, rock.y)
+         this.addChild(this.shoveOverlay)
+         this.aiming = true
+         this.shoveRock = rock
+
+         // if (this.shoveBtn.angle == 0) {
+         //    rock.pushUp()
+         // } else if (this.shoveBtn.angle == 90) {
+         //    rock.pushRight()
+         // } else if (this.shoveBtn.angle == 270) {
+         //    rock.pushLeft()
+         // }
+      }
    }
 
    toggleButtonClicked( name ) {
@@ -189,6 +256,7 @@ export default class WordMine extends BasePhysicsGame {
          this.submitFailed()
       }
    }
+
    submitSuccess() {
       let gone = []
       this.items.forEach( i => {
@@ -217,6 +285,7 @@ export default class WordMine extends BasePhysicsGame {
          this.selections = [] 
       }, 150)
    }
+
    submitFailed() {
       this.selections.forEach( s => {
          s.setError()
@@ -232,27 +301,6 @@ export default class WordMine extends BasePhysicsGame {
             this.gameOver()
          }
       })
-   }
-
-   rockTouhed( rock ) {
-      if (this.gameState != "play") return 
-
-      if ( this.clickMode == "bomb") {
-         new Boom(this.app.stage, this.smoke, this.bit, rock.x, rock.y, () => {
-            this.removePhysicsItem( rock )
-         })
-      } else if ( this.clickMode == "pick") {
-         this.rockSelected( rock )
-      } else if ( this.clickMode == "shove") {
-         this.resetRocks()
-         if (this.shoveBtn.angle == 0) {
-            rock.pushUp()
-         } else if (this.shoveBtn.angle == 90) {
-            rock.pushRight()
-         } else if (this.shoveBtn.angle == 270) {
-            rock.pushLeft()
-         }
-      }
    }
 
    rockSelected( rock ) {
