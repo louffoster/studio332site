@@ -6,6 +6,7 @@ import Rock from "@/games/wordmine/rock"
 import ToggleButton from "@/games/wordmine/togglebutton"
 import IconButton from "@/games/wordmine/iconbutton"
 import ShoveIndicator from "@/games/wordmine/shoveindicator"
+import StartOverlay from "@/games/wordmine/startoverlay"
 import Boom from "@/games/wordmine/boom"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
@@ -21,6 +22,7 @@ export default class WordMine extends BasePhysicsGame {
    lastPickedRock = null
    selections = []
    word = null
+   wordCount = 0
    score = 0
    scoreDisplay = null
    dictionary = null
@@ -103,7 +105,7 @@ export default class WordMine extends BasePhysicsGame {
       this.addChild(pinBtn)
 
       let wordStyle = {
-         fill: "#FCFAFF",
+         fill: "#efef00",
          fontFamily: "Arial",
          fontSize: 28,
          stroke: {color: "#333333", width: 2},
@@ -122,7 +124,22 @@ export default class WordMine extends BasePhysicsGame {
 
       this.draw()
 
-      // fill in rocks
+      // setup drag to set shove angle
+      this.app.stage.eventMode = 'static'
+      this.app.stage.hitArea = this.app.screen
+      this.shoveOverlay = new ShoveIndicator()
+      this.app.stage.on('pointermove', this.pointerMove.bind(this))
+      this.app.stage.on('pointerup', this.dragEnd.bind(this))
+      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+
+      const startOverlay = new StartOverlay(Rock.WIDTH*6, Rock.HEIGHT*10, () => {
+         this.removeChild(startOverlay)
+         this.fillRocks()
+      })
+      this.addChild(startOverlay)
+   }
+
+   async fillRocks() {
       this.pool.refill()
       let y = 0
       let x = this.gameWidth - Rock.WIDTH*0.5
@@ -130,14 +147,13 @@ export default class WordMine extends BasePhysicsGame {
       for ( let c=0; c< 60; c++) {
          x = this.gameWidth - Rock.WIDTH
          if ( c % 2) {
-            x = this.gameWidth - Rock.WIDTH*0.5   
+            x = this.gameWidth - Rock.WIDTH  
          }
          let ltr = this.pool.popScoringLetter()
          let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
          this.addPhysicsItem( rock )
-         await new Promise(r => setTimeout(r, 50))
+         await new Promise(r => setTimeout(r, 60))
       }
-
 
       // add markers
       setTimeout( () => {
@@ -150,15 +166,7 @@ export default class WordMine extends BasePhysicsGame {
             mX+=(Rock.WIDTH*2)
          }
          this.gameState = "play"
-      }, 3000)
-
-      // setup drag to set shove angle
-      this.app.stage.eventMode = 'static'
-      this.app.stage.hitArea = this.app.screen
-      this.shoveOverlay = new ShoveIndicator()
-      this.app.stage.on('pointermove', this.pointerMove.bind(this))
-      this.app.stage.on('pointerup', this.dragEnd.bind(this))
-      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
+      }, 2500)
    }
 
    pointerMove(e) {
