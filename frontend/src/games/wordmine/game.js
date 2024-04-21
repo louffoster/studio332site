@@ -4,7 +4,6 @@ import Dictionary from "@/games/common/dictionary"
 import PhysicsShape from "@/games/common/physicsshape"
 import Rock from "@/games/wordmine/rock"
 import ToggleButton from "@/games/wordmine/togglebutton"
-import RotateButton from "@/games/wordmine/rotatebutton"
 import IconButton from "@/games/wordmine/iconbutton"
 import ShoveIndicator from "@/games/wordmine/shoveindicator"
 import Boom from "@/games/wordmine/boom"
@@ -31,8 +30,6 @@ export default class WordMine extends BasePhysicsGame {
    smoke = null
    bit = null
    shoveRock = null
-   aiming = false
-   shoveBtn = null
    shoveOverlay = null
 
    async initialize(replayHandler, backHandler) {
@@ -42,7 +39,8 @@ export default class WordMine extends BasePhysicsGame {
       const checkImg = await Assets.load('/images/wordmine/check.png')
       const clearImg = await Assets.load('/images/wordmine/clear.png')
       const bombImg = await Assets.load('/images/wordmine/bomb.png')
-      const upImg = await Assets.load('/images/wordmine/up.png')
+      const throwImg = await Assets.load('/images/wordmine/throw.png')
+      const nailImg = await Assets.load('/images/wordmine/nail.png')
 
       this.smoke = await Assets.load('/smoke.png')
       this.bit = await Assets.load('/particle.png')
@@ -67,23 +65,6 @@ export default class WordMine extends BasePhysicsGame {
       wedge.setAngle(.785*4)
       wedge.setFriction(0)
       this.addPhysicsItem(wedge)
-
-      // let lX = [Rock.WIDTH, this.gameWidth/2-Rock.WIDTH, Rock.WIDTH*5]
-      // let lY = [this.gameHeight-Rock.HEIGHT*4.5, this.gameHeight-Rock.HEIGHT*7.5, this.gameHeight-Rock.HEIGHT*1.5]
-      // for (let l = 0; l< 3; l++) {
-      //    let ledge = PhysicsShape.createBox(lX[l], lY[l], 120, 10, 0xA68A64,0xA68A64, true)
-      //    ledge.setFriction(0)
-      //    this.addPhysicsItem(ledge)
-      // }
-      // let w = PhysicsShape.createBox(lX[0]+55, lY[0]-10, 10, 15, 0xA68A64,0xA68A64, true)
-      // this.addPhysicsItem(w)
-      // let w1 = PhysicsShape.createBox(lX[1]-55, lY[1]-10, 10,15, 0xA68A64,0xA68A64, true)
-      // this.addPhysicsItem(w1)
-      // let w2 = PhysicsShape.createBox(lX[1]+55, lY[1]-10, 10,15, 0xA68A64,0xA68A64, true)
-      // this.addPhysicsItem(w2)
-      // let w3 = PhysicsShape.createBox(lX[2]-55, lY[2]-10, 10,15, 0xA68A64,0xA68A64, true)
-      // this.addPhysicsItem(w3)
-
 
       // control buttons -----
       let btnsY = 205
@@ -111,10 +92,15 @@ export default class WordMine extends BasePhysicsGame {
       this.toggleButtons.push( bombButton )
       this.addChild(bombButton)
       btnsY += ToggleButton.HEIGHT + 10
-      this.shoveBtn = new RotateButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "shove", Sprite.from(upImg) )
-      this.shoveBtn.setListener( this.toggleButtonClicked.bind(this) )
-      this.toggleButtons.push( this.shoveBtn )
-      this.addChild(this.shoveBtn)
+      let throwBtn = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "shove", Sprite.from(throwImg) )
+      throwBtn.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( throwBtn )
+      this.addChild(throwBtn)
+      btnsY += ToggleButton.HEIGHT + 10
+      let pinBtn = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pin", Sprite.from(nailImg) )
+      pinBtn.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( pinBtn )
+      this.addChild(pinBtn)
 
       let wordStyle = {
          fill: "#FCFAFF",
@@ -141,7 +127,7 @@ export default class WordMine extends BasePhysicsGame {
       let y = 0
       let x = this.gameWidth - Rock.WIDTH*0.5
 
-      for ( let c=0; c< 64; c++) {
+      for ( let c=0; c< 60; c++) {
          x = this.gameWidth - Rock.WIDTH
          if ( c % 2) {
             x = this.gameWidth - Rock.WIDTH*0.5   
@@ -176,28 +162,29 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    pointerMove(e) {
-      if (this.aiming) {
+      if (this.shoveRock != null) {
          let actualW = this.gameWidth*this.scale
          let scale = (this.gameWidth / actualW )
          let ptX = e.global.x*scale
          let ptY = e.global.y*scale
          let dX =  ptX - this.shoveRock.x
          let dY =  ptY - this.shoveRock.y
-         let pullDist = Math.sqrt( dX*dX + dY*dY)
          let angle = Math.atan2(dY, dX)
          this.shoveAngle = angle + Math.PI
          this.shoveOverlay.setRotation(this.shoveAngle* 180.0 / Math.PI)
-         this.shoveOverlay.setPullbackDistance( pullDist )
       }
    }
+
    dragEnd() {
-      if ( this.aiming ) {
-         if ( this.shoveOverlay.power > 0.01) {
-            let fX = Math.cos(this.shoveAngle) * 0.08 * this.shoveOverlay.power
-            let fY = Math.sin(this.shoveAngle) * 0.08 * this.shoveOverlay.power
-            this.shoveRock.applyForce(fX,fY)
-         } 
-         this.aiming = false
+      if ( this.shoveRock != null ) {
+         let force = 0.08 
+         if ( this.shoveRock.isVowel) {
+            // vowel rocks are smaller... use less force
+            force = 0.06
+         }
+         let fX = Math.cos(this.shoveAngle) * force
+         let fY = Math.sin(this.shoveAngle) * force
+         this.shoveRock.applyForce(fX,fY)
          this.shoveRock = null
          this.removeChild(this.shoveOverlay, false)
       }
@@ -214,19 +201,17 @@ export default class WordMine extends BasePhysicsGame {
          this.rockSelected( rock )
       } else if ( this.clickMode == "shove") {
          this.resetRocks()
-
          this.shoveOverlay.place( rock.x, rock.y)
          this.addChild(this.shoveOverlay)
-         this.aiming = true
          this.shoveRock = rock
-
-         // if (this.shoveBtn.angle == 0) {
-         //    rock.pushUp()
-         // } else if (this.shoveBtn.angle == 90) {
-         //    rock.pushRight()
-         // } else if (this.shoveBtn.angle == 270) {
-         //    rock.pushLeft()
-         // }
+      } else if ( this.clickMode == "pin") {
+         this.resetRocks()    
+         console.log("PIN CLICK")
+         if ( rock.pinned == false ) {
+            rock.pin()
+         } else {
+            rock.unPin()
+         }
       }
    }
 
