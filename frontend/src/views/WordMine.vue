@@ -18,7 +18,7 @@ var game = null
 
 // https://coolors.co/palette/fcfafa-c8d3d5-a4b8c4-6e8387
 onMounted(async () => {
-   game = new WordMine(GAME_WIDTH, GAME_HEIGHT, 0x333D29 )
+   game = new WordMine(GAME_WIDTH, GAME_HEIGHT, 0xA68A64 )
    game.initialize(replayHandler, backHandler)
 })
 

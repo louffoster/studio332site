@@ -18,7 +18,7 @@ export default class StartOverlay extends Container {
          fontFamily: "Arial",
          fontSize: 18,
          wordWrap: true,
-         wordWrapWidth: panelW - 50,
+         wordWrapWidth: panelW - 35,
       }
 
       let msg = `Manipulate the rocks to form seams of adjacent letters. `
@@ -34,7 +34,7 @@ export default class StartOverlay extends Container {
       this.addChild(note1)
 
 
-      let startBtn = new Button( panelW/2, 265, "Start Game", startHandler, 0xFCFAFA,0x34629c,0x5482bc)
+      let startBtn = new Button( panelW/2, 255, "Start Game", startHandler, 0xFCFAFA,0x34629c,0x5482bc)
       this.addChild(startBtn)
 
       const bombHelp = new Text({text: "Destroy unwanted rocks", style: style})

@@ -63,7 +63,7 @@ export default class WordMine extends BasePhysicsGame {
       r2.friction = 0   
       Matter.Composite.add(this.physics.world, r2)
 
-      let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7+0.5,165, 82, 82, 0xA68A64,0xA68A64, true)
+      let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7,165, 82, 82, 0xA68A64,0xA68A64, true)
       wedge.setAngle(.785*4)
       wedge.setFriction(0)
       this.addPhysicsItem(wedge)
@@ -116,7 +116,7 @@ export default class WordMine extends BasePhysicsGame {
       this.addChild(this.word)
 
       this.score = 0
-      this.scoreDisplay = new Text({text: "00000", style: wordStyle})
+      this.scoreDisplay = new Text({text: "$0000", style: wordStyle})
       this.scoreDisplay.anchor.set(0.5)
       this.scoreDisplay.x = this.gameWidth/2
       this.scoreDisplay.y = 20
@@ -147,7 +147,7 @@ export default class WordMine extends BasePhysicsGame {
       for ( let c=0; c< 60; c++) {
          x = this.gameWidth - Rock.WIDTH
          if ( c % 2) {
-            x = this.gameWidth - Rock.WIDTH  
+            x = this.gameWidth - Rock.WIDTH*2  
          }
          let ltr = this.pool.popScoringLetter()
          let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
@@ -266,7 +266,7 @@ export default class WordMine extends BasePhysicsGame {
       this.selections.forEach( s=> {
          totalTileValue += s.value  
       })
-      this.score += (totalTileValue * tileCnt) 
+      this.score += (totalTileValue * tileCnt * 5) 
       this.renderScore()
 
       setTimeout( () => {
@@ -361,7 +361,8 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    renderScore() {
-      this.scoreDisplay.text = `${this.score}`.padStart(5,"0")
+      let val = `${this.score}`.padStart(4,"0")
+      this.scoreDisplay.text = `$${val}`
    }
 
    gameOver() {
@@ -383,19 +384,18 @@ export default class WordMine extends BasePhysicsGame {
       this.gfx.rect(0,0, this.gameWidth, 105).
          fill(0x86BBD8).stroke({width: 1, color: 0x86BBD8})
 
-      // buttons container
-      this.gfx.rect(330,125, this.gameWidth-330, this.gameHeight-125).
-         fill(0xA68A64).stroke({width: 2, color: 0x582F0E} )
+      this.gfx.rect(0,105, this.gameWidth, this.gameHeight-105).fill(0x333D29)
 
-      // black box for drop chute
-      this.gfx.rect(this.gameWidth-110,105, this.gameWidth, 85).fill(0x333D29)
+      // buttons container
+      this.gfx.rect(330,190, this.gameWidth-330, this.gameHeight-190).
+         fill(0xA68A64)//.stroke({width: 2, color: 0x582F0E} )
 
        // grass
        this.gfx.roundRect(-20,105, this.gameWidth-100, 20, 20).
          fill(0x73a942).stroke({width: 2, color: 0x538922})
       
       // buttons divider
-      this.gfx.moveTo(this.gameWidth-110, 420)
+      this.gfx.moveTo(this.gameWidth-80, 420)
       this.gfx.lineTo(this.gameWidth, 420)
       this.gfx.stroke({width: 3, color: 0x582F0E})
    }
