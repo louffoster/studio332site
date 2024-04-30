@@ -21,7 +21,7 @@ export default class Marker extends PhysicsShape {
    }
 
    fade() {
-      new TWEEDLE.Tween(this.gfx).to({ alpha: 0}, 500).start().easing(TWEEDLE.Easing.Linear.None)
+      new TWEEDLE.Tween(this.gfx).to({ alpha: 0}, 750).start().easing(TWEEDLE.Easing.Linear.None)
    }
 
    draw() {

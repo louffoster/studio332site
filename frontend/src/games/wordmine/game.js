@@ -161,13 +161,28 @@ export default class WordMine extends BasePhysicsGame {
          }
       }
 
-      // add markers
       setTimeout( () => {
          let m = new Marker( this.gameWidth-50, 20, this.markerTouched.bind(this) )
          this.addPhysicsItem(m)
          this.markers.push(m)
          this.gameState = "play"
       }, 2000)
+   }
+
+   async dropExtraRocks() {
+      let y = 0
+      let x = this.gameWidth - Rock.WIDTH*0.5
+
+      for ( let c=0; c< 10; c++) {
+         x = this.gameWidth - Rock.WIDTH
+         if ( c % 2) {
+            x = this.gameWidth - Rock.WIDTH*2  
+         }
+         let ltr = this.pool.popScoringLetter()
+         let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
+         this.addPhysicsItem( rock )
+         await new Promise(r => setTimeout(r, 60))
+      }   
    }
 
    pointerMove(e) {
@@ -208,6 +223,7 @@ export default class WordMine extends BasePhysicsGame {
          marker.fade()
          new Boom(this.app.stage, this.smoke, this.bit, marker.x, marker.y, () => {
             this.removePhysicsItem( marker )
+            this.dropExtraRocks()
          })
       }
    }
@@ -431,6 +447,7 @@ export default class WordMine extends BasePhysicsGame {
             this.markers.splice(idx,1)
             new Boom(this.app.stage, this.smoke, this.bit, m.x,m.y, () => {
                this.removePhysicsItem( m )
+               this.dropExtraRocks()
             })
          })
       }  else {
