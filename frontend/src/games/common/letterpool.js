@@ -11,10 +11,16 @@ export default class LetterPool {
    }
 
    pop() {
+      if ( this.hasTilesLeft()==false ) {
+         this.refill()
+      }
       return this.pool.pop()
    }
 
    popScoringLetter() {
+      if ( this.hasTilesLeft()==false ) {
+         this.refill()
+      }
       let txt = this.pop() 
       return new Letter(txt, this.value(txt))
    }
@@ -50,8 +56,8 @@ export default class LetterPool {
       //    4: "G", 5: "L", 6: "D,S,U", 8: "N",
       //    9: "T,R", 11: "O,I", 13: "A", 18: "E"}
       var dist = {
-         1: "Z,X,W,V,Q,K,J", 2: "G,F,C,B", 3:"Y,U,M,H",
-         4: "P,D,L", 7:"T,S,R,O,N", 8: "I,A,E"}
+         1: "Z,X,W,V,Q,K,J", 2: "G,F,C,B,U", 3:"Y,M,H",
+         4: "P,D,L", 7:"T,R,O,N,I", 8: "S,A,E"}
       for ( var key in dist) {
          var letters = dist[key].split(",")
          var cnt = parseInt(key, 10)

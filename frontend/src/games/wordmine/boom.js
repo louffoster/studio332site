@@ -2,7 +2,7 @@ import {Sprite, Container} from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
 export default class Boom extends Container {
-   particleCnt = 250
+   particleCnt = 500
 
    constructor(stage, smokeImg, bitImg, x,y, listener ) {
       super()
@@ -15,8 +15,8 @@ export default class Boom extends Container {
          smoke.scale = 0.1
          smoke.anchor.set(0.5, 0.5)
          this.addChild(smoke)
-         let endX = this.randomRange(-20, 20)
-         let endY = this.randomRange(-20,20)
+         let endX = this.randomRange(-30, 30)
+         let endY = this.randomRange(-30, 30)
          const anim = new TWEEDLE.Tween(smoke).
             to({alpha: 0, scale: {x:0.7,y:0.7}, x: x+endX, y: y+endY}, 1000).
             easing(TWEEDLE.Easing.Quadratic.Out).
@@ -39,8 +39,8 @@ export default class Boom extends Container {
          }
          spark.anchor.set(0.5, 0.5)
          this.addChild(spark)
-         let rangeX = this.randomRange(50, 150)
-         let rangeY = this.randomRange(50, 150)
+         let rangeX = this.randomRange(75, 200)
+         let rangeY = this.randomRange(75, 200)
          let endX = this.randomRange(rangeX*-1, rangeX)
          let endY = this.randomRange(rangeY*-1, rangeY)
          const anim = new TWEEDLE.Tween(spark).

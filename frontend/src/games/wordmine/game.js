@@ -8,6 +8,7 @@ import IconButton from "@/games/wordmine/iconbutton"
 import ShoveIndicator from "@/games/wordmine/shoveindicator"
 import StartOverlay from "@/games/wordmine/startoverlay"
 import Boom from "@/games/wordmine/boom"
+import Marker from "@/games/wordmine/marker"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
 import * as TWEEDLE from "tweedle.js"
@@ -153,20 +154,20 @@ export default class WordMine extends BasePhysicsGame {
          let rock = new Rock( x,y, ltr, this.rockTouhed.bind(this) )
          this.addPhysicsItem( rock )
          await new Promise(r => setTimeout(r, 60))
+         if ( c == 20 || c == 40 ) {
+            let m = new Marker( this.gameWidth-150, 20, this.markerTouched.bind(this) )
+            this.addPhysicsItem(m)
+            this.markers.push(m)
+         }
       }
 
       // add markers
       setTimeout( () => {
-         let mX = 50
-         let xPos = [ 30, this.gameWidth/2, this.gameWidth-30]
-         for ( let i=0; i < 3; i++) {
-            let m = PhysicsShape.createBox(xPos[i], 20,25,25, 0x662222, 0xcc5533)
-            this.addPhysicsItem(m)
-            this.markers.push(m)
-            mX+=(Rock.WIDTH*2)
-         }
+         let m = new Marker( this.gameWidth-50, 20, this.markerTouched.bind(this) )
+         this.addPhysicsItem(m)
+         this.markers.push(m)
          this.gameState = "play"
-      }, 2500)
+      }, 2000)
    }
 
    pointerMove(e) {
@@ -195,6 +196,19 @@ export default class WordMine extends BasePhysicsGame {
          this.shoveRock.applyForce(fX,fY)
          this.shoveRock = null
          this.removeChild(this.shoveOverlay, false)
+      }
+   }
+
+   markerTouched( marker ) {
+      if ( this.gameState != "play") return  
+
+      if (  this.clickMode == "bomb" ) {
+         let idx = this.markers.findIndex( m => m == marker )
+         this.markers.splice(idx,1)
+         marker.fade()
+         new Boom(this.app.stage, this.smoke, this.bit, marker.x, marker.y, () => {
+            this.removePhysicsItem( marker )
+         })
       }
    }
 
@@ -407,7 +421,7 @@ export default class WordMine extends BasePhysicsGame {
       if (this.markers.length > 0) {
          let pop = []
          this.markers.forEach( (m,idx) => {
-            if ( m.y >= this.gameHeight - 15 ) {
+            if ( m.y >= this.gameHeight - Marker.HEIGHT/2-5 ) {
                m.stop()
                pop.push(idx)
             }
