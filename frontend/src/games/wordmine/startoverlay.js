@@ -18,26 +18,27 @@ export default class StartOverlay extends Container {
          fontFamily: "Arial",
          fontSize: 18,
          wordWrap: true,
-         wordWrapWidth: panelW - 35,
+         wordWrapWidth: panelW - 20,
       }
 
       let msg = `Manipulate the rocks to form seams of adjacent letters. `
-      msg += "Select these letters to make words of 4 letters or more, and mine them for points. "
-      msg += "Each invalid word destroys one of the red markers. Once all have beeen "
-      msg += "destroyed, the game ends. The game also ends when all thrree markers reach the "
+      msg += "Select these letters to make words of 4 letters or more, and mine them for cash. "
+      msg += "There are also red markers present. Bombs and invalid words destroy them, releasing extra rocks."
+      msg += " Once all markers have beeen "
+      msg += "destroyed, the game ends. The game also ends when all remaining markers reach the "
       msg += "bottom of the mine."
 
       const note1 = new Text({text: msg, style: style})
       note1.anchor.set(0.5,0)
       note1.x = panelW/2
-      note1.y = 20
+      note1.y = 10
       this.addChild(note1)
 
 
       let startBtn = new Button( panelW/2, 255, "Start Game", startHandler, 0xFCFAFA,0x34629c,0x5482bc)
       this.addChild(startBtn)
 
-      const bombHelp = new Text({text: "Destroy unwanted rocks", style: style})
+      const bombHelp = new Text({text: "Destroy unwanted rocks / markers", style: style})
       bombHelp.x = 20
       bombHelp.y = 310
       this.addChild(bombHelp)

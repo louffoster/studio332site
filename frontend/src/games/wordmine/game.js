@@ -7,6 +7,7 @@ import ToggleButton from "@/games/wordmine/togglebutton"
 import IconButton from "@/games/wordmine/iconbutton"
 import ShoveIndicator from "@/games/wordmine/shoveindicator"
 import StartOverlay from "@/games/wordmine/startoverlay"
+import EndOverlay from "@/games/wordmine/endoverlay"
 import Boom from "@/games/wordmine/boom"
 import Marker from "@/games/wordmine/marker"
 import LetterPool from "@/games/common/letterpool"
@@ -106,10 +107,10 @@ export default class WordMine extends BasePhysicsGame {
       this.addChild(pinBtn)
 
       let wordStyle = {
-         fill: "#efef00",
+         fill: "#ffffff",
          fontFamily: "Arial",
          fontSize: 28,
-         stroke: {color: "#333333", width: 2},
+         stroke: {color: "#333333", width: 4},
       }
       this.word = new Text({text: "", style: wordStyle})
       this.word.x = 10 
@@ -138,6 +139,7 @@ export default class WordMine extends BasePhysicsGame {
          this.fillRocks()
       })
       this.addChild(startOverlay)
+      this.endOverlay = new EndOverlay(Rock.WIDTH*6, Rock.HEIGHT*10, replayHandler, backHandler)
    }
 
    async fillRocks() {
@@ -225,6 +227,11 @@ export default class WordMine extends BasePhysicsGame {
             this.removePhysicsItem( marker )
             this.dropExtraRocks()
          })
+      } else if ( this.clickMode == "shove") {
+         this.resetRocks()
+         this.shoveOverlay.place( marker.x, marker.y)
+         this.addChild(this.shoveOverlay)
+         this.shoveRock = marker
       }
    }
 
@@ -244,7 +251,6 @@ export default class WordMine extends BasePhysicsGame {
          this.shoveRock = rock
       } else if ( this.clickMode == "pin") {
          this.resetRocks()    
-         console.log("PIN CLICK")
          if ( rock.pinned == false ) {
             rock.pin()
          } else {
@@ -262,6 +268,7 @@ export default class WordMine extends BasePhysicsGame {
             b.setSelected(false)
          }
       })
+      this.resetRocks()
    }
 
    clearClicked() {
@@ -396,6 +403,7 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    gameOver() {
+      this.resetRocks()
       for ( let i=0; i<5; i++) {
          new Boom(this.app.stage, this.smoke, this.bit, 10+(this.gameWidth/5)*i, this.gameHeight-10)
       }
@@ -404,7 +412,11 @@ export default class WordMine extends BasePhysicsGame {
       this.toggleButtons.forEach( tb => {
          tb.setEnabled(false)
       })
-      this.resetRocks()
+
+      const endY = this.endOverlay.y
+      this.endOverlay.y = -1200
+      this.addChild(this.endOverlay)
+      new TWEEDLE.Tween(this.endOverlay).to({ y: endY}, 2500).start().easing(TWEEDLE.Easing.Linear.None)
    }
 
    draw() {

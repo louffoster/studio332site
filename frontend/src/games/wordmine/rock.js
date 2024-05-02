@@ -120,32 +120,10 @@ export default class Rock extends BasePhysicsItem {
       this.draw()
    }
 
-   pushUp() {
-      let fx = this.randomRange(-0.025, 0.025)
-      this.setFriction(0)
-      this.applyForce(fx,-0.07)
-      setTimeout( ()=>{
-         this.setFriction(Rock.FRICTION)
-      }, 100)
-   }
    randomRange(min, max) {
       const a = Math.min(min, max)
       const b = Math.max(min, max)
       return (a + (b - a) * Math.random())
-  }
-   pushLeft() {
-      this.setFriction(0)
-      this.applyForce(-0.06,-0.01)
-      setTimeout( ()=>{
-         this.setFriction(Rock.FRICTION)
-      }, 100)
-   }
-   pushRight() {
-      this.setFriction(0)
-      this.applyForce(0.06,-0.01)
-      setTimeout( ()=>{
-         this.setFriction(Rock.FRICTION)
-      }, 100)
    }
 
    toggleSelected(  ) {

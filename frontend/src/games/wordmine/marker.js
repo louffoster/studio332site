@@ -10,6 +10,7 @@ export default class Marker extends PhysicsShape {
 
    constructor( x,y, listener ) {
       super( x,y, {type: "box", w:Marker.WIDTH, h: Marker.HEIGHT, lineColor: 0x000000, fillColor: 0xdb3a34})
+      this.setMass(2.75)
       this.draw()
 
       this.cursor ="pointer"
