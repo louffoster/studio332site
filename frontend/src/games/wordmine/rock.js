@@ -29,7 +29,7 @@ export default class Rock extends BasePhysicsItem {
       let tgtH = Rock.HEIGHT
       if ( letter.isVowel()) {
          this.isVowel = true
-         this.fillColor = 0x6F3F14
+         this.fillColor = 0x5F2F04
          tgtW -= 5 
          tgtH -= 5
          this.polyPts = [ 
@@ -65,6 +65,7 @@ export default class Rock extends BasePhysicsItem {
       let txt = new Text({text: letter.text, style: {
          fill: this.letterColor,
          fontFamily: "Arial",
+         fontWeight: "bold",
          fontSize: 18,
       }})
       txt.anchor.set(0.5)
@@ -76,6 +77,7 @@ export default class Rock extends BasePhysicsItem {
          let uTxt = new Text({text: "U", style: {
             fill: this.letterColor,
             fontFamily: "Arial",
+            fontWeight: "bold",
             fontSize: 15,
          }})
          uTxt.anchor.set(0.5)
@@ -109,7 +111,6 @@ export default class Rock extends BasePhysicsItem {
    }
 
    pin() {
-      console.log("PIN IT")
       this.pinned = true 
       this.body.isStatic = true
       this.draw()
@@ -185,14 +186,7 @@ export default class Rock extends BasePhysicsItem {
    draw() {
       this.gfx.clear()
 
-      this.gfx.poly( this.polyPts )
-      if ( this.target ) {
-         this.gfx.stroke({width: 5, color: this.targetColor} )   
-      } else if ( this.pinned ) {
-         this.gfx.stroke({width: 5, color: this.pinColor} )
-      }else {
-         this.gfx.stroke({width: 1, color: this.lineColor})
-      }
+      this.gfx.poly( this.polyPts ).stroke({width:0})
       if (this.enabled == false ) {
          this.gfx.fill(this.dimColor)
       } else {
@@ -206,7 +200,7 @@ export default class Rock extends BasePhysicsItem {
       }
 
       if ( this.pinned) {
-         this.gfx.circle(0,-20, 3).fill(this.pinColor)
+         this.gfx.circle(0,-18, 5).fill(this.pinColor).stroke({width: 1, color: 0x000000})
       }
    }
 

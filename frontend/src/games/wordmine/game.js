@@ -36,6 +36,9 @@ export default class WordMine extends BasePhysicsGame {
    shoveRock = null
    shoveOverlay = null
 
+   static LEFT_EDGE_W = 25
+   static PIT_TOP = 105
+
    async initialize(replayHandler, backHandler) {
       await super.initialize()
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
@@ -58,14 +61,17 @@ export default class WordMine extends BasePhysicsGame {
       let l = Matter.Bodies.rectangle(-25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
       l.friction = 0
       Matter.Composite.add(this.physics.world, l)
-      let r = Matter.Bodies.rectangle((Rock.WIDTH*6)+25, (this.gameHeight+250)/2, 50, this.gameHeight-125, { isStatic: true, friction: 0, restitution: 0})
+      const l2 = PhysicsShape.createBox(0,this.gameHeight/2+75, 50, this.gameHeight-WordMine.PIT_TOP, 0x664A24,0xA68A64,true)
+      this.addPhysicsItem(l2)
+      let r = Matter.Bodies.rectangle(WordMine.LEFT_EDGE_W+(Rock.WIDTH*6)+25, (this.gameHeight+250)/2, 
+         50, this.gameHeight-125, { isStatic: true, friction: 0, restitution: 0})
       r.friction = 0
       Matter.Composite.add(this.physics.world, r)
       let r2 = Matter.Bodies.rectangle(this.gameWidth+25, this.gameHeight/2, 50, this.gameHeight, { isStatic: true, friction: 0, restitution: 0})
       r2.friction = 0   
       Matter.Composite.add(this.physics.world, r2)
 
-      let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7,165, 82, 82, 0xA68A64,0xA68A64, true)
+      let wedge = PhysicsShape.createTriangle(Rock.WIDTH*7+WordMine.LEFT_EDGE_W,165, 82, 82, 0xA68A64,0xA68A64, true)
       wedge.setAngle(.785*4)
       wedge.setFriction(0)
       this.addPhysicsItem(wedge)
@@ -134,12 +140,12 @@ export default class WordMine extends BasePhysicsGame {
       this.app.stage.on('pointerup', this.dragEnd.bind(this))
       this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
 
-      const startOverlay = new StartOverlay(Rock.WIDTH*6, Rock.HEIGHT*10, () => {
+      const startOverlay = new StartOverlay(WordMine.LEFT_EDGE_W+Rock.WIDTH*6, Rock.HEIGHT*10, () => {
          this.removeChild(startOverlay)
          this.fillRocks()
       })
       this.addChild(startOverlay)
-      this.endOverlay = new EndOverlay(Rock.WIDTH*6, Rock.HEIGHT*10, replayHandler, backHandler)
+      this.endOverlay = new EndOverlay(WordMine.LEFT_EDGE_W+Rock.WIDTH*6, Rock.HEIGHT*10, replayHandler, backHandler)
    }
 
    async fillRocks() {
@@ -423,13 +429,14 @@ export default class WordMine extends BasePhysicsGame {
       this.gfx.clear() 
 
       // sky
-      this.gfx.rect(0,0, this.gameWidth, 105).
+      this.gfx.rect(0,0, this.gameWidth, WordMine.PIT_TOP).
          fill(0x86BBD8).stroke({width: 1, color: 0x86BBD8})
 
-      this.gfx.rect(0,105, this.gameWidth, this.gameHeight-105).fill(0x333D29)
+      this.gfx.rect(0,WordMine.PIT_TOP, this.gameWidth, this.gameHeight-WordMine.PIT_TOP).fill(0x333D29)
 
       // buttons container
-      this.gfx.rect(330,190, this.gameWidth-330, this.gameHeight-190).
+      const containerX = WordMine.LEFT_EDGE_W+330 
+      this.gfx.rect(containerX,190, this.gameWidth-containerX, this.gameHeight-190).
          fill(0xA68A64)//.stroke({width: 2, color: 0x582F0E} )
 
        // grass

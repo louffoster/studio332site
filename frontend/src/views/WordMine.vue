@@ -8,7 +8,7 @@ import { onMounted, onBeforeUnmount } from "vue"
 import WordMine from "@/games/wordmine/game"
 import { useRouter } from 'vue-router'
 
-const GAME_WIDTH = 410
+const GAME_WIDTH = 435
 const GAME_HEIGHT = 650
 
 const router = useRouter()

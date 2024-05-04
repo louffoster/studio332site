@@ -5,7 +5,7 @@ export default class EndOverlay extends Container {
    constructor(panelW, panelH, replayHandler, backHandler) {
       super()
 
-      this.x = 0
+      this.x = 15
       this.y = 130
       
       let style = {

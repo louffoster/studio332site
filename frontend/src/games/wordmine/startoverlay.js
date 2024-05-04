@@ -6,7 +6,7 @@ export default class StartOverlay extends Container {
       super()
 
       this.x = 0
-      this.y = 130
+      this.y = 125
       this.panelW = panelW 
       this.panelH = panelH
 
