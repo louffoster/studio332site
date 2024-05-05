@@ -16,9 +16,9 @@ export default class StartOverlay extends Container {
       let style = {
          fill: "#e0e0e0",
          fontFamily: "Arial",
-         fontSize: 18,
+         fontSize: 17,
          wordWrap: true,
-         wordWrapWidth: panelW - 20,
+         wordWrapWidth: panelW - 25,
       }
 
       let msg = `Manipulate the rocks to form seams of adjacent letters. `

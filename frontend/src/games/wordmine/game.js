@@ -52,7 +52,6 @@ export default class WordMine extends BasePhysicsGame {
 
       this.smoke = await Assets.load('/smoke.png')
       this.bit = await Assets.load('/particle.png')
-      this.angle = 0
 
       this.dictionary = new Dictionary()
 
@@ -455,13 +454,22 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    update() {
-      // this.gfx.moveTo(50,50).arc(50,50, 50, 0,this.angle).fill(0xff8888)
-      // this.angle += 0.01
-
       super.update()
       if (this.gameState != "play") return 
 
       if (this.markers.length > 0) {
+         if (this.markers.length == 1) {
+            const lastM = this.markers[0]
+            if (lastM.countDown == false ) {
+               lastM.countDown = true
+            }
+            lastM.tick(this.app.ticker.deltaMS, () => {
+               new Boom(this.app.stage, this.smoke, this.bit, lastM.x,lastM.y, () => {
+                  this.removePhysicsItem( lastM )
+                  this.gameOver()
+               })    
+            })
+         }
          let pop = []
          this.markers.forEach( (m,idx) => {
             if ( m.y >= this.gameHeight - Marker.HEIGHT/2-5 ) {
