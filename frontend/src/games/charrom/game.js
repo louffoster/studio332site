@@ -86,8 +86,8 @@ export default class Charrom extends BasePhysicsGame {
       this.timer.setTimeoutHandler( this.timeExpired.bind(this) )
       this.addChild(this.timer)
 
+      // NOTE: if you set hit area = scree, mobile pointer events for children are BLOCKED
       this.app.stage.eventMode = 'static'
-      this.app.stage.hitArea = this.app.screen
       this.app.stage.on('pointerdown', this.pointerDown.bind(this))
       this.app.stage.on('pointermove', this.pointerMove.bind(this))
       this.app.stage.on('pointerup', this.dragEnd.bind(this))

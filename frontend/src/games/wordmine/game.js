@@ -36,6 +36,7 @@ export default class WordMine extends BasePhysicsGame {
    shoveRock = null
    shoveOverlay = null
 
+
    static LEFT_EDGE_W = 25
    static PIT_TOP = 105
 
@@ -51,6 +52,7 @@ export default class WordMine extends BasePhysicsGame {
 
       this.smoke = await Assets.load('/smoke.png')
       this.bit = await Assets.load('/particle.png')
+      this.angle = 0
 
       this.dictionary = new Dictionary()
 
@@ -132,20 +134,19 @@ export default class WordMine extends BasePhysicsGame {
 
       this.draw()
 
-      // setup drag to set shove angle
-      this.app.stage.eventMode = 'static'
-      this.app.stage.hitArea = this.app.screen
-      this.shoveOverlay = new ShoveIndicator()
-      this.app.stage.on('pointermove', this.pointerMove.bind(this))
-      this.app.stage.on('pointerup', this.dragEnd.bind(this))
-      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
-
       const startOverlay = new StartOverlay(WordMine.LEFT_EDGE_W+Rock.WIDTH*6, Rock.HEIGHT*10, () => {
          this.removeChild(startOverlay)
          this.fillRocks()
       })
       this.addChild(startOverlay)
       this.endOverlay = new EndOverlay(WordMine.LEFT_EDGE_W+Rock.WIDTH*6, Rock.HEIGHT*10, replayHandler, backHandler)
+
+      // setup drag to set shove angle
+      this.app.stage.eventMode = 'static'
+      this.shoveOverlay = new ShoveIndicator()
+      this.app.stage.on('pointermove', this.pointerMove.bind(this))
+      this.app.stage.on('pointerup', this.dragEnd.bind(this))
+      this.app.stage.on('pointerupoutside', this.dragEnd.bind(this))
    }
 
    async fillRocks() {
@@ -226,13 +227,17 @@ export default class WordMine extends BasePhysicsGame {
       if ( this.gameState != "play") return  
 
       if (  this.clickMode == "bomb" ) {
-         let idx = this.markers.findIndex( m => m == marker )
-         this.markers.splice(idx,1)
-         marker.fade()
-         new Boom(this.app.stage, this.smoke, this.bit, marker.x, marker.y, () => {
-            this.removePhysicsItem( marker )
-            this.dropExtraRocks()
-         })
+         if ( this.markers.length > 1) {
+            let idx = this.markers.findIndex( m => m == marker )
+            this.markers.splice(idx,1)
+            marker.fade()
+            new Boom(this.app.stage, this.smoke, this.bit, marker.x, marker.y, () => {
+               this.removePhysicsItem( marker )
+               this.dropExtraRocks()
+            })
+         } else {
+            // dont allow the last marker to be blown up
+         }
       } else if ( this.clickMode == "shove") {
          this.resetRocks()
          this.shoveOverlay.place( marker.x, marker.y)
@@ -266,7 +271,7 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    toggleButtonClicked( name ) {
-      if (this.gameState != "play") return 
+      if (this.gameState == "over") return 
 
       this.clickMode = name
       this.toggleButtons.forEach( b => {
@@ -450,6 +455,9 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    update() {
+      // this.gfx.moveTo(50,50).arc(50,50, 50, 0,this.angle).fill(0xff8888)
+      // this.angle += 0.01
+
       super.update()
       if (this.gameState != "play") return 
 

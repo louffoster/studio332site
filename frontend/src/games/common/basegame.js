@@ -101,7 +101,7 @@ export default class BaseGame {
    }
 
    destroy() {
-      // this.app.ticker.stop()
+      this.app.ticker.stop()
       this.app.stage.removeChildren()
       this.gameElement.removeChild(this.app.canvas)
    }

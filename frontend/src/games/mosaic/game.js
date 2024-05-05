@@ -20,7 +20,7 @@ export default class Mosaic extends BaseGame {
    targetTiles = null
    spinners = null
    clock = null
-   gameDurationMS = 3.0 * 1000.0
+   gameDurationMS = 300.0 * 1000.0
    matchCount = 0
    matchDisplay = null
    gameState = "start"
