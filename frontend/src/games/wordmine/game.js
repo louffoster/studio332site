@@ -316,6 +316,8 @@ export default class WordMine extends BasePhysicsGame {
       this.score += (totalTileValue * tileCnt * 5) 
       this.renderScore()
 
+      this.markers[0].extendTime()
+
       setTimeout( () => {
          gone.forEach( r => this.removePhysicsItem(r))
          this.resetRocks()
@@ -334,7 +336,7 @@ export default class WordMine extends BasePhysicsGame {
          this.resetRocks()
       }, 500) 
 
-      let m = this.markers.pop() 
+      let m = this.markers.shift() 
       new Boom(this.app.stage, this.smoke, this.bit, m.x,m.y, () => {
          this.removePhysicsItem( m )
          if ( this.markers.length == 0) {
@@ -413,16 +415,19 @@ export default class WordMine extends BasePhysicsGame {
    }
 
    gameOver() {
+      if ( this.gameState == "over" ) return
+
+      this.gameState = "over"
       this.resetRocks()
       for ( let i=0; i<5; i++) {
          new Boom(this.app.stage, this.smoke, this.bit, 10+(this.gameWidth/5)*i, this.gameHeight-10)
       }
       Matter.Composite.remove(this.physics.world, this.mineFloor)
-      this.gameState = "over"
       this.toggleButtons.forEach( tb => {
          tb.setEnabled(false)
       })
 
+      console.log("END OVERLAY")
       const endY = this.endOverlay.y
       this.endOverlay.y = -1200
       this.addChild(this.endOverlay)

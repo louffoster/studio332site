@@ -41,8 +41,16 @@ export default class Marker extends PhysicsShape {
       this.gfx.circle(Marker.WIDTH/2,Marker.HEIGHT/2,2).fill(0xff8888)
    }
 
+   extendTime() {
+      if ( this.countDown == false ) return
+
+      // move up 90 degress 
+      this.angle += 1.5707
+      this.angle = Math.min(6.28, this.angle)
+   }
+
    tick(deltaMS, expireCallback) {
-      if (this.countDown == false || this.angle <= 0 ) return
+      if (this.countDown == false  ) return
 
       this.timerGfx.clear()
 
@@ -66,6 +74,7 @@ export default class Marker extends PhysicsShape {
       const colors = [0x00ff66, 0xffcc00]
       this.timerGfx.circle(Marker.WIDTH/2,Marker.HEIGHT/2,5).fill(colors[this.flip]).stroke({width:0})
       if ( this.angle <= 0) {
+         this.countDown = false
          expireCallback()
       }
    }

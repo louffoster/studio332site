@@ -98,6 +98,7 @@ export default class Rock extends BasePhysicsItem {
       this.setAirFriction( 0.0)
       this.setFriction(Rock.FRICTION)
       this.setRestitution( 0 )
+      this.setMass(3.25)
 
       this.update()
       this.draw()
