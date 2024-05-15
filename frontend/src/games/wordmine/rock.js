@@ -29,7 +29,7 @@ export default class Rock extends BasePhysicsItem {
       let tgtH = Rock.HEIGHT
       if ( letter.isVowel()) {
          this.isVowel = true
-         this.fillColor = 0x5F2F04
+         this.fillColor = 0x936639
          tgtW -= 5 
          tgtH -= 5
          this.polyPts = [ 
@@ -155,9 +155,11 @@ export default class Rock extends BasePhysicsItem {
       if (this.enabled == false) {
          this.eventMode = 'none'
          this.cursor ="default"
+         this.letters.forEach( l => l.style.fill = 0x666666 )
       } else {
          this.eventMode = 'static'
          this.cursor ="pointer"
+         this.letters.forEach( l => l.style.fill = this.letterColor )
       }
       this.draw()
    }
@@ -187,18 +189,22 @@ export default class Rock extends BasePhysicsItem {
    draw() {
       this.gfx.clear()
 
-      this.gfx.poly( this.polyPts ).stroke({width:0})
-      if (this.enabled == false ) {
-         this.gfx.fill(this.dimColor)
-      } else {
-         if ( this.error ) {
-            this.gfx.fill(0xa20c01) 
-         } else if ( this.selected ) {
-            this.gfx.fill(this.selectColor)
-         } else {
-            this.gfx.fill(this.fillColor)
-         }
+      let alpha = 1
+      if ( this.enabled == false ) {
+         alpha = 0.6
       }
+      this.gfx.poly( this.polyPts ).stroke({width:0})
+      // if (this.enabled == false ) {
+      //    this.gfx.fill(this.dimColor)
+      // } else {
+         if ( this.error ) {
+            this.gfx.fill({color: 0xa20c01, alpha: alpha}) 
+         } else if ( this.selected ) {
+            this.gfx.fill( {color: this.selectColor, alpha: alpha})
+         } else {
+            this.gfx.fill({color: this.fillColor, alpha: alpha})
+         }
+      // }
 
       if ( this.pinned) {
          this.gfx.circle(0,-18, 5).fill(this.pinColor).stroke({width: 1, color: 0x000000})
