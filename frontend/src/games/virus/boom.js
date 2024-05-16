@@ -3,7 +3,7 @@ import * as TWEEDLE from "tweedle.js"
 
 export default class Boom extends Container {
    group = null
-   particleCnt = 250
+   particleCnt = 750
 
    constructor(stage, texture, x,y, virus = true ) {
       super()
@@ -32,8 +32,8 @@ export default class Boom extends Container {
          spark.scale = 0.4
          if ( virus == false)  spark.scale = 0.1
          this.addChild(spark)
-         let rangeX = this.randomRange(20, 70)
-         let rangeY = this.randomRange(20, 70)
+         let rangeX = this.randomRange(40, 150)
+         let rangeY = this.randomRange(40, 150)
          let endX = this.randomRange(rangeX*-1, rangeX)
          let endY = this.randomRange(rangeY*-1, rangeY)
          const anim = new TWEEDLE.Tween(spark).

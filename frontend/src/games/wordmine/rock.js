@@ -155,7 +155,7 @@ export default class Rock extends BasePhysicsItem {
       if (this.enabled == false) {
          this.eventMode = 'none'
          this.cursor ="default"
-         this.letters.forEach( l => l.style.fill = 0x666666 )
+         this.letters.forEach( l => l.style.fill = 0xaaaacc )
       } else {
          this.eventMode = 'static'
          this.cursor ="pointer"
