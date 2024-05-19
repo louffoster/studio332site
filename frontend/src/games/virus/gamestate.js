@@ -1,8 +1,18 @@
 export default class GameState {
+   static INIT=0
+   static PLAY=1
+   static SUBMIT_REQUESTED=2
+   static SUBMIT = 3
+   static FAIL = 4
+   static SUCCESS = 5
+   static REMOVE = 6
+   static CLEAR_ALL = 7
+   static PLAYER_LOST = 8
+   static GAME_OVER = 9
+
    constructor() {
       this.state = GameState.INIT
       this.stateDuration = -1.0
-      this.stateRepeatCount = 0
    }
 
    initialized() {
@@ -12,27 +22,22 @@ export default class GameState {
    requestSubmit() {
       this.state = GameState.SUBMIT_REQUESTED
       this.stateDuration = 0.1
-      this.stateRepeatCount = 1
    }
    submitFailed() {
       this.state = GameState.FAIL
       this.stateDuration = 1.0
-      this.stateRepeatCount = 1
    }
-   submitSuccess( wordSize ) {
+   submitSuccess() {
       this.state = GameState.SUCCESS
-      this.stateDuration = 0.05
-      this.stateRepeatCount = wordSize
+      this.stateDuration = 1.5
    }
    clearVirus() {
       this.state = GameState.CLEAR_ALL
-      this.stateDuration = 2
-      this.stateRepeatCount = 1   
+      this.stateDuration = 1
    }
    gameLost() {
       this.state = GameState.PLAYER_LOST
       this.stateDuration = 2
-      this.stateRepeatCount = 1   
    }
    isLosing() {
       return this.state == GameState.PLAYER_LOST
@@ -56,10 +61,7 @@ export default class GameState {
    }
 
    update(deltaMS, statusCallback) {
-      if (this.stateDuration < 0 ) {
-         this.stateDuration = -1.0
-         this.stateRepeatCount-- 
-         this.stateRepeatCount = Math.max(0, this.stateRepeatCount)
+      if (this.stateDuration <= 0 ) {
          return
       } 
 
@@ -74,15 +76,8 @@ export default class GameState {
             this.state = GameState.PLAY
             statusCallback(GameState.FAIL, this.state)
          } else if ( this.state == GameState.SUCCESS) {
-            this.stateRepeatCount--
-            if ( this.stateRepeatCount < 0) {
-               this.stateRepeatCount = 0
-               this.state = GameState.PLAY
-               statusCallback(GameState.SUCCESS, this.state)
-            } else {
-               statusCallback(GameState.SUCCESS, this.state)
-               this.stateDuration = 0.05
-            }
+            this.state = GameState.PLAY
+            statusCallback(GameState.SUCCESS, this.state)
          } else if ( this.state == GameState.CLEAR_ALL ) {
             this.state = GameState.GAME_OVER
             statusCallback(GameState.CLEAR_ALL, this.state) 
@@ -93,14 +88,3 @@ export default class GameState {
       }
    }
 }
-
-GameState.INIT=0
-GameState.PLAY=1
-GameState.SUBMIT_REQUESTED=2
-GameState.SUBMIT = 3
-GameState.FAIL = 4
-GameState.SUCCESS = 5
-GameState.REMOVE = 6
-GameState.CLEAR_ALL = 7
-GameState.PLAYER_LOST = 8
-GameState.GAME_OVER = 9

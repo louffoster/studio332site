@@ -6,7 +6,7 @@ export default class Letter extends Container {
    // 100% is full so take 100 / rate to get time for total infection
    static infectRatePerSec = 5.0 // 20 sec to fill
 
-   constructor(letter, x,y, r,c ) {
+   constructor(x,y, r,c ) {
       super()
       this.eventMode = 'static'
       this.hitArea =  new Circle(0,0,25)
@@ -26,21 +26,22 @@ export default class Letter extends Container {
       this.col = c
 
       this.graphics = new Graphics()
-      this.letter = new Text({text: letter, style: {
+      this.letter = null
+      this.letterDisplay = new Text({text: "", style: {
          fill: "#cccccc",
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 36,
          stroke: {color: 0x111111, wifth: 4},
       }})
-      this.letter.anchor.set(0.5)
-      this.letter.x = 0
-      this.letter.y = 0
+      this.letterDisplay.anchor.set(0.5)
+      this.letterDisplay.x = 0
+      this.letterDisplay.y = 0
 
       this.draw()
 
       this.addChild(this.graphics)
       this.addChild(this.virusGfx)
-      this.addChild(this.letter)
+      this.addChild(this.letterDisplay)
    }
 
    static increseInfectionRate() {
@@ -53,7 +54,15 @@ export default class Letter extends Container {
    }
 
    get text() {
+      if ( this.letter == null ) return ""
       return this.letter.text
+   }
+   get value() {
+      if ( this.letter == null ) return 0
+      return this.letter.value
+   }
+   get isSelected() {
+      return this.selected
    }
 
    clickHandler() {
@@ -65,7 +74,7 @@ export default class Letter extends Container {
       this.clickCallback(this)
    }
 
-   isInfected() {
+   get isInfected() {
       return this.infected && this.virusPercent < 100.0
    }
    isLost() {
@@ -73,22 +82,26 @@ export default class Letter extends Container {
    }
 
    deselect() {
-      this.selected = false
-      this.draw()
+      if (this.selected) {
+         this.selected = false
+         this.draw()
+      }
    }
 
    replace( newLetter ) {
       if ( this.isLost() == false ) {
-         this.letter.text = newLetter    
+         this.letter = newLetter
+         this.letterDisplay.text = newLetter.text   
       }
    }
 
    reset( newLetter ) {
+      this.letter = newLetter
       this.selected = false
       this.infected = false 
       this.virusPercent = 0
       this.virusGfx.clear()
-      this.letter.text = newLetter 
+      this.letterDisplay.text = newLetter.text
       this.draw()  
    }
 
@@ -102,7 +115,7 @@ export default class Letter extends Container {
       this.infected = true
       this.virusPercent = 100.0
       this.selected = false
-      this.letter.text = ""
+      this.letterDisplay.text = ""
       this.cursor = 'default'
       this.draw()
       this.drawVirus()
@@ -118,16 +131,16 @@ export default class Letter extends Container {
 
       if (this.selected) {
          this.graphics.stroke({width: 2, color: 0xaaddff})
-         this.letter.style.fill = 0xaaddff
+         this.letterDisplay.style.fill = 0xaaddff
       } else {
          this.graphics.stroke({width: 1, color: 0xcccccc})
          if ( this.isLost() ) {
             this.graphics.stroke({width: 1, color: 0x885588})
          } 
-         if ( this.isInfected() ) {
-            this.letter.style.fill = 0x33aa33
+         if ( this.isInfected ) {
+            this.letterDisplay.style.fill = 0x33aa33
          } else {
-            this.letter.style.fill = 0xcccccc
+            this.letterDisplay.style.fill = 0xcccccc
          }
       }
    }
@@ -143,7 +156,7 @@ export default class Letter extends Container {
    }
 
    update(deltaMS, infectedCallback) {
-      if ( this.isInfected() ) {
+      if ( this.isInfected ) {
          // only unselected letters grow
          if ( this.selected == false ) {
             this.virusPercent += Letter.infectRatePerSec * (deltaMS/1000.0)
@@ -151,7 +164,7 @@ export default class Letter extends Container {
          if (this.virusPercent >= 100.0) {
             this.virusPercent = 100.0
             this.selected = false
-            this.letter.text = ""
+            this.letterDisplay.text = ""
             this.cursor = 'default'
             this.draw()
             infectedCallback(this.row, this.col)

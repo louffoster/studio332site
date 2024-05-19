@@ -12,7 +12,7 @@ import Virus from "@/games/virus/game"
 const router = useRouter()
 
 const GAME_WIDTH = 350
-const GAME_HEIGHT = 615
+const GAME_HEIGHT = 570
 
 var game = null 
 
