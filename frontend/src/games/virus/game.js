@@ -153,7 +153,7 @@ export default class Virus extends BaseGame {
       for (let r = 0; r < Virus.ROWS; r++) {
          for (let c = 0; c < Virus.COLS; c++) {
             // selected tiles don't expand the virus, so they don't count 
-            if ( this.grid[r][c].isInfected() &&  this.grid[r][c].selected == false) {
+            if ( this.grid[r][c].isInfected &&  this.grid[r][c].selected == false) {
                cnt++
             }
          }
@@ -243,6 +243,7 @@ export default class Virus extends BaseGame {
                letterValue += letterCell.value
                new Boom( this.app.stage, this.particle, letterCell.x, letterCell.y, letterCell.isInfected)
                letterCell.reset( this.pickNewLetter() )
+               // TODO STOPPED HEREE
             }
          }
       }
@@ -250,7 +251,7 @@ export default class Virus extends BaseGame {
 
    setWordColor( c ) {
       this.word.forEach( wl => {
-         wl.letter.style.fill = c
+         wl.style.fill = c
       }) 
    }
 
@@ -289,7 +290,7 @@ export default class Virus extends BaseGame {
    //    while ( pass < 2 && clearCnt > 0) {
    //       for (let r = (Virus.ROWS-1); r >= 0; r--) {
    //          for (let c = (Virus.COLS-1); c  >= 0; c--) {
-   //             if ( (pass == 0 && this.grid[r][c].isLost()) || 
+   //             if ( (pass == 0 && this.grid[r][c].isLost) || 
    //                  (pass == 1 && this.grid[r][c].infected) )  {   
    //                const letter = this.grid[r][c]   
    //                letter.reset( this.pickNewLetter() )
@@ -379,7 +380,7 @@ export default class Virus extends BaseGame {
       for (let r = (Virus.ROWS-1); r >= 0; r--) {
          for (let c = (Virus.COLS-1); c  >= 0; c--) {
             let letter = this.grid[r][c]
-            if ( letter.isLost() || letter.infected ) {
+            if ( letter.isLost || letter.infected ) {
                letter.reset( this.pickNewLetter() )
                new Boom( this.app.stage, this.particle, letter.x, letter.y)
             } 
@@ -393,7 +394,7 @@ export default class Virus extends BaseGame {
       let remainingLetters = 0
       for (let r = 0; r < Virus.ROWS; r++) {
          for (let c = 0; c < Virus.COLS; c++) {
-            if ( this.grid[r][c].isLost() == false) {
+            if ( this.grid[r][c].isLost == false) {
                remainingLetters++
             }
          }

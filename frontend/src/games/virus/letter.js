@@ -66,7 +66,7 @@ export default class Letter extends Container {
    }
 
    clickHandler() {
-      if ( Letter.wordFull || this.selected  || this.isLost() ) { 
+      if ( Letter.wordFull || this.selected  || this.isLost ) { 
          return
       }
       this.selected = true
@@ -77,7 +77,7 @@ export default class Letter extends Container {
    get isInfected() {
       return this.infected && this.virusPercent < 100.0
    }
-   isLost() {
+   get isLost() {
       return this.infected && this.virusPercent == 100.0
    }
 
@@ -89,7 +89,7 @@ export default class Letter extends Container {
    }
 
    replace( newLetter ) {
-      if ( this.isLost() == false ) {
+      if ( this.isLost == false ) {
          this.letter = newLetter
          this.letterDisplay.text = newLetter.text   
       }
@@ -134,7 +134,7 @@ export default class Letter extends Container {
          this.letterDisplay.style.fill = 0xaaddff
       } else {
          this.graphics.stroke({width: 1, color: 0xcccccc})
-         if ( this.isLost() ) {
+         if ( this.isLost ) {
             this.graphics.stroke({width: 1, color: 0x885588})
          } 
          if ( this.isInfected ) {
