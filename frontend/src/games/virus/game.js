@@ -274,11 +274,11 @@ export default class Virus extends BaseGame {
       if ( wordSize == 4 ) {
          this.gauge.increaseValue( 7 ) 
       } else if (wordSize == 5) {
-         this.gauge.increaseValue( 14 ) 
+         this.gauge.increaseValue( 10 ) 
       } else if (wordSize == 6 || wordSize == 7 ) {
-         this.gauge.increaseValue( 20 ) 
+         this.gauge.increaseValue( 15 ) 
       }  else if (wordSize > 7 ) {
-         this.gauge.increaseValue( 25 ) 
+         this.gauge.increaseValue( 20 ) 
       }
 
       this.state.submitSuccess()
