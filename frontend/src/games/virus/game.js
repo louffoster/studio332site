@@ -198,9 +198,26 @@ export default class Virus extends BaseGame {
    }
 
    zapPushed() {
-      // FIXME
-      // this.state.clearVirus()
-      // this.clearAllInfections()
+      if ( this.gauge.isFull) {
+         this.state.clearVirus()
+         this.clearAllInfections()
+      } else {
+         this.gauge.zapUsed()
+         this.zapButton.setEnabled( this.gauge.enableZap)
+         let disinfectCnt = 6 
+         for (let r = 0; r < Virus.ROWS; r++) {
+            for (let c = 0; c < Virus.COLS; c++) {
+               if ( disinfectCnt > 0) {
+                  const tgtCell = this.grid[r][c]
+                  if ( tgtCell.isInfected || tgtCell.isLost ) {
+                     new Boom( this.app.stage, this.particle, tgtCell.x, tgtCell.y, true)
+                     tgtCell.reset( this.pickNewLetter() )  
+                     disinfectCnt--  
+                  }
+               }
+            }
+         }
+      }
    }
 
    shuffleGrid() {
@@ -400,7 +417,7 @@ export default class Virus extends BaseGame {
       Letter.wordFull = false
    
       // is the game over?
-      if ( this.gauge.isFull) {
+      if ( this.gauge.enableZap) {
          this.zapButton.setEnabled(true)
       }
    }
