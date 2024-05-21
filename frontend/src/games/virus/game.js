@@ -33,7 +33,6 @@ export default class Virus extends BaseGame {
    pendingInfections = 0  // numner of infections to add to bring up to current level
    letterIndex = 0
    word = []
-   lastWordSize = 0
    wordCounts = []
    gauge = null
    enterKey = null 
@@ -199,8 +198,9 @@ export default class Virus extends BaseGame {
    }
 
    zapPushed() {
-      this.state.clearVirus()
-      this.clearAllInfections()
+      // FIXME
+      // this.state.clearVirus()
+      // this.clearAllInfections()
    }
 
    shuffleGrid() {
@@ -226,7 +226,6 @@ export default class Virus extends BaseGame {
       let testWord = ""
       this.word.forEach( l => testWord += l.text)
       if (this.dictionary.isValid(testWord)) {
-         this.lastWordSize = this.letterIndex 
          this.submitSuccess()
       } else {
          this.setWordColor(0xff5555)
@@ -236,17 +235,36 @@ export default class Virus extends BaseGame {
 
    submitSuccess() {
       let letterValue = 0
+      let wordSize = 0
       for (let r = 0; r < Virus.ROWS; r++) {
          for (let c = 0; c < Virus.COLS; c++) {
             const letterCell = this.grid[r][c]
             if (letterCell.isSelected ) {
                letterValue += letterCell.value
+               wordSize++
                new Boom( this.app.stage, this.particle, letterCell.x, letterCell.y, letterCell.isInfected)
                letterCell.reset( this.pickNewLetter() )
-               // TODO STOPPED HEREE
             }
          }
       }
+
+      this.score += letterValue * this.word.length * 5
+      this.wordCounts[(wordSize-1)]++
+      let val = `${this.score}`.padStart(5,"0")
+      this.scoreDisplay.text = `$${val}`
+
+      // FIXME adjust values to make it not easy
+      if ( wordSize == 4 ) {
+         this.gauge.increaseValue( 7 ) 
+      } else if (wordSize == 5) {
+         this.gauge.increaseValue( 14 ) 
+      } else if (wordSize == 6 || wordSize == 7 ) {
+         this.gauge.increaseValue( 20 ) 
+      }  else if (wordSize > 7 ) {
+         this.gauge.increaseValue( 25 ) 
+      }
+
+      this.state.submitSuccess()
    }
 
    setWordColor( c ) {
@@ -254,61 +272,6 @@ export default class Virus extends BaseGame {
          wl.style.fill = c
       }) 
    }
-
-   // disinfectLetter() {
-   //    // clear the letter from the word and deselect it from the this.grid
-   //    this.letterIndex--
-   //    let selR = this.word[this.letterIndex].fromRow
-   //    let selC = this.word[this.letterIndex].fromCol 
-   //    let letter = this.grid[selR][selC]
-   //    let isSelectedInfected = letter.infected
-   
-   //    // reset this.grid letter and clear word letter
-   //    letter.reset( this.pickNewLetter() )   
-   //    this.word[this.letterIndex].letter.text = ""
-   //    this.word[this.letterIndex].fromCol = -1
-   //    this.word[this.letterIndex].fromRow = -1   
-      
-   //    let clearCnt = 1 
-   //    if (this.letterIndex > 4) {
-   //       // for words longer that 5 letters, fix two tiles
-   //       clearCnt = 2
-   //    }
-         
-   //    if ( isSelectedInfected ) {
-   //       new Boom( this.app.stage, this.particle, letter.x, letter.y, true)
-   //       clearCnt-- 
-   //       if (clearCnt == 0) {
-   //          return
-   //       }
-   //    } else {
-   //       new Boom( this.app.stage, this.particle, letter.x, letter.y, false)   
-   //    }
-   
-   //    // start with restoring lost tiles. when there are none, reset infected
-   //    let pass = 0
-   //    while ( pass < 2 && clearCnt > 0) {
-   //       for (let r = (Virus.ROWS-1); r >= 0; r--) {
-   //          for (let c = (Virus.COLS-1); c  >= 0; c--) {
-   //             if ( (pass == 0 && this.grid[r][c].isLost) || 
-   //                  (pass == 1 && this.grid[r][c].infected) )  {   
-   //                const letter = this.grid[r][c]   
-   //                letter.reset( this.pickNewLetter() )
-   //                new Boom( this.app.stage, this.particle, letter.x, letter.y)
-   //                clearCnt-- 
-   //                if (clearCnt == 0) {
-   //                   break
-   //                }
-   //             }
-   //          }
-   //          if (clearCnt == 0) {
-   //             break
-   //          }
-   //       }
-      
-   //       pass++
-   //    }
-   // }
 
    clearWord() {
       this.word.forEach( wl  => wl.text = "")
@@ -318,7 +281,6 @@ export default class Virus extends BaseGame {
          }
       }
       this.letterIndex = 0
-      this.lastWordSize = 0
       Letter.wordFull = false
       this.enterKey.setEnabled(false)
       this.deleteKey.setEnabled(false)
@@ -372,8 +334,12 @@ export default class Virus extends BaseGame {
          }
       }
 
-      // FIXME
-      // blow up EVERYTHING
+      let x = 20
+      for (let i=0; i<5; i++) {
+         new Boom( this.app.stage, this.particle, x, 430)
+         x += this.gameWidth / 5
+      }
+      this.gauge.reset()
    }
 
    clearAllInfections() {   
@@ -430,25 +396,7 @@ export default class Virus extends BaseGame {
    }
 
    wordSubmitFinished() {
-      // lastWordSize is 1 based; 4-10. subtract one for count index
-      this.wordCounts[(this.lastWordSize-1)]++
-
-      // FIXME adjust values to make it not easy
-      // accepted lengths = 4 to 10
-      if ( this.lastWordSize == 4 ) {
-         this.gauge.increaseValue( 5 ) 
-      } else if (this.lastWordSize == 5) {
-         this.gauge.increaseValue( 10 ) 
-      } else if (this.lastWordSize == 6 || this.lastWordSize == 7 ) {
-         this.gauge.increaseValue( 20 ) 
-      }  else if (this.lastWordSize > 7 ) {
-         this.gauge.increaseValue( 30 ) 
-      }
-   
-      // reset this.grid and word trackers
-      this.pickNewLetters( this.lastWordSize )
       this.letterIndex = 0
-      this.lastWordSize = 0
       Letter.wordFull = false
    
       // is the game over?
@@ -472,11 +420,11 @@ export default class Virus extends BaseGame {
       } else if ( newState == GameState.GAME_OVER )  {
          if ( oldState == GameState.CLEAR_ALL ) {
             this.gameEndOverlay.setWin(true)
-            this.gameEndOverlay.updateStats( this.clock.timeSec, this.wordCounts)
+            this.gameEndOverlay.updateStats( this.clock.timeSec, this.score,this.wordCounts)
             this.addChild(this.gameEndOverlay)
          } else if (oldState == GameState.PLAYER_LOST ) {
             this.gameEndOverlay.setWin( false )
-            this.gameEndOverlay.updateStats( this.clock.timeSec, this.wordCounts)
+            this.gameEndOverlay.updateStats( this.clock.timeSec, this.score, this.wordCounts)
             this.addChild(this.gameEndOverlay)
          }
       }

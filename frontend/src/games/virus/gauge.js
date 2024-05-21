@@ -32,6 +32,7 @@ export default class Gauge extends Container {
       this.gfx.clear()
       this.gfx.roundRect(0,0, this.gaugeWidth, 25, 20).stroke({width:1, color:0xdbdbff})
 
+      console.log("GAUGE "+this.value)
       if (this.value > 0) {
          let percent = this.value / this.maxValue
          let fillW = (this.gaugeWidth * percent)

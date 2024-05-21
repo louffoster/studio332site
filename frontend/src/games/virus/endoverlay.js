@@ -31,29 +31,35 @@ export default class EndOverlay extends Container {
       this.winMessage.anchor.set(0.5)
       this.winMessage.x = this.panelW / 2.0
       this.winMessage.y = 50
+      
+      const smallStyle = {
+         fill: "#55dd55",
+         fontFamily: "\"Courier New\", Courier, monospace",
+         fontSize: 16,     
+      }
 
-      let restartButton = new Button( this.panelW/2, 210, "Play Again", 
+      let restartButton = new Button( this.panelW/2, 260, "Play Again", 
          restartCallback, 0x55dd55,0x114a11,0x55dd55)
       this.addChild(restartButton)
 
-      this.uptime = new Text({text: "Uptime: 00:00", style: {
-         
-      }})
+      this.score = new Text({text: "Score: 00000", style: smallStyle})
+      this.score.anchor.set(0.5)
+      this.score.x = this.panelW/2
+      this.score.y = 90
+      this.addChild(this.score)
+
+      this.uptime = new Text({text: "Uptime: 00:00", style: smallStyle})
       this.uptime.anchor.set(0.5)
       this.uptime.x = this.panelW/2
-      this.uptime.y = 100
+      this.uptime.y = 110
       this.addChild(this.uptime)
 
       this.wordStats = []
-      let xPos = [10,150,10,150]
-      let yPos = [130,130,152,152]
-      for ( let i=0; i<4; i++) { 
-         let wl = 3+i
-         let stats = new Text({text: `${wl} Letters: 0`, style: {
-            fill: "#55dd55",
-            fontFamily: "\"Courier New\", Courier, monospace",
-            fontSize: 16,
-         }})
+      let xPos = [10,150,10,150,10,150,85]
+      let yPos = [130,130,152,152,174,174,196]
+      for ( let i=0; i<7; i++) { 
+         let wl = 4+i
+         let stats = new Text({text: `${wl} Letters: 0`, style: smallStyle})
          stats.x = xPos[i]+5
          stats.y = yPos[i]
          this.addChild(stats)
@@ -67,7 +73,7 @@ export default class EndOverlay extends Container {
       }})
       backTxt.anchor.set(0.5)
       backTxt.x = this.panelW/2
-      backTxt.y = 260
+      backTxt.y = 300
       backTxt.eventMode = 'static'
       backTxt.cursor ="pointer"
       this.addChild(backTxt)
@@ -86,7 +92,7 @@ export default class EndOverlay extends Container {
 
    drawPopup() {
       // draw the border and background
-      this.graphics.rect(0,0, this.panelW,280).fill(0x333333).stroke({width:2, color: 0x55dd55})
+      this.graphics.rect(0,0, this.panelW,320).fill(0x333333).stroke({width:2, color: 0x55dd55})
 
       // draw lines around message
       let color = 0xff5555
@@ -97,7 +103,10 @@ export default class EndOverlay extends Container {
       this.graphics.moveTo(10,75).lineTo(this.panelW-10, 75).stroke({width:1, color: color})
    }
  
-   updateStats(gameTime, stats) {
+   updateStats(gameTime, score, stats) {
+      let scoreStr = `${score}`.padStart(5,"0")
+      this.score.text = "Score: "+ scoreStr
+
       let secs = gameTime
       let mins = Math.floor(gameTime / 60)
       if ( mins > 0) {
@@ -106,13 +115,8 @@ export default class EndOverlay extends Container {
       let timeStr = `Uptime: ${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       this.uptime.text = timeStr
 
-      for ( let i=0; i<4; i++) { 
-         let wl = `${i+3}`
-         if (i==3) {
-            wl+= "+"
-         } else {
-            wl += " "
-         }
+      for ( let i=0; i<7; i++) { 
+         let wl = `${i+4}`
          this.wordStats[i].text = `${wl} Letters: ${stats[i]}`
       }
    }

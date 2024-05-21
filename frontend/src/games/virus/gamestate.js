@@ -29,7 +29,7 @@ export default class GameState {
    }
    submitSuccess() {
       this.state = GameState.SUCCESS
-      this.stateDuration = 1.5
+      this.stateDuration = 1
    }
    clearVirus() {
       this.state = GameState.CLEAR_ALL
