@@ -5,7 +5,7 @@ export default class Gauge extends Container {
       super()
       this.x = x 
       this.y = y
-      this.value = 40
+      this.value = 0
       this.maxValue = 100
 
       this.gfx = new Graphics() 
