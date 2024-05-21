@@ -38,86 +38,86 @@ export default class Sweep extends BaseGame {
    
    async initialize(replayHandler, backHandler) {
       await super.initialize()
-      this.spark = await Assets.load('/spark.png')
-      this.square = await Assets.load('/square.png')
+      // this.spark = await Assets.load('/spark.png')
+      // this.square = await Assets.load('/square.png')
 
-      this.app.ticker.add(() => TWEEDLE.Group.shared.update())
+      // this.app.ticker.add(() => TWEEDLE.Group.shared.update())
       
-      this.pool.refill()
-      this.grid = Array(Sweep.ROWS).fill().map(() => Array(Sweep.COLS))
-      let x = 5 
-      let y = 5
-      for (let r = 0; r < Sweep.ROWS; r++) {
-         for (let c = 0; c < Sweep.COLS; c++) {
-            let scoredLetter = this.pool.popScoringLetter()
-            let t = new Tile( scoredLetter, x,y, this.tileClicked.bind(this))
-            this.addChild(t)
-            this.grid[r][c] = t
-            x += Tile.WIDTH
-         }
-         y += Tile.HEIGHT
-         x = 5
-      } 
+      // this.pool.refill()
+      // this.grid = Array(Sweep.ROWS).fill().map(() => Array(Sweep.COLS))
+      // let x = 5 
+      // let y = 5
+      // for (let r = 0; r < Sweep.ROWS; r++) {
+      //    for (let c = 0; c < Sweep.COLS; c++) {
+      //       let scoredLetter = this.pool.popScoringLetter()
+      //       let t = new Tile( scoredLetter, x,y, this.tileClicked.bind(this))
+      //       this.addChild(t)
+      //       this.grid[r][c] = t
+      //       x += Tile.WIDTH
+      //    }
+      //    y += Tile.HEIGHT
+      //    x = 5
+      // } 
    
-      let wordStyle = new TextStyle({
-         fill: "#CAF0F8",
-         fontFamily: "Arial",
-         fontSize: 28,
-         lineHeight: 28,
-      })
-      this.word = new Text({text: "", style: wordStyle})
-      this.word.anchor.set(0.5, 1)
-      this.word.x = 185 
-      this.word.y = 410
-      this.addChild(this.word)
+      // let wordStyle = new TextStyle({
+      //    fill: "#CAF0F8",
+      //    fontFamily: "Arial",
+      //    fontSize: 28,
+      //    lineHeight: 28,
+      // })
+      // this.word = new Text({text: "", style: wordStyle})
+      // this.word.anchor.set(0.5, 1)
+      // this.word.x = 185 
+      // this.word.y = 410
+      // this.addChild(this.word)
    
-      this.giveUpButton = new Button( 20, 425, "Give Up", 
-         this.giveUpClicked.bind(this), 0xEAE0E8,0x892b64,0xa94b84)
-      this.giveUpButton.alignTopLeft()
-      this.addChild(this.giveUpButton)
+      // this.giveUpButton = new Button( 20, 425, "Give Up", 
+      //    this.giveUpClicked.bind(this), 0xEAE0E8,0x892b64,0xa94b84)
+      // this.giveUpButton.alignTopLeft()
+      // this.addChild(this.giveUpButton)
    
-      this.clearButton = new Button( 145, 425, "Clear", 
-         this.clearSelections.bind(this), 0xEAE0E8,0xc5472b,0xe5674b)
-      this.clearButton.alignTopLeft()
-      this.addChild(this.clearButton)
-      this.clearButton.disable()
+      // this.clearButton = new Button( 145, 425, "Clear", 
+      //    this.clearSelections.bind(this), 0xEAE0E8,0xc5472b,0xe5674b)
+      // this.clearButton.alignTopLeft()
+      // this.addChild(this.clearButton)
+      // this.clearButton.disable()
       
-      this.submitButton = new Button( 247, 425, "Submit", 
-         this.submitWord.bind(this), 0xCAF0F8,0x298058,0x48CAE4)
-      this.submitButton.disable()
-      this.submitButton.alignTopLeft()
-      this.addChild(this.submitButton)
+      // this.submitButton = new Button( 247, 425, "Submit", 
+      //    this.submitWord.bind(this), 0xCAF0F8,0x298058,0x48CAE4)
+      // this.submitButton.disable()
+      // this.submitButton.alignTopLeft()
+      // this.addChild(this.submitButton)
    
-      this.gfx.rect(4, 488, Tile.WIDTH*3+8, Tile.HEIGHT+8). 
-         stroke({width: 1, color: 0xCAF0F8}).fill(0x48CAE4)
+      // this.gfx.rect(4, 488, Tile.WIDTH*3+8, Tile.HEIGHT+8). 
+      //    stroke({width: 1, color: 0xCAF0F8}).fill(0x48CAE4)
    
-      let helpX = 8
-      for ( let i=0; i<3; i++ ) {
-         let h = new Tile(new Letter("?", 0), helpX,492, this.tileClicked.bind(this))
-         this.helpers.push( h )
-         helpX += Tile.WIDTH
-         this.addChild(h)
-      }
+      // let helpX = 8
+      // for ( let i=0; i<3; i++ ) {
+      //    let h = new Tile(new Letter("?", 0), helpX,492, this.tileClicked.bind(this))
+      //    this.helpers.push( h )
+      //    helpX += Tile.WIDTH
+      //    this.addChild(h)
+      // }
    
       this.clock = new Clock(280, 505, "", 0xCAF0F8)
       this.addChild(this.clock)
-      this.scoreDisplay = new Text({text: "00000", style: {
-         fill: "#CAF0F8",
-         fontFamily: "Arial",
-         fontSize: 24,
-         fontWeight: "bold",
-      }})
-      this.scoreDisplay.anchor.set(0.5, 1)
-      this.scoreDisplay.x = 280 
-      this.scoreDisplay.y = 545
-      this.addChild(this.scoreDisplay)
+      // this.scoreDisplay = new Text({text: "00000", style: {
+      //    fill: "#CAF0F8",
+      //    fontFamily: "Arial",
+      //    fontSize: 24,
+      //    fontWeight: "bold",
+      // }})
+      // this.scoreDisplay.anchor.set(0.5, 1)
+      // this.scoreDisplay.x = 280 
+      // this.scoreDisplay.y = 545
+      // this.addChild(this.scoreDisplay)
 
-      this.enableGrid( false )
+      // this.enableGrid( false )
 
-      this.startOverlay = new StartOverlay(this.startHandler.bind(this)) 
-      this.addChild(this.startOverlay)
-      this.pickOverlay = new PickOverlay( this.helperHandler.bind(this) )
-      this.endOverlay = new EndOverlay(replayHandler, backHandler)
+      // this.startOverlay = new StartOverlay(this.startHandler.bind(this)) 
+      // this.addChild(this.startOverlay)
+      // this.pickOverlay = new PickOverlay( this.helperHandler.bind(this) )
+      // this.endOverlay = new EndOverlay(replayHandler, backHandler)
    }
 
    helperHandler( pickedLetters ) {
