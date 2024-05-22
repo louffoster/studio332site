@@ -236,13 +236,13 @@ export default class Virus extends BaseGame {
       this.enterKey.setEnabled(false)
       this.deleteKey.setEnabled(false)
       this.state.requestSubmit()
-      this.setWordColor(0xaaddff)  
    }
 
    doSubmission() {
       let testWord = ""
       this.word.forEach( l => testWord += l.text)
       if (this.dictionary.isValid(testWord)) {
+         this.setWordColor(0xaaddff)  
          this.submitSuccess()
       } else {
          this.setWordColor(0xff5555)
