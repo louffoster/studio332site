@@ -28,10 +28,10 @@ export default class Letter extends Container {
       this.graphics = new Graphics()
       this.letter = null
       this.letterDisplay = new Text({text: "", style: {
-         fill: "#cccccc",
+         fill: "#ccccff",
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 36,
-         stroke: {color: 0x111111, wifth: 4},
+         stroke: {color: 0x000000, width: 3},
       }})
       this.letterDisplay.anchor.set(0.5)
       this.letterDisplay.x = 0
@@ -70,6 +70,7 @@ export default class Letter extends Container {
          return
       }
       this.selected = true
+      this.letterDisplay.style.fill = 0x48cae4  
       this.draw()
       this.clickCallback(this)
    }
@@ -84,6 +85,7 @@ export default class Letter extends Container {
    deselect() {
       if (this.selected) {
          this.selected = false
+         this.letterDisplay.style.fill = 0xcccccc  
          this.draw()
       }
    }
@@ -91,7 +93,8 @@ export default class Letter extends Container {
    replace( newLetter ) {
       if ( this.isLost == false ) {
          this.letter = newLetter
-         this.letterDisplay.text = newLetter.text   
+         this.letterDisplay.text = newLetter.text 
+         this.letterDisplay.style.fill = 0xcccccc  
       }
    }
 
@@ -102,12 +105,14 @@ export default class Letter extends Container {
       this.virusPercent = 0
       this.virusGfx.clear()
       this.letterDisplay.text = newLetter.text
+      this.letterDisplay.style.fill = 0xcccccc
       this.draw()  
    }
 
    infect() {
       if ( this.infected == false) {
          this.infected = true
+         this.letterDisplay.style.fill = 0x44dd22
          this.draw()
       }
    }
@@ -130,29 +135,23 @@ export default class Letter extends Container {
       this.graphics.circle(0,0, 25).fill(0x4f4f55)
 
       if (this.selected) {
-         this.graphics.stroke({width: 2, color: 0xaaddff})
-         this.letterDisplay.style.fill = 0xaaddff
+         this.graphics.stroke({width: 2, color: 0x48cae4})
       } else {
          this.graphics.stroke({width: 1, color: 0xcccccc})
-         if ( this.isLost ) {
-            this.graphics.stroke({width: 1, color: 0x885588})
-         } 
-         if ( this.isInfected ) {
-            this.letterDisplay.style.fill = 0x33aa33
-         } else {
-            this.letterDisplay.style.fill = 0xcccccc
-         }
       }
    }
 
    drawVirus() {
       this.virusGfx.clear()
       let radius = 25.0 * (this.virusPercent/100.0)
-      let color = 0x995599
+      let color = 0xc45ab3// 0x995599
       if ( this.virusPercent == 100) {
-         color = 0x550044
+         color = 0xc683c3 //0x550044
       }
-      this.virusGfx.circle(0,0,radius).fill(color)
+      this.virusGfx.circle(0,0,radius).fill(color).stroke({width:3, color: 0x631a86})
+      if ( this.virusPercent == 100) {
+         this.virusGfx.circle(0,0,3).fill(0x631a86)
+      }
    }
 
    update(deltaMS, infectedCallback) {
