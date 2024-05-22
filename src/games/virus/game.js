@@ -265,10 +265,10 @@ export default class Virus extends BaseGame {
          }
       }
 
-      this.score += letterValue * this.word.length * 5
+      this.score += (letterValue * this.word.length * 5)
       this.wordCounts[(wordSize-1)]++
       let val = `${this.score}`.padStart(5,"0")
-      this.scoreDisplay.text = `$${val}`
+      this.scoreDisplay.text = `${val}`
 
       // FIXME adjust values to make it not easy
       if ( wordSize == 4 ) {
@@ -437,7 +437,7 @@ export default class Virus extends BaseGame {
       } else if ( newState == GameState.GAME_OVER )  {
          if ( oldState == GameState.CLEAR_ALL ) {
             this.gameEndOverlay.setWin(true)
-            this.gameEndOverlay.updateStats( this.clock.timeSec, this.score,this.wordCounts)
+            this.gameEndOverlay.updateStats( this.clock.timeSec, this.score, this.wordCounts)
             this.addChild(this.gameEndOverlay)
          } else if (oldState == GameState.PLAYER_LOST ) {
             this.gameEndOverlay.setWin( false )

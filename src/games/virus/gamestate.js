@@ -37,7 +37,7 @@ export default class GameState {
    }
    gameLost() {
       this.state = GameState.PLAYER_LOST
-      this.stateDuration = 2
+      this.stateDuration = 1
    }
    isLosing() {
       return this.state == GameState.PLAYER_LOST
