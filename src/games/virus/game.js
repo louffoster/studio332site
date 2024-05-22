@@ -204,17 +204,22 @@ export default class Virus extends BaseGame {
       } else {
          this.gauge.zapUsed()
          this.zapButton.setEnabled( this.gauge.enableZap)
-         let disinfectCnt = 6 
+         let lost = []
          for (let r = 0; r < Virus.ROWS; r++) {
             for (let c = 0; c < Virus.COLS; c++) {
-               if ( disinfectCnt > 0) {
-                  const tgtCell = this.grid[r][c]
-                  if ( tgtCell.isInfected || tgtCell.isLost ) {
-                     new Boom( this.app.stage, this.particle, tgtCell.x, tgtCell.y, true)
-                     tgtCell.reset( this.pickNewLetter() )  
-                     disinfectCnt--  
-                  }
+               const tgtCell = this.grid[r][c]
+               if ( tgtCell.isLost ) {
+                  lost.push(tgtCell)
                }
+            }
+         }
+         for (let i=0; i<6; i++) {
+            lost = this.shuffleArray(lost)
+            const fix = lost.pop()
+            new Boom( this.app.stage, this.particle, fix.x, fix.y, true)
+            fix.reset( this.pickNewLetter() )  
+            if (lost.length == 0 ) {
+               break
             }
          }
       }
