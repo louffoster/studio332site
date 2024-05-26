@@ -105,7 +105,6 @@ export default class Virus extends BaseGame {
 
       this.zapButton = new IconButton(318,495,zapImg,0x4de699)
       this.zapButton.setListener( this.zapPushed.bind(this) )
-      this.zapButton.setEnabled(false)
       this.addChild(this.zapButton)
    
       this.gauge = new Gauge(10, 430, this.gameWidth-20)
@@ -203,7 +202,6 @@ export default class Virus extends BaseGame {
          this.clearAllInfections()
       } else {
          this.gauge.zapUsed()
-         this.zapButton.setEnabled( this.gauge.enableZap)
          let lost = []
          for (let r = 0; r < Virus.ROWS; r++) {
             for (let c = 0; c < Virus.COLS; c++) {
@@ -213,14 +211,23 @@ export default class Virus extends BaseGame {
                }
             }
          }
-         for (let i=0; i<6; i++) {
+         if ( lost.length < 6 ) {
+            for (let r = 0; r < Virus.ROWS; r++) {
+               for (let c = 0; c < Virus.COLS; c++) {
+                  const tgtCell = this.grid[r][c]
+                  if ( tgtCell.isInfected ) {
+                     lost.push(tgtCell)
+                  }
+               }
+            }  
+         }
+
+         let maxRemove = Math.min(6, lost.length)
+         for (let i=0; i<maxRemove; i++) {
             lost = this.shuffleArray(lost)
             const fix = lost.pop()
             new Boom( this.app.stage, this.particle, fix.x, fix.y, true)
             fix.reset( this.pickNewLetter() )  
-            if (lost.length == 0 ) {
-               break
-            }
          }
       }
    }
@@ -420,15 +427,9 @@ export default class Virus extends BaseGame {
    wordSubmitFinished() {
       this.letterIndex = 0
       Letter.wordFull = false
-   
-      // is the game over?
-      if ( this.gauge.enableZap) {
-         this.zapButton.setEnabled(true)
-      }
    }
 
    gameStateChanged( oldState, newState, ) {
-      console.log("NEW STATE FROM "+oldState+" TO "+newState)
       if (newState == GameState.SUBMIT) {
          this.doSubmission()
       } else if (newState == GameState.PLAY) {
@@ -465,7 +466,9 @@ export default class Virus extends BaseGame {
          return
       }
 
-      this.clock.tick(this.app.ticker.deltaMS)
+      this.clock.tick( this.app.ticker.deltaMS )
+      this.gauge.update( this.app.ticker.deltaMS)
+      this.zapButton.setEnabled( this.gauge.enableZap)
 
       // Every 30 seconds, increase rate by 10%, and raise infection level
       let timeSec = this.clock.timeSec
