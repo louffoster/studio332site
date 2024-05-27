@@ -32,12 +32,10 @@ export default class Board extends Container {
       this.addChild(h2)
 
       let h3 = new Hole(top, 35, this.boardH-35, 35)
-      h3.setTrashMode()
       this.holes.push(h3)
       this.addChild(h3)
 
       let h4 = new Hole(top, this.boardW-35, this.boardH-35, 35)
-      h4.setTrashMode()
       this.holes.push(h4)
       this.addChild(h4)
 
@@ -65,10 +63,9 @@ export default class Board extends Container {
       this.holes.forEach( h => {
          if ( h.checkForSink( puck ) ) {
             sunk = true
-            trash = h.trashPucks
          }
       })
-      return {sunk: sunk, trash: trash}
+      return sunk
    }
 
    canPlaceStriker(x,y, radius) {
@@ -98,19 +95,16 @@ export default class Board extends Container {
       this.gfx.circle(this.boardW/2, this.boardH/2, 85).stroke({width: 1, color: 0x7A6C5D})
       this.gfx.circle(this.boardW/2, this.boardH/2, 10).fill(0x7A6C5D)
 
-      // trash markers
-      this.gfx.circle(35, this.boardH-35, 60).stroke({width:10, color: 0xC17C74})
-      this.gfx.circle(this.boardW-35, this.boardH-35, 60).stroke({width:10, color: 0xC17C74})
-
       // score markers
       this.gfx.circle(35, 35, 60).stroke({width:10, color: 0x5574bd})
       this.gfx.circle(this.boardW-35, 35, 60).stroke({width:10, color: 0x5574bd})
+      this.gfx.circle(35, this.boardH-35, 60).stroke({width:10, color: 0x5574bd})
+      this.gfx.circle(this.boardW-35, this.boardH-35, 60).stroke({width:10, color: 0x5574bd})
    }
 }
 
 class Hole extends Container {
    gfx = null
-   trashPucks = false
 
    constructor( physTop, x,y, radius) {
       super() 
@@ -122,10 +116,6 @@ class Hole extends Container {
       this.gfx = new Graphics()
       this.addChild(this.gfx)
       this.draw()
-   }
-
-   setTrashMode() {
-      this.trashPucks = true
    }
 
    checkForSink( shape ) {

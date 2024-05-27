@@ -218,7 +218,7 @@ export default class Charrom extends BasePhysicsGame {
       }
    }
 
-   puckSunk( puck, trash ) {
+   puckSunk( puck ) {
       this.sunkCount++
       this.puckCount--
       this.score += 25
@@ -229,20 +229,16 @@ export default class Charrom extends BasePhysicsGame {
       this.renderScore()
 
       let sunkLetter = puck.letter
-      if ( trash ) {
-         new TrashAnim(this.app.stage, this.smoke, puck.x, puck.y)
+      if ( this.sunkLetters.length < Charrom.LETTER_LIMIT) {
+         let x = 65
+         let y = Charrom.BOARD_HEIGHT+7+this.statsHeight
+         let t = new Tile(sunkLetter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
+         this.sunkLetters.push(t)
+         this.addChild(t)
       } else {
-         if ( this.sunkLetters.length < Charrom.LETTER_LIMIT) {
-            let x = 7
-            let y = Charrom.BOARD_HEIGHT+7+this.statsHeight
-            let t = new Tile(sunkLetter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
-            this.sunkLetters.push(t)
-            this.addChild(t)
-         } else {
-            this.endReason = "overflow"
-            if ( this.gameState != "shot") {
-               this.gameOver()
-            }
+         this.endReason = "overflow"
+         if ( this.gameState != "shot") {
+            this.gameOver()
          }
       }
 
@@ -274,6 +270,7 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    submitSuccess() {
+      // FIXME
       let tileCnt = this.word.text.length
       let totalTileValue = 0
       let clear = []
@@ -408,10 +405,9 @@ export default class Charrom extends BasePhysicsGame {
             stopped++
          }
 
-         let sunkResp = this.board.checkSunk( i )
-         if ( sunkResp.sunk ) {
+         if (  this.board.checkSunk( i ) ) {
             if ( i.tag != "striker") {
-               this.puckSunk( i, sunkResp.trash )
+               this.puckSunk( i )
                i.removeFromTable()
                this.offTable.push( i )
             } else {
@@ -445,7 +441,6 @@ export default class Charrom extends BasePhysicsGame {
             setTimeout( () => {
                this.offTable.forEach( p => {
                   if ( p.tag != "striker") {
-                     console.log(p)
                      this.removePhysicsItem(p, false )
                   } 
                })
