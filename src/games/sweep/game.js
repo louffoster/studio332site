@@ -88,8 +88,8 @@ export default class Sweep extends BaseGame {
       // this.submitButton.alignTopLeft()
       // this.addChild(this.submitButton)
    
-      // this.gfx.rect(4, 488, Tile.WIDTH*3+8, Tile.HEIGHT+8). 
-      //    stroke({width: 1, color: 0xCAF0F8}).fill(0x48CAE4)
+      this.gfx.rect(4, 488, Tile.WIDTH*3+8, Tile.HEIGHT+8). 
+         stroke({width: 1, color: 0xCAF0F8}).fill(0x48CAE4)
    
       // let helpX = 8
       // for ( let i=0; i<3; i++ ) {
