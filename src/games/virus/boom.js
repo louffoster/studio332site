@@ -1,5 +1,5 @@
 import {Sprite, Container} from "pixi.js"
-// import * as TWEEDLE from "tweedle.js"
+import * as TWEEDLE from "tweedle.js"
 
 export default class Boom extends Container {
    group = null

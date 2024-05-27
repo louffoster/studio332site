@@ -12,7 +12,7 @@ import Button from "@/games/common/button"
 import IconButton from "@/games/common/iconbutton"
 import Dictionary from "@/games/common/dictionary"
 import Boom from "@/games/virus/boom"
-// import * as TWEEDLE from "tweedle.js"
+import * as TWEEDLE from "tweedle.js"
 
 export default class Virus extends BaseGame {
    static ROWS = 6

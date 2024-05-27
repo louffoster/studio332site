@@ -1,5 +1,5 @@
 import {Text, Graphics, Container, Rectangle} from "pixi.js"
-// import * as TWEEDLE from "tweedle.js"
+import * as TWEEDLE from "tweedle.js"
 
 export default class Tile extends Container {
    static WIDTH = 60 

@@ -1,5 +1,5 @@
 import {Sprite, Container} from "pixi.js"
-// import * as TWEEDLE from "tweedle.js"
+import * as TWEEDLE from "tweedle.js"
 
 export default class ClearAnim extends Container {
    group = null
