@@ -1,5 +1,5 @@
 import {Text, TextStyle, Assets, Sprite } from "pixi.js"
-import * as TWEEDLE from "tweedle.js"
+// import * as TWEEDLE from "tweedle.js"
 import Dictionary from "@/games/common/dictionary"
 import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"

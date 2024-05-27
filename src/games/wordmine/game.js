@@ -12,7 +12,7 @@ import Boom from "@/games/wordmine/boom"
 import Marker from "@/games/wordmine/marker"
 import LetterPool from "@/games/common/letterpool"
 import Matter from 'matter-js'
-import * as TWEEDLE from "tweedle.js"
+// import * as TWEEDLE from "tweedle.js"
 
 export default class WordMine extends BasePhysicsGame {
    pool = new LetterPool()

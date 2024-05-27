@@ -1,5 +1,5 @@
 import { Text, Container, ColorMatrixFilter } from "pixi.js"
-import * as TWEEDLE from "tweedle.js"
+// import * as TWEEDLE from "tweedle.js"
 import BaseGame from "@/games/common/basegame"
 import Tile from "@/games/mosaic/tile"
 import Spinner from "@/games/mosaic/spinner"

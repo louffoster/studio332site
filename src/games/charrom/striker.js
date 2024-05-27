@@ -1,7 +1,7 @@
 import BasePhysicsItem from "@/games/common/basephysicsitem"
 import Matter from 'matter-js'
 import { Circle } from "pixi.js"
-import * as TWEEDLE from "tweedle.js"
+// // import * as TWEEDLE from "tweedle.js"
 
 
 export default class Striker extends BasePhysicsItem {

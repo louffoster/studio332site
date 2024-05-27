@@ -1,5 +1,5 @@
 import { Text, Assets }  from "pixi.js"
-import * as TWEEDLE from "tweedle.js"
+// import * as TWEEDLE from "tweedle.js"
 import StartOverlay from "@/games/letterdrop/startoverlay"
 import EndOverlay from "@/games/letterdrop/endoverlay"
 import BaseGame from "@/games/common/basegame"

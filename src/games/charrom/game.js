@@ -12,7 +12,7 @@ import StartOverlay from "@/games/charrom/startoverlay"
 import EndOverlay from "@/games/charrom/endoverlay"
 import TrashAnim from "@/games/letterdrop/trashanim"
 import { Text, Assets } from "pixi.js"
-import * as TWEEDLE from "tweedle.js"
+// // import * as TWEEDLE from "tweedle.js"
 
 export default class Charrom extends BasePhysicsGame {
    dictionary = new Dictionary()
