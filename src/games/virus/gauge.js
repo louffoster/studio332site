@@ -56,8 +56,10 @@ export default class Gauge extends Container {
 
    update(deltaMS) {
       if ( this.targetValue == 0) {
-         this.value -= (0.4 * (deltaMS/1000.0))
-         this.value = Math.max(0, this.value)
+         if ( this.value != this.maxValue) {
+            this.value -= (0.4 * (deltaMS/1000.0))
+            this.value = Math.max(0, this.value)
+         }
       } else {
          if ( this.value > this.targetValue ) {
             this.value -= (50 * (deltaMS/1000.0))
