@@ -33,6 +33,7 @@ const toggleWMHelp = ((event) => {
 <template>
    <div class="content">
       <h2>Games</h2>
+      <p><i>** Updatd Pixi.JS to latest rev</i></p>
       <ul>
          <li>
             <div class="game-info">
