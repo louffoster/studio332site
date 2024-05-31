@@ -398,6 +398,7 @@ export default class WordMine extends BasePhysicsGame {
    resetRocks() {
       this.items.forEach( i => {
          if ( i.tag.indexOf("rock") == 0 ) {
+            i.setBombMode( this.clickMode == 'bomb')
             i.deselect()
             i.setTarget(false)
             i.setEnabled(true)

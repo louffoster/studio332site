@@ -13,6 +13,8 @@ export default class Rock extends BasePhysicsItem {
    polyPts = []
    isVowel = false
    pinned = false
+   bombMode = false
+
    static WIDTH = 55
    static HEIGHT = 55
    static FRICTION = 0.01
@@ -60,7 +62,6 @@ export default class Rock extends BasePhysicsItem {
       this.selLetterColor = 0x414833
       this.targetColor = 0xe26312
       this.pinColor = 0x33aadd
-      this.dimColor = 0x616853
 
       let txt = new Text({text: letter.text, style: {
          fill: this.letterColor,
@@ -163,6 +164,9 @@ export default class Rock extends BasePhysicsItem {
       }
       this.draw()
    }
+   setBombMode( enable ) {
+      this.bombMode = enable
+   }
 
    setError() {
       if (this.error == false ) {
@@ -194,20 +198,22 @@ export default class Rock extends BasePhysicsItem {
          alpha = 0.6
       }
       this.gfx.poly( this.polyPts ).stroke({width:0})
-      // if (this.enabled == false ) {
-      //    this.gfx.fill(this.dimColor)
-      // } else {
-         if ( this.error ) {
-            this.gfx.fill({color: 0xa20c01, alpha: alpha}) 
-         } else if ( this.selected ) {
-            this.gfx.fill( {color: this.selectColor, alpha: alpha})
-         } else {
-            this.gfx.fill({color: this.fillColor, alpha: alpha})
-         }
-      // }
+      if ( this.error ) {
+         this.gfx.fill({color: 0xa20c01, alpha: alpha}) 
+      } else if ( this.selected ) {
+         this.gfx.fill( {color: this.selectColor, alpha: alpha})
+      } else {
+         this.gfx.fill({color: this.fillColor, alpha: alpha})
+      }
 
       if ( this.pinned) {
          this.gfx.circle(0,-18, 5).fill(this.pinColor).stroke({width: 1, color: 0x000000})
+      }
+
+      if ( this.bombMode) {
+         this.gfx.tint = 0xff9999
+      } else {
+         this.gfx.tint = 0xffffff  
       }
    }
 
