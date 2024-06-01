@@ -31,6 +31,7 @@ export default class Virus extends BaseGame {
    lastIncreasedTimeSec = 0
    infectionLevel = 3     // minmum number of infected tiles
    pendingInfections = 0  // numner of infections to add to bring up to current level
+   selections = []
    letterIndex = 0
    word = []
    wordCounts = []
@@ -49,6 +50,7 @@ export default class Virus extends BaseGame {
       const checkImg = await Assets.load('/images/virus/check.png')
       const cancelImg = await Assets.load('/images/virus/cancel.png')
       const zapImg = await Assets.load('/images/virus/antivirus.png')
+      const offImg = await Assets.load('/images/virus/off.png')
 
       let y = 40
       let x = 40   
@@ -71,7 +73,7 @@ export default class Virus extends BaseGame {
       // setup blank word... to be filled with clicked letters from grid
       x = 8
       for ( let i=0; i<10; i++) {
-         // draw the underline for the lettercl
+         // draw the underline for the letter
          this.gfx.moveTo(x, 395).lineTo(x+20, 395).stroke({width: 1, color: 0x888899})  
    
          let wordLetter = new Text({text: "", style: {
@@ -82,7 +84,7 @@ export default class Virus extends BaseGame {
          wordLetter.anchor.set(0.5, 0)
          wordLetter.x = x+10
          wordLetter.y = 365
-         this.addChild(wordLetter)
+         this.addChild( wordLetter )
          this.word.push( wordLetter )
    
          x+=23
@@ -98,13 +100,18 @@ export default class Virus extends BaseGame {
       this.deleteKey.setEnabled(false)
       this.addChild(this.deleteKey)
 
-      this.shuffleKey = new Button( 10, 475, "RANDOMIZE", 
+      this.offButton = new IconButton(35,495,offImg,0x990000)
+      this.offButton.setListener( this.offPushed.bind(this) )
+      this.addChild(this.offButton)
+
+      this.shuffleKey = new Button( 100, 475, "RANDOMIZE", 
          this.shuffleGrid.bind(this), 0xccccff,0x445577,0x77aaff)
       this.shuffleKey.alignTopLeft()
       this.addChild(this.shuffleKey)
 
       this.zapButton = new IconButton(318,495,zapImg,0x4de699)
       this.zapButton.setListener( this.zapPushed.bind(this) )
+      this.zapButton.setEnabled(false)
       this.addChild(this.zapButton)
    
       this.gauge = new Gauge(10, 430, this.gameWidth-20)
@@ -194,6 +201,10 @@ export default class Virus extends BaseGame {
          }
          if (added ) break
       }
+   }
+
+   offPushed() {
+      this.beginGameOver()
    }
 
    zapPushed() {
@@ -332,20 +343,36 @@ export default class Virus extends BaseGame {
    }
    
    letterClicked( letter ) {
-      if (this.state.isGameOver()) return 
+      if ( this.state.isGameOver() ) return 
+      if ( letter.selected == false && this.letterIndex == 10 ) return
 
-      Letter.wordFull = false
-      this.word[this.letterIndex].text = letter.text
-      this.letterIndex++
-      if ( this.letterIndex > 3) {
-         this.enterKey.setEnabled(true)
+      if (letter.selected) {
+         const lastLetter = this.selections[ this.selections.length-1 ]
+         if (lastLetter != letter) {
+            return
+         }
+         this.selections.pop()
+         this.letterIndex--
+         this.word[this.letterIndex].text = ""
+         letter.deselect()
+         if ( this.selections.length > 0) {
+            this.selections[ this.selections.length-1 ].highlight( true )
+         }
       } else {
-         this.enterKey.setEnabled(false)
+         if ( this.selections.length > 0) {
+            this.selections[ this.selections.length-1 ].highlight( false )
+         }
+         this.selections.push(letter)
+         letter.select()
+         this.word[this.letterIndex].text = letter.text
+         this.letterIndex++
+         if ( this.letterIndex > 3) {
+            this.enterKey.setEnabled(true)
+         } else {
+            this.enterKey.setEnabled(false)
+         }
+         this.deleteKey.setEnabled( true )
       }
-      if (this.letterIndex == 10) {
-         Letter.wordFull = true
-      }
-      this.deleteKey.setEnabled( true )
    }
 
    beginGameOver() {

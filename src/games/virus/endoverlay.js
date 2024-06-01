@@ -115,7 +115,6 @@ export default class EndOverlay extends Container {
       let timeStr = `Uptime: ${mins}`.padStart(2,"0")+":"+`${secs}`.padStart(2,"0")
       this.uptime.text = timeStr
 
-      console.log(stats )
       for ( let i=3; i<=9; i++) { 
          let wl = `${i+1}`
          this.wordStats[i-3].text = `${wl} Letters: ${stats[i]}`

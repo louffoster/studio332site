@@ -1,18 +1,18 @@
 import { Container, Graphics, Text, Circle } from "pixi.js"
 
 export default class Letter extends Container {
-   static wordFull = false 
-
    // 100% is full so take 100 / rate to get time for total infection
    static infectRatePerSec = 5.0 // 20 sec to fill
 
    constructor(x,y, r,c ) {
       super()
+      this.lastTapTime = 0
       this.eventMode = 'static'
       this.hitArea =  new Circle(0,0,25)
       this.cursor = "pointer"
       this.on('pointerdown', this.clickHandler)
 
+      this.highlighted = false
       this.selected = false
       this.infected = false
       this.virusGfx = new Graphics() 
@@ -31,6 +31,7 @@ export default class Letter extends Container {
          fill: "#ccccff",
          fontFamily: "\"Courier New\", Courier, monospace",
          fontSize: 36,
+         fontWeight: "bold",
          stroke: {color: 0x000000, width: 3},
       }})
       this.letterDisplay.anchor.set(0.5)
@@ -66,12 +67,9 @@ export default class Letter extends Container {
    }
 
    clickHandler() {
-      if ( Letter.wordFull || this.selected  || this.isLost ) { 
+      if ( this.isLost ) { 
          return
       }
-      this.selected = true
-      this.letterDisplay.style.fill = 0x48cae4  
-      this.draw()
       this.clickCallback(this)
    }
 
@@ -82,9 +80,24 @@ export default class Letter extends Container {
       return this.infected && this.virusPercent == 100.0
    }
 
+   select() {
+      if ( this.selected == false ) {
+         this.selected = true
+         this.highlighted = true
+         this.letterDisplay.style.fill = 0x48cae4  
+         this.draw()
+      }    
+   }
+
+   highlight( flag ) {
+      this.highlighted = flag
+      this.draw()
+   }
+
    deselect() {
       if (this.selected) {
          this.selected = false
+         this.highlighted = false
          this.letterDisplay.style.fill = 0xcccccc  
          this.draw()
       }
@@ -101,6 +114,7 @@ export default class Letter extends Container {
    reset( newLetter ) {
       this.letter = newLetter
       this.selected = false
+      this.highlighted = false
       this.infected = false 
       this.virusPercent = 0
       this.virusGfx.clear()
@@ -120,6 +134,7 @@ export default class Letter extends Container {
       this.infected = true
       this.virusPercent = 100.0
       this.selected = false
+      this.highlighted = false
       this.letterDisplay.text = ""
       this.cursor = 'default'
       this.draw()
@@ -132,21 +147,23 @@ export default class Letter extends Container {
 
    draw() {
       this.graphics.clear()
-      this.graphics.circle(0,0, 25).fill(0x4f4f55)
+      this.graphics.circle(0,0, 25)
 
-      if (this.selected) {
-         this.graphics.stroke({width: 2, color: 0x48cae4})
+      if (this.highlighted) {
+         this.graphics.fill(0x1070b0).stroke({width: 2, color: 0x48cae4})
+      } else if (this.selected) {
+         this.graphics.fill(0x4f4f55).stroke({width: 2, color: 0x48cae4})
       } else {
-         this.graphics.stroke({width: 1, color: 0xcccccc})
+         this.graphics.fill(0x4f4f55).stroke({width: 1, color: 0xcccccc})
       }
    }
 
    drawVirus() {
       this.virusGfx.clear()
       let radius = 25.0 * (this.virusPercent/100.0)
-      let color = 0xc45ab3// 0x995599
+      let color = 0xc45ab3
       if ( this.virusPercent == 100) {
-         color = 0xc683c3 //0x550044
+         color = 0xc683c3
       }
       this.virusGfx.circle(0,0,radius).fill(color).stroke({width:3, color: 0x631a86})
       if ( this.virusPercent == 100) {

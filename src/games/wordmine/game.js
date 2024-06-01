@@ -428,7 +428,6 @@ export default class WordMine extends BasePhysicsGame {
          tb.setEnabled(false)
       })
 
-      console.log("END OVERLAY")
       const endY = this.endOverlay.y
       this.endOverlay.y = -1200
       this.addChild(this.endOverlay)
