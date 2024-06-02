@@ -32,7 +32,6 @@ export default class Virus extends BaseGame {
    infectionLevel = 3     // minmum number of infected tiles
    pendingInfections = 0  // numner of infections to add to bring up to current level
    selections = []
-   letterIndex = 0
    word = []
    wordCounts = []
    gauge = null
@@ -320,7 +319,7 @@ export default class Virus extends BaseGame {
             this.grid[r][c].deselect()
          }
       }
-      this.letterIndex = 0
+      this.selections = []
       Letter.wordFull = false
       this.enterKey.setEnabled(false)
       this.deleteKey.setEnabled(false)
@@ -344,7 +343,7 @@ export default class Virus extends BaseGame {
    
    letterClicked( letter ) {
       if ( this.state.isGameOver() ) return 
-      if ( letter.selected == false && this.letterIndex == 10 ) return
+      if ( letter.selected == false && this.selections.length == 10 ) return
 
       if (letter.selected) {
          const lastLetter = this.selections[ this.selections.length-1 ]
@@ -352,8 +351,7 @@ export default class Virus extends BaseGame {
             return
          }
          this.selections.pop()
-         this.letterIndex--
-         this.word[this.letterIndex].text = ""
+         this.word[ this.selections.length ].text = ""
          letter.deselect()
          if ( this.selections.length > 0) {
             this.selections[ this.selections.length-1 ].highlight( true )
@@ -362,11 +360,10 @@ export default class Virus extends BaseGame {
          if ( this.selections.length > 0) {
             this.selections[ this.selections.length-1 ].highlight( false )
          }
+         this.word[ this.selections.length ].text = letter.text
          this.selections.push(letter)
-         letter.select()
-         this.word[this.letterIndex].text = letter.text
-         this.letterIndex++
-         if ( this.letterIndex > 3) {
+         letter.select()        
+         if ( this.selections.length > 3) {
             this.enterKey.setEnabled(true)
          } else {
             this.enterKey.setEnabled(false)
@@ -452,7 +449,7 @@ export default class Virus extends BaseGame {
    }
 
    wordSubmitFinished() {
-      this.letterIndex = 0
+      this.selections = []
       Letter.wordFull = false
    }
 
