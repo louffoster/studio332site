@@ -5,7 +5,7 @@ import * as TWEEDLE from "tweedle.js"
 
 
 export default class Striker extends BasePhysicsItem {
-   static RADIUS = 30
+   static RADIUS = 28
    
    lineColor = null 
    fillColor = null

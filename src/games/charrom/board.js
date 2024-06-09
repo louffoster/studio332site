@@ -23,21 +23,16 @@ export default class Board extends Container {
       this.topShotLineY = this.shotZoneH
       this.bottomShotLineY = this.boardH - this.shotZoneH
 
-      let h1 = new Hole(top, 35,35, 35)
-      this.holes.push(h1)
-      this.addChild(h1)
-
-      let h2 = new Hole(top, this.boardW-35, 35, 35)
-      this.holes.push(h2)
-      this.addChild(h2)
-
-      let h3 = new Hole(top, 35, this.boardH-35, 35)
-      this.holes.push(h3)
-      this.addChild(h3)
-
-      let h4 = new Hole(top, this.boardW-35, this.boardH-35, 35)
-      this.holes.push(h4)
-      this.addChild(h4)
+      let hp = [ 
+         {x: 30, y: 30, r: 30}, {x: this.boardW-30, y: 30, r: 30},
+         {x: 30, y: this.boardH/2, r: 30}, {x: this.boardW-30, y: this.boardH/2, r: 30},
+         {x: 30, y: this.boardH-30, r: 30}, {x: this.boardW-30, y: this.boardH-30, r: 30}
+      ]
+      hp.forEach( pos => {
+         let h = new Hole(top, pos.x, pos.y, pos.r)
+         this.holes.push(h)
+         this.addChild(h)
+      })
 
       // add non-rendered rails around the edge of the board
       let b = Matter.Bodies.rectangle(this.boardW/2, this.y+this.boardH+25, this.boardW, 50, { isStatic: true, friction: 0, restitution: 1})
@@ -85,9 +80,9 @@ export default class Board extends Container {
 
       // shot lines
       this.gfx.circle(this.boardW/2, this.boardH, 150).
-         fill({color: 0x5574bd, alpha: 0.1}).stroke({width:2, color: 0x5574bd})
+         fill({color: 0xccccff, alpha: 0.2}).stroke({width:2, color: 0x5574bd})
       this.gfx.circle(this.boardW/2, 0, 150).
-         fill({color: 0x5574bd, alpha: 0.1}).stroke({width:2, color: 0x5574bd})
+         fill({color: 0xccccff, alpha: 0.2}).stroke({width:2, color: 0x5574bd})
       this.upperShotArea = new Circle(this.boardW/2, 0, 150)
       this.lowerShotArea = new Circle(this.boardW/2, this.boardH, 150)
       
@@ -96,10 +91,14 @@ export default class Board extends Container {
       this.gfx.circle(this.boardW/2, this.boardH/2, 10).fill(0x7A6C5D)
 
       // score markers
-      this.gfx.circle(35, 35, 60).stroke({width:10, color: 0x5574bd})
-      this.gfx.circle(this.boardW-35, 35, 60).stroke({width:10, color: 0x5574bd})
-      this.gfx.circle(35, this.boardH-35, 60).stroke({width:10, color: 0x5574bd})
-      this.gfx.circle(this.boardW-35, this.boardH-35, 60).stroke({width:10, color: 0x5574bd})
+      this.gfx.circle(30, 30, 50).stroke({width:6, color: 0x5574bd})
+      this.gfx.circle(this.boardW-30, 30, 50).stroke({width:6, color: 0x5574bd})
+
+      this.gfx.circle(30, this.boardH/2, 50).stroke({width:6, color: 0x5574bd})
+      this.gfx.circle(this.boardW-30, this.boardH/2, 50).stroke({width:6, color: 0x5574bd})
+
+      this.gfx.circle(30, this.boardH-30, 50).stroke({width:6, color: 0x5574bd})
+      this.gfx.circle(this.boardW-30, this.boardH-30, 50).stroke({width:6, color: 0x5574bd})
    }
 }
 

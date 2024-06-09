@@ -5,6 +5,7 @@ export default class Tile extends Container {
    static WIDTH = 55 
    static HEIGHT = 55 
 
+   target = false
    selected = false
    error = false
    success = false
@@ -60,8 +61,9 @@ export default class Tile extends Container {
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', () => {
-         if ( this.selected == false ) {
+         if ( this.target || this.selected == false ) {
             this.selected = !this.selected
+            this.target = false
             if ( clickHandler ) {
                clickHandler( this )
             }
@@ -77,9 +79,15 @@ export default class Tile extends Container {
       }
    }
 
+   setTarget( flag ) {
+      this.target = flag 
+      this.draw()
+   }
+
    setSuccess() {
       this.success = true 
       this.selected = false
+      this.target = false
       this.draw()
       new TWEEDLE.Tween(this.graphics).to({ alpha: 0}, 250).start().easing(TWEEDLE.Easing.Linear.None)//.onComplete(fadeDone)
    }
@@ -96,6 +104,7 @@ export default class Tile extends Container {
    }
 
    setError( ) {
+      this.target = false
       this.error = true 
       this.selected = false
       this.draw()
@@ -105,32 +114,32 @@ export default class Tile extends Container {
       }, 250)
    }
 
-   select() {
-      if ( this.selected == false ) {
-         this.selected = true 
-         this.draw()
-      }
-   }
-
    deselect() {
-      if (this.selected ) {
-         this.selected = false 
-         this.draw(0)
-      }
+      this.selected = false 
+      this.target = false
+      this.draw(0)
    }
 
    draw() {
       this.graphics.clear()
- 
 
-      this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT).stroke({width:1, color: 0x5E3023})
+      this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT)
+      if ( this.target == false) {
+         this.graphics.stroke({width:1, color: 0x5E3023})
+      } else {
+         this.graphics.stroke({width:8, color: 0x33ddff})
+      }
       if ( this.error ) {
          this.graphics.fill(0xe0adc1) 
-      } else if ( this.success) {
+      } else if ( this.success ) {
          this.graphics.fill(0x75c482) 
       } else {
          if (this.selected) {
-            this.graphics.fill(0x8ecae6)
+            if ( this.target == false) {
+               this.graphics.fill(0x8ecae6)
+            } else {
+               this.graphics.fill(0xcefaf6)
+            }
          } else {
             this.graphics.fill(0xF3E9DC)
          }

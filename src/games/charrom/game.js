@@ -24,6 +24,7 @@ export default class Charrom extends BasePhysicsGame {
    tileRackHeight = 69
    statsHeight = 55
    word = null
+   selections = []
    score = 0
    sunkCount = 0 
    wordCount = 0
@@ -46,7 +47,7 @@ export default class Charrom extends BasePhysicsGame {
 
    static BOARD_WIDTH = 600
    static BOARD_HEIGHT = 600
-   static LETTER_LIMIT = 8
+   static LETTER_LIMIT = 10
 
    async initialize(replayHandler, backHandler) {
       await super.initialize()
@@ -102,26 +103,26 @@ export default class Charrom extends BasePhysicsGame {
          fill: 0xBDD5EA
       }})
       this.word.anchor.set(0,1)
-      this.word.x = 25
-      this.word.y =  this.gameHeight - 16
+      this.word.x = 175
+      this.word.y =  this.gameHeight - 14
       this.addChild(this.word)
 
       let buttonsY = this.gameHeight - 50
-      this.submitBtn = new Button( this.gameWidth-110, buttonsY, "Submit", () => {
+      this.submitBtn = new Button( this.gameWidth-105, buttonsY, "Submit", () => {
          this.submitWord()
       }, 0xFCFAFA,0x2f6690,0x5482bc)
       this.submitBtn.alignTopLeft()
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn )
 
-      this.clearBtn = new Button( this.gameWidth-205, buttonsY, "Clear", () => {
+      this.clearBtn = new Button( this.gameWidth-196, buttonsY, "Clear", () => {
          this.clearWord()
       }, 0xFCFAFA,0x9c5060,0x7c3040)
       this.clearBtn.alignTopLeft()
       this.clearBtn.setEnabled( false )
       this.addChild(this.clearBtn )
 
-      this.rackBtn = new Button( 7, buttonsY, "New Rack", () => {
+      this.rackBtn = new Button( 8, buttonsY, "Rack", () => {
          this.rackLetterPucks()
       }, 0xFCFAFA,0x1b998b,0x3bb9ab)
       this.rackBtn.alignTopLeft()
@@ -230,12 +231,13 @@ export default class Charrom extends BasePhysicsGame {
 
       let sunkLetter = puck.letter
       if ( this.sunkLetters.length < Charrom.LETTER_LIMIT) {
-         let x = 65
+         let x = 7
          let y = Charrom.BOARD_HEIGHT+7+this.statsHeight
-         let t = new Tile(sunkLetter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileSelected.bind(this))
+         let t = new Tile(sunkLetter, x + this.sunkLetters.length*(Tile.WIDTH+4), y, this.tileClicked.bind(this))
          this.sunkLetters.push(t)
          this.addChild(t)
       } else {
+         // TODO ani,ate something!
          this.endReason = "overflow"
          if ( this.gameState != "shot") {
             this.gameOver()
@@ -251,9 +253,22 @@ export default class Charrom extends BasePhysicsGame {
       this.scoreTxt.text = `${this.score}`.padStart(5,"0")
    }
 
-   tileSelected( t ) {
-      this.word.text += t.text
-      this.clearBtn.setEnabled( true )
+   tileClicked( t ) {
+      if ( t.selected ) {
+         this.selections.push(t)
+         this.word.text += t.text
+      } else {
+         this.selections.pop()
+         this.word.text = this.word.text.slice(0, -1)
+      }
+
+      if ( this.selections.length > 0 ) {
+         this.clearBtn.setEnabled( true )
+         this.selections.forEach( s => s.setTarget( false ) )
+         this.selections[ this.selections.length-1 ].setTarget( true )
+      } else {
+         this.clearBtn.setEnabled( false )   
+      }
       this.submitBtn.setEnabled( this.word.text.length >= 3 )
    }
 
@@ -270,33 +285,27 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    submitSuccess() {
-      // FIXME
       let tileCnt = this.word.text.length
       let totalTileValue = 0
-      let clear = []
-      this.sunkLetters.forEach( sl => {
-         if ( sl.selected ) {
-            clear.push(sl)
-            sl.setSuccess()
-            totalTileValue += sl.value
+      this.selections.forEach( sel => {
+         sel.setSuccess()
+         totalTileValue += sel.value
+         let idx = this.sunkLetters.findIndex( sl => sl == sel)
+         if ( idx > -1 ) {
+            // TODO animate success
+            this.removeChild( sel )
+            this.sunkLetters.splice(idx, 1)
          }
       })
 
       this.score += (totalTileValue * tileCnt) 
       this.renderScore()
       this.word.text = ""
+      this.selections = []
       this.wordCount++
       this.timer.reset()
 
       setTimeout(  () => {
-         clear.forEach( c => {
-            let idx = this.sunkLetters.findIndex( sl => sl == c)
-            if ( idx > -1 ) {
-               this.removeChild(c)
-               this.sunkLetters.splice(idx,1)
-            }
-         })
-
          // collapse tiles back to left
          let tgtX = 7
          this.sunkLetters.forEach( sl => {
@@ -309,10 +318,8 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    submitFailed() {
-      this.sunkLetters.forEach( sl => {
-         if ( sl.selected ) {
-            sl.setError()
-         }
+      this.selections.forEach( sl => {
+         sl.setError()
       })
    }
 
@@ -346,6 +353,7 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    clearWord() {
+      this.selections = []
       this.word.text = ""
       this.sunkLetters.forEach( t => t.deselect() )
       this.clearBtn.setEnabled( false )
@@ -359,7 +367,7 @@ export default class Charrom extends BasePhysicsGame {
       this.gfx.lineTo(this.gameWidth, rackY).stroke({width: 5, color: 0x5E3023})
 
       // empty letters
-      let x = 65
+      let x = 7
       let y = rackY+7
       for (let i=0; i< Charrom.LETTER_LIMIT; i++) {
          this.gfx.rect(x,y, Tile.WIDTH, Tile.HEIGHT).fill(0xF3E9DC).stroke({width:1, color: 0x5E3023})

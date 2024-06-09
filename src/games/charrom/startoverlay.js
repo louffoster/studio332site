@@ -25,9 +25,8 @@ export default class StartOverlay extends Container {
          wordWrapWidth: panelW - 50,
       }
 
-      let msg = `Each turn, place your striker within one of the red shot circles. `
-      msg += "Flick it into the letter pucks to sink them into the pockets. "
-      msg += "Red pockets trash the letter, blue add it to your letter supply."
+      let msg = `Each turn, place your striker within one of the light coloerd shot circles. `
+      msg += "Shoot it into the letter pucks to sink them into the pockets, adding them to your letter supply. "
       const note1 = new Text({text: msg, style: style})
       note1.anchor.set(0.5,0)
       note1.x = panelW/2
@@ -41,7 +40,7 @@ export default class StartOverlay extends Container {
       note2.y = 120
       this.addChild(note2)
 
-      msg = `The game is over when your letter rack exceeds 8 letters, time expires or you scratch 3 times.`
+      msg = `The game is over when your letter rack exceeds 10 letters, time expires or you scratch 3 times.`
       const note3 = new Text({text: msg, style: style})
       note3.anchor.set(0.5,0)
       note3.x = panelW/2
