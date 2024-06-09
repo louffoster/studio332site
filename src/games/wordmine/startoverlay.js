@@ -34,24 +34,23 @@ export default class StartOverlay extends Container {
       note1.y = 10
       this.addChild(note1)
 
-
-      let startBtn = new Button( panelW/2, 255, "Start Game", startHandler, 0xFCFAFA,0x34629c,0x5482bc)
-      this.addChild(startBtn)
-
       const bombHelp = new Text({text: "Destroy unwanted rocks / markers", style: style})
       bombHelp.x = 20
-      bombHelp.y = 310
+      bombHelp.y = 230
       this.addChild(bombHelp)
 
       const pushHelp = new Text({text: "Throw rocks into new positions", style: style})
       pushHelp.x = 20
-      pushHelp.y = 380
+      pushHelp.y = 300
       this.addChild(pushHelp)
 
       const pinHelp = new Text({text: "Pin / unpin rocks into place", style: style})
       pinHelp.x = 20
-      pinHelp.y = 450
+      pinHelp.y = 370
       this.addChild(pinHelp)
+
+      let startBtn = new Button( panelW/2, 480, "Start Game", startHandler, 0xFCFAFA,0x34629c,0x5482bc)
+      this.addChild(startBtn)
 
       this.draw()
    }
@@ -60,16 +59,16 @@ export default class StartOverlay extends Container {
       this.graphics.clear() 
       this.graphics.rect(0,0,this.panelW, this.panelH).fill(0x333D29)
 
-      this.graphics.moveTo(this.panelW/2+25, 340). 
-         lineTo(this.panelW-10, 340).stroke({width:2, color: 0xe0e0e0})
-      this.graphics.circle(this.panelW-15, 340, 10).fill(0xe0e0e0)
+      this.graphics.moveTo(this.panelW/2+25, 260). 
+         lineTo(this.panelW-10, 260).stroke({width:2, color: 0xe0e0e0})
+      this.graphics.circle(this.panelW-15, 260, 10).fill(0xe0e0e0)
 
-      this.graphics.moveTo(this.panelW/2+25, 410). 
-         lineTo(this.panelW-10, 410).stroke({width:2, color: 0xe0e0e0})
-      this.graphics.circle(this.panelW-15, 410, 10).fill(0xe0e0e0)
+      this.graphics.moveTo(this.panelW/2+25, 330). 
+         lineTo(this.panelW-10, 330).stroke({width:2, color: 0xe0e0e0})
+      this.graphics.circle(this.panelW-15, 330, 10).fill(0xe0e0e0)
 
-      this.graphics.moveTo(this.panelW/2+25, 480). 
-         lineTo(this.panelW-10, 480).stroke({width:2, color: 0xe0e0e0})
-      this.graphics.circle(this.panelW-15, 480, 10).fill(0xe0e0e0)
+      this.graphics.moveTo(this.panelW/2+25, 400). 
+         lineTo(this.panelW-10, 400).stroke({width:2, color: 0xe0e0e0})
+      this.graphics.circle(this.panelW-15, 400, 10).fill(0xe0e0e0)
    }
 }

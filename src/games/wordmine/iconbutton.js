@@ -1,4 +1,4 @@
-import { Container, Rectangle, Graphics } from "pixi.js"
+import { Container, Rectangle, Graphics, Sprite } from "pixi.js"
 
 export default class IconButton extends Container {
    static WIDTH = 60
@@ -9,14 +9,14 @@ export default class IconButton extends Container {
    selectColor = 0xBBE5ED  
    down = false
    enabled = true
-   name = ""
+   btnSprite = null
    
-   constructor( x,y, name, image) {
+   constructor( x,y, image) {
       super()
 
-      this.name = name
       this.x = x
       this.y = y
+      this.btnSprite = Sprite.from(image)
 
       this.eventMode = 'static'
       this.hitArea = new Rectangle(0,0, IconButton.WIDTH,IconButton.HEIGHT)
@@ -26,10 +26,10 @@ export default class IconButton extends Container {
       this.draw()
 
       this.addChild(this.graphics)
-      image.anchor.set(0.5,0.5)
-      image.x = IconButton.WIDTH/2 
-      image.y = IconButton.HEIGHT/2
-      this.addChild(image)
+      this.btnSprite.anchor.set(0.5,0.5)
+      this.btnSprite.x = IconButton.WIDTH/2 
+      this.btnSprite.y = IconButton.HEIGHT/2
+      this.addChild(this.btnSprite)
    }
 
    setSelected( flag ) {
@@ -53,7 +53,7 @@ export default class IconButton extends Container {
          if (this.enabled == true) {
             this.down = false
             this.draw()   
-            listener(this.name)
+            listener()
          }
       })
    }

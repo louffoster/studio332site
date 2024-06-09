@@ -1,4 +1,4 @@
-import { Container, Rectangle, Graphics } from "pixi.js"
+import { Container, Rectangle, Graphics, Sprite } from "pixi.js"
 
 export default class ToggleButton extends Container {
    static WIDTH = 60
@@ -10,7 +10,8 @@ export default class ToggleButton extends Container {
    selected = false
    enabled = true
    name = ""
-   btnImage = null
+   btnSprite = null
+   canClick = false
    
    constructor( x,y, name, image) {
       super()
@@ -18,7 +19,7 @@ export default class ToggleButton extends Container {
       this.name = name
       this.x = x
       this.y = y
-      this.btnImage = image
+      this.btnSprite = Sprite.from(image)
 
       this.eventMode = 'static'
       this.hitArea = new Rectangle(0,0, ToggleButton.WIDTH,ToggleButton.HEIGHT)
@@ -28,12 +29,22 @@ export default class ToggleButton extends Container {
       this.draw()
 
       this.addChild(this.graphics)
-      image.anchor.set(0.5,0.5)
-      image.x = ToggleButton.WIDTH/2 
-      image.y = ToggleButton.HEIGHT/2
+      this.btnSprite.anchor.set(0.5,0.5)
+      this.btnSprite.x = ToggleButton.WIDTH/2 
+      this.btnSprite.y = ToggleButton.HEIGHT/2
+      this.addChild(this.btnSprite)
+   }
 
-      this.btnImage.angle = 0
-      this.addChild(this.btnImage)
+   setImage( image ) {
+      if ( this.btnSprite ) {
+         this.removeChild(this.btnSprite)
+      }
+      this.btnSprite = Sprite.from(image)
+      this.btnSprite.anchor.set(0.5,0.5)
+      this.btnSprite.x = ToggleButton.WIDTH/2 
+      this.btnSprite.y = ToggleButton.HEIGHT/2
+      this.addChild(this.btnSprite)
+      this.canClick = true
    }
 
    setSelected( flag ) {
@@ -48,8 +59,8 @@ export default class ToggleButton extends Container {
 
    setListener( listener ) {
       this.on('pointerdown', () => {
-         if (this.enabled == true && this.selected == false) {
-            this.selected = !this.selected 
+         if (this.enabled == true && (this.selected == false || this.canClick == true)) {
+            this.selected = true 
             this.draw()   
             listener(this.name)
          }

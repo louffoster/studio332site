@@ -43,9 +43,10 @@ export default class WordMine extends BasePhysicsGame {
    async initialize(replayHandler, backHandler) {
       await super.initialize()
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
-      const pickImg = await Assets.load('/images/wordmine/pick.png')
+      this.pickImg = await Assets.load('/images/wordmine/pick.png')
+      this.clearImg = await Assets.load('/images/wordmine/clear.png')
       const checkImg = await Assets.load('/images/wordmine/check.png')
-      const clearImg = await Assets.load('/images/wordmine/clear.png')
+      const quitImg = await Assets.load('/images/wordmine/quit.png')
       const bombImg = await Assets.load('/images/wordmine/bomb.png')
       const throwImg = await Assets.load('/images/wordmine/throw.png')
       const nailImg = await Assets.load('/images/wordmine/nail.png')
@@ -78,40 +79,39 @@ export default class WordMine extends BasePhysicsGame {
       this.addPhysicsItem(wedge)
 
       // control buttons -----
-      let btnsY = 205
-      let pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", Sprite.from(pickImg) )
-      pickButton.setSelected(true)
-      pickButton.setListener( this.toggleButtonClicked.bind(this) )
-      this.toggleButtons.push( pickButton )
-      this.addChild(pickButton)
+      let btnsY = 200
+      this.pickButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pick", this.pickImg )
+      this.pickButton.setSelected(true)
+      this.pickButton.setListener( this.toggleButtonClicked.bind(this) )
+      this.toggleButtons.push( this.pickButton )
+      this.addChild(this.pickButton)
 
       btnsY += ToggleButton.HEIGHT + 10
-      this.submitBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, "submit", Sprite.from(checkImg) )
+      this.submitBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, checkImg )
       this.submitBtn.setListener( this.submitClicked.bind(this) )
       this.submitBtn.setEnabled( false )
       this.addChild(this.submitBtn)
 
-      btnsY += IconButton.HEIGHT + 10
-      this.clearBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, "clear", Sprite.from(clearImg) )
-      this.clearBtn.setListener( this.clearClicked.bind(this) )
-      this.clearBtn.setEnabled(false)
-      this.addChild(this.clearBtn)
-
-      btnsY += IconButton.HEIGHT + 30
-      let bombButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "bomb", Sprite.from(bombImg) )
+      btnsY += IconButton.HEIGHT + 25
+      let bombButton = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "bomb", bombImg )
       bombButton.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( bombButton )
       this.addChild(bombButton)
       btnsY += ToggleButton.HEIGHT + 10
-      let throwBtn = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "shove", Sprite.from(throwImg) )
+      let throwBtn = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "shove", throwImg )
       throwBtn.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( throwBtn )
       this.addChild(throwBtn)
       btnsY += ToggleButton.HEIGHT + 10
-      let pinBtn = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pin", Sprite.from(nailImg) )
+      let pinBtn = new ToggleButton(this.gameWidth-ToggleButton.WIDTH-10, btnsY, "pin", nailImg )
       pinBtn.setListener( this.toggleButtonClicked.bind(this) )
       this.toggleButtons.push( pinBtn )
       this.addChild(pinBtn)
+
+      btnsY += ToggleButton.HEIGHT + 25
+      let quitBtn = new IconButton(this.gameWidth-IconButton.WIDTH-10, btnsY, quitImg )
+      quitBtn.setListener( this.quitClicked.bind(this) )
+      this.addChild(quitBtn)
 
       let wordStyle = {
          fill: "#ffffff",
@@ -281,12 +281,8 @@ export default class WordMine extends BasePhysicsGame {
       this.resetRocks()
    }
 
-   clearClicked() {
-      this.word.text = "" 
-      this.selections = [] 
-      this.resetRocks()
-      this.clearBtn.setEnabled(false)
-      this.submitBtn.setEnabled(false)
+   quitClicked() {
+      this.gameOver()
    }
 
    submitClicked() {
@@ -321,7 +317,6 @@ export default class WordMine extends BasePhysicsGame {
       setTimeout( () => {
          gone.forEach( r => this.removePhysicsItem(r))
          this.resetRocks()
-         this.clearBtn.setEnabled(false)
          this.submitBtn.setEnabled(false)
          this.word.text = "" 
          this.selections = [] 
@@ -349,6 +344,7 @@ export default class WordMine extends BasePhysicsGame {
       if ( this.word.text.length == 10 && rock.selected == false) return
 
       rock.toggleSelected()
+      this.pickButton.setImage( this.clearImg )
 
       let tgtRock = rock
       if ( tgtRock.selected ) {
@@ -365,7 +361,6 @@ export default class WordMine extends BasePhysicsGame {
          this.selections.pop()
          if ( this.selections.length == 0) {
             this.resetRocks()
-            this.clearBtn.setEnabled(false)
             this.submitBtn.setEnabled(false)
             return
          }
@@ -373,7 +368,6 @@ export default class WordMine extends BasePhysicsGame {
          tgtRock.setTarget(true) 
       }
 
-      this.clearBtn.setEnabled(true)
       this.submitBtn.setEnabled(this.word.text.length > 3)
 
       this.items.forEach( i => {
@@ -404,8 +398,8 @@ export default class WordMine extends BasePhysicsGame {
             i.setEnabled(true)
          }
       })
+      this.pickButton.setImage( this.pickImg )
       this.submitBtn.setEnabled( false )
-      this.clearBtn.setEnabled(false)
       this.word.text = "" 
       this.selections = [] 
    }
@@ -440,7 +434,6 @@ export default class WordMine extends BasePhysicsGame {
       // sky
       this.gfx.rect(0,0, this.gameWidth, WordMine.PIT_TOP).
          fill(0x86BBD8).stroke({width: 1, color: 0x86BBD8})
-
       this.gfx.rect(0,WordMine.PIT_TOP, this.gameWidth, this.gameHeight-WordMine.PIT_TOP).fill(0x333D29)
 
       // buttons container
@@ -452,10 +445,9 @@ export default class WordMine extends BasePhysicsGame {
        this.gfx.roundRect(-20,105, this.gameWidth-100, 20, 20).
          fill(0x73a942).stroke({width: 2, color: 0x538922})
       
-      // buttons divider
-      this.gfx.moveTo(this.gameWidth-80, 420)
-      this.gfx.lineTo(this.gameWidth, 420)
-      this.gfx.stroke({width: 3, color: 0x582F0E})
+      // buttons divider2
+      this.gfx.moveTo(this.gameWidth-80, 342).lineTo(this.gameWidth, 342).stroke({width: 3, color: 0x582F0E})
+      this.gfx.moveTo(this.gameWidth-80, 568).lineTo(this.gameWidth, 568).stroke({width: 3, color: 0x582F0E})
    }
 
    update() {
