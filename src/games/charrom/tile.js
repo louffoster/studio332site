@@ -84,12 +84,12 @@ export default class Tile extends Container {
       this.draw()
    }
 
-   setSuccess() {
+   setSuccess( listener) {
       this.success = true 
       this.selected = false
       this.target = false
       this.draw()
-      new TWEEDLE.Tween(this.graphics).to({ alpha: 0}, 250).start().easing(TWEEDLE.Easing.Linear.None)//.onComplete(fadeDone)
+      new TWEEDLE.Tween(this.graphics).to({ alpha: 0}, 500).start().easing(TWEEDLE.Easing.Linear.None).onComplete(listener)
    }
 
    get value() {
@@ -111,7 +111,7 @@ export default class Tile extends Container {
       setTimeout( () => {
          this.error = false 
          this.draw()
-      }, 250)
+      }, 500)
    }
 
    deselect() {

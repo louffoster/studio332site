@@ -6,16 +6,20 @@ export default class TrashAnim extends Container {
       super()
       stage.addChild(this)
       this.group = new TWEEDLE.Group()
-      for (let i=0; i<5; i++) {
+      for (let i=0; i<10; i++) {
          const smoke = new Sprite(texture)
          smoke.x = x+this.randomRange(-10, 10)
          smoke.y = y+this.randomRange(-10, 10)
-         smoke.scale = 0.25
+         smoke.scale = 0.2
          smoke.anchor.set(0.5, 0.5)
          this.addChild(smoke)
          let angle = this.randomRange(-360, 360)
+         let rangeX = this.randomRange(10, 50)
+         let rangeY = this.randomRange(10, 50)
+         let endX = this.randomRange(rangeX*-1, rangeX)
+         let endY = this.randomRange(rangeY*-1, rangeY)
          const anim = new TWEEDLE.Tween(smoke).
-            to({angle: angle, alpha: 0, scale: {x:0.9,y:0.9}}, 900).
+            to({angle: angle, alpha: 0, scale: {x:0.9,y:0.9}, x: x+endX, y: y+endY}, 700).
             easing(TWEEDLE.Easing.Quadratic.Out).
             onComplete( () => {
                stage.removeChild(this)

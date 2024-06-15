@@ -32,6 +32,10 @@ export default class Timer extends Container {
       this.percent += 20
       this.percent = Math.min(this.percent, 100.0)
    }
+   failedWord() {
+      this.percent -= 20 
+      this.percent = Math.max(this.percent, 0.0)
+   }
 
    setTimeoutHandler( handler ) {
       this.timeoutHandler = handler

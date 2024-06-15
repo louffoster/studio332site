@@ -7,11 +7,13 @@ export default class Dictionary {
 
    constructor() { 
       axios.get(DICT_URL).then( (resp) => {
-         this.dictionary = resp.data
+         this.dictionary = resp.data.split("\n")
       })
    }
 
    isValid(word) {
-      return this.dictionary.includes( word.toLowerCase())
+      const ok = this.dictionary.includes( word.toLowerCase())
+      console.log(word+" valid: "+ok)
+      return ok
    }
 }

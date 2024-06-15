@@ -69,6 +69,7 @@ export default class Board extends Container {
 
       if ( this.lowerShotArea.contains(x,y-this.y-radius) ) return true
       if ( this.upperShotArea.contains(x,y-this.y-radius)  ) return true
+      if ( this.centerShotArea.contains(x,y-this.y-radius)  ) return true
       return false
    }
 
@@ -79,15 +80,16 @@ export default class Board extends Container {
          fill(0xcDb9a4).stroke({width:3, color: 0x7A6C5D})
 
       // shot lines
-      this.gfx.circle(this.boardW/2, this.boardH, 150).
+      this.gfx.circle(this.boardW/2, this.boardH, 120).
          fill({color: 0xccccff, alpha: 0.2}).stroke({width:2, color: 0x5574bd})
-      this.gfx.circle(this.boardW/2, 0, 150).
+      this.gfx.circle(this.boardW/2, 0, 120).
          fill({color: 0xccccff, alpha: 0.2}).stroke({width:2, color: 0x5574bd})
-      this.upperShotArea = new Circle(this.boardW/2, 0, 150)
-      this.lowerShotArea = new Circle(this.boardW/2, this.boardH, 150)
+      this.upperShotArea = new Circle(this.boardW/2, 0, 120)
+      this.lowerShotArea = new Circle(this.boardW/2, this.boardH, 120)
+      this.centerShotArea = new Circle(this.boardW/2, this.boardH/2, 75)
       
       // rack circle
-      this.gfx.circle(this.boardW/2, this.boardH/2, 85).stroke({width: 1, color: 0x7A6C5D})
+      this.gfx.circle(this.boardW/2, this.boardH/2, 75).fill({color: 0xccccff, alpha: 0.2}).stroke({width:2, color: 0x5574bd})//stroke({width: 1, color: 0x7A6C5D})
       this.gfx.circle(this.boardW/2, this.boardH/2, 10).fill(0x7A6C5D)
 
       // score markers

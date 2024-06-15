@@ -10,7 +10,8 @@ import Dictionary from "@/games/common/dictionary"
 import ShotIndicator from "@/games/charrom/shotindicator"
 import StartOverlay from "@/games/charrom/startoverlay"
 import EndOverlay from "@/games/charrom/endoverlay"
-import TrashAnim from "@/games/letterdrop/trashanim"
+import TrashAnim from "@/games/charrom/trashanim"
+import SparksAnim from "@/games/charrom/sparksanim"
 import { Text, Assets } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 
@@ -52,6 +53,7 @@ export default class Charrom extends BasePhysicsGame {
    async initialize(replayHandler, backHandler) {
       await super.initialize()
       this.smoke = await Assets.load('/smoke.png')
+      this.spark = await Assets.load('/particle.png')
 
       this.physics.gravity.scale = 0
       this.replayHandler = replayHandler 
@@ -172,11 +174,29 @@ export default class Charrom extends BasePhysicsGame {
 
    pointerDown(e) {
       if ( this.gameState == "place") {
-         let actualW = this.gameWidth*this.scale
-         let scale = (this.gameWidth / actualW )
-         if ( this.board.canPlaceStriker(e.global.x*scale, e.global.y*scale, Striker.RADIUS) ) {
-            this.placeStriker(e.global.x*scale, e.global.y*scale)
-         } 
+         const actualW = this.gameWidth*this.scale
+         const scale = (this.gameWidth / actualW )
+         const x = e.global.x*scale
+         const y = e.global.y*scale
+
+         if ( this.board.canPlaceStriker(x, y, Striker.RADIUS*0.5) ) {
+            // see if this is on top of another puck. reject if so
+            let ok = true 
+            this.items.forEach( i => {
+               if ( i.tag.includes("puck")) {
+                  if (
+                     x >= i.x - Puck.DIAMETER/2 && x <= i.x + Puck.DIAMETER/2 && 
+                     y >= i.y - Puck.DIAMETER/2 && y <= i.y + Puck.DIAMETER/2   
+                  ) {
+                     console.log("touched "+i.tag)
+                     ok = false
+                  }
+               }
+            })
+            if ( ok ) {
+               this.placeStriker(x,y)
+            }
+         }
       }
    }
 
@@ -288,12 +308,12 @@ export default class Charrom extends BasePhysicsGame {
       let tileCnt = this.word.text.length
       let totalTileValue = 0
       this.selections.forEach( sel => {
-         sel.setSuccess()
+         sel.setSuccess(() => this.removeChild( sel ))
          totalTileValue += sel.value
          let idx = this.sunkLetters.findIndex( sl => sl == sel)
          if ( idx > -1 ) {
-            // TODO animate success
-            this.removeChild( sel )
+            new SparksAnim(this.app.stage, this.spark, sel.x+Tile.WIDTH/2, sel.y+Tile.HEIGHT/2)
+            
             this.sunkLetters.splice(idx, 1)
          }
       })
@@ -306,7 +326,6 @@ export default class Charrom extends BasePhysicsGame {
       this.timer.reset()
 
       setTimeout(  () => {
-         // collapse tiles back to left
          let tgtX = 7
          this.sunkLetters.forEach( sl => {
             if ( sl.x != tgtX) {
@@ -314,10 +333,11 @@ export default class Charrom extends BasePhysicsGame {
             }
             tgtX += (Tile.WIDTH+4)
          })
-      }, 300)
+      }, 750)
    }
 
    submitFailed() {
+      this.timer.failedWord()
       this.selections.forEach( sl => {
          sl.setError()
       })
@@ -416,6 +436,7 @@ export default class Charrom extends BasePhysicsGame {
          if (  this.board.checkSunk( i ) ) {
             if ( i.tag != "striker") {
                this.puckSunk( i )
+               new SparksAnim(this.app.stage, this.spark, i.x, i.y)
                i.removeFromTable()
                this.offTable.push( i )
             } else {
