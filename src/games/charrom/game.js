@@ -1,4 +1,5 @@
 import BasePhysicsGame from "@/games/common/basephysicsgame"
+import Matter from 'matter-js'
 import Supply from "@/games/charrom/supply"
 import Puck from "@/games/charrom/puck"
 import Board from "@/games/charrom/board"
@@ -140,6 +141,19 @@ export default class Charrom extends BasePhysicsGame {
       }) 
       this.addChild(this.startOverlay)
 
+      this.puckHit = false
+      Matter.Events.on(this.physics, 'collisionStart', (event) => {
+         event.pairs.forEach( pair => {
+            const objA = pair.bodyA.label 
+            const objB = pair.bodyB.label 
+            if ( objA == "striker" || objB == "striker") {
+               if ( objA.includes("puck") || objB.includes("puck")) {
+                  this.puckHit = true 
+               }
+            }
+         })
+      })
+
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
    }
 
@@ -169,7 +183,6 @@ export default class Charrom extends BasePhysicsGame {
       } else {
          this.striker.placeOnTable( x, y)
       }
-      this.gameState = "touch"
    }
 
    pointerDown(e) {
@@ -188,7 +201,6 @@ export default class Charrom extends BasePhysicsGame {
                      x >= i.x - Puck.DIAMETER/2 && x <= i.x + Puck.DIAMETER/2 && 
                      y >= i.y - Puck.DIAMETER/2 && y <= i.y + Puck.DIAMETER/2   
                   ) {
-                     console.log("touched "+i.tag)
                      ok = false
                   }
                }
@@ -217,7 +229,7 @@ export default class Charrom extends BasePhysicsGame {
    }
 
    strikerTouched() {  
-      if ( this.gameState != "touch") return
+      if ( this.gameState != "place") return
       this.shotOverlay.place( this.striker.x, this.striker.y)
       this.addChild(this.shotOverlay)
       this.gameState = "aim"
@@ -229,11 +241,12 @@ export default class Charrom extends BasePhysicsGame {
             let fX = Math.cos(this.shotAngle) * 0.45 * this.shotOverlay.power
             let fY = Math.sin(this.shotAngle) * 0.45 * this.shotOverlay.power
 
+            this.puckHit = false
             this.striker.applyForce(fX,fY)
             this.gameState = "shot"
             this.removeChild(this.shotOverlay, false)
          } else {
-            this.gameState = "touch"
+            this.gameState = "place"
             this.removeChild(this.shotOverlay, false)   
          }
       }
@@ -445,12 +458,18 @@ export default class Charrom extends BasePhysicsGame {
                this.scratchTxt.text = `= ${this.scratchesLeft}`
                new TrashAnim(this.app.stage, this.smoke, this.striker.x, this.striker.y)
                this.striker.removeFromTable()
-               this.offTable.push( this.striker )
             }
          }
       })
 
-      if ( stopped == this.items.length ) {         
+      if ( stopped == this.items.length ) {    
+         if ( this.puckHit == false ) {
+            new TrashAnim(this.app.stage, this.smoke, this.striker.x, this.striker.y)
+            this.striker.removeFromTable()
+            this.scratchesLeft--
+            this.scratchTxt.text = `= ${this.scratchesLeft}`
+            scratched = true
+         }     
          if ( this.scratchesLeft == 0 ) {
             this.endReason = "scratch"
          }
@@ -462,16 +481,12 @@ export default class Charrom extends BasePhysicsGame {
             if ( scratched == false  ) {
                this.striker.fade( () => {
                   this.striker.removeFromTable()
-                  this.offTable.push( this.striker )
-                  this.gameState = "place"
                })
             } 
 
             setTimeout( () => {
                this.offTable.forEach( p => {
-                  if ( p.tag != "striker") {
-                     this.removePhysicsItem(p, false )
-                  } 
+                  this.removePhysicsItem(p, false )
                })
                this.offTable = [] 
             }, 250)
