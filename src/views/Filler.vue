@@ -16,7 +16,7 @@ const router = useRouter()
 var game = null
 
 onMounted(async () => {
-   game = new Filler(GAME_WIDTH, GAME_HEIGHT, 0x073B4C )
+   game = new Filler(GAME_WIDTH, GAME_HEIGHT, 0x006d77 )
    game.initialize(replayHandler, backHandler)
 })
 
