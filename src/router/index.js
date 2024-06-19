@@ -15,6 +15,11 @@ const router = createRouter({
          component: () => import('../views/Virus.vue')
       },
       {
+         path: '/filler',
+         name: 'filler',
+         component: () => import('../views/Filler.vue')
+      },
+      {
          path: '/mosaic',
          name: 'mosaic',
          component: () => import('../views/Mosaic.vue')

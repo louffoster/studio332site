@@ -8,6 +8,7 @@ const dwhelp = ref()
 const vhelp = ref()
 const mosaichelp = ref()
 const sweephelp = ref()
+const fillerhelp = ref()
 const wmhelp = ref()
 
 const toggleDWHelp = ((event) => {
@@ -18,6 +19,9 @@ const toggleVirusHelp = ((event) => {
 })
 const toggleSweepHelp = ((event) => {
    sweephelp.value.toggle(event)
+})
+const toggleFillerHelp = ((event) => {
+   fillerhelp.value.toggle(event)
 })
 const toggleMosiacHelp = ((event) => {
    mosaichelp.value.toggle(event)
@@ -140,6 +144,18 @@ const toggleWMHelp = ((event) => {
                <div class="rules">
                   <h3>Sweep</h3>
                   <p>Clear all letters from the board by uing them in 3-10 letter words.</p>
+               </div>
+            </OverlayPanel>
+         </li>
+         <li>
+            <div class="game-info">
+               <router-link to="/filler">Filler</router-link>
+               <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleFillerHelp" />
+            </div>
+            <OverlayPanel ref="fillerhelp">
+               <div class="rules">
+                  <h3>Filler</h3>
+                  <p>Fill the board with words.</p>
                </div>
             </OverlayPanel>
          </li>
