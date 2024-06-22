@@ -9,7 +9,7 @@ import Filler from "@/games/filler/game"
 import { useRouter } from 'vue-router'
 
 const GAME_WIDTH = 370
-const GAME_HEIGHT = 520
+const GAME_HEIGHT = 580
 
 const router = useRouter()
 

@@ -93,15 +93,16 @@ export default class Tile extends Container {
       return this.tileValue
    }
 
-   disable() {
-      this.disabled = true
-      this.eventMode = 'none'
-      this.cursor ="default"
-   }
-   enable() {
-      this.disabled = false
-      this.eventMode = 'static'
-      this.cursor ="pointer"
+   setEnabled( isEnabled ) {
+      if ( isEnabled == false) {
+         this.disabled = true
+         this.eventMode = 'none'
+         this.cursor ="default"
+      } else {
+         this.disabled = false
+         this.eventMode = 'static'
+         this.cursor ="pointer"
+      }
    }
 
    deselect() {
@@ -117,12 +118,6 @@ export default class Tile extends Container {
       }
    }
 
-   set( letterTile ) {
-      this.letter.text = letterTile.text 
-      this.tileValue = letterTile.score
-      this.value.text = `${letterTile.score}`
-   }
-
    draw() {
       this.graphics.clear()
 
@@ -130,7 +125,7 @@ export default class Tile extends Container {
       if (this.selected) {
          this.graphics.fill(0x00B4D8)
       } else {
-         this.graphics.fill(0x0077B6)
+         this.graphics.fill(0x83C5BE)
       }
    }
 }
