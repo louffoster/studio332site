@@ -1,10 +1,11 @@
-import {Text, TextStyle, Assets } from "pixi.js"
+import {Text, TextStyle, Assets, Graphics } from "pixi.js"
 import * as TWEEDLE from "tweedle.js"
 import Dictionary from "@/games/common/dictionary"
 import BaseGame from "@/games/common/basegame"
 import LetterPool from "@/games/common/letterpool"
 import Clock from "@/games/common/clock"
 import Button from "@/games/common/button"
+import IconButton from "@/games/common/iconbutton"
 import Tile from "@/games/filler/tile"
 import Blank from "@/games/filler/blank"
 
@@ -18,12 +19,14 @@ export default class Filler extends BaseGame {
    word = null
    score = 0 
    scoreDisplay = null
+   trashCnt = 3
 
    static ROWS = 8
    static COLS = 7
    static GRID_TOP = 45
    static GRID_LEFT = 10
    static TILES_TOP = 460
+   static TILES_LEFT = 0 // 54
    static PREVIEW_CNT = 5
    
    // palette: https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
@@ -47,7 +50,7 @@ export default class Filler extends BaseGame {
          x = Filler.GRID_LEFT
       } 
 
-      x = 54
+      x = Filler.TILES_LEFT
       for ( let i=0; i<Filler.PREVIEW_CNT; i++ ) {
          let letter = this.pool.popScoringLetter()
          let tile = new Tile(letter, x, Filler.TILES_TOP, this.tileClicked.bind(this))
@@ -63,6 +66,25 @@ export default class Filler extends BaseGame {
       // highlight the last tile
       x -= (Tile.WIDTH+4)
       this.gfx.rect(x,Filler.TILES_TOP-4, Tile.WIDTH+8, Tile.HEIGHT+8).stroke({width:2, color:0xfff3b0})
+
+      const trashImg = await Assets.load('/images/filler/trash.png')
+      const trashX = this.gameWidth-60
+      const trashY = Filler.TILES_TOP+25
+      this.trashButton = new IconButton(trashX, trashY, trashImg, 0xffadad)
+      this.trashButton.setListener( this.trashTile.bind(this) )
+      this.trashButton.setPadding(3)
+      this.trashButton.setOutlined( true )
+      this.addChild(this.trashButton)
+      this.trashText = new Text({text: "x "+this.trashCnt, style: {
+         fill: "#edf6f9",
+         fontFamily: "Arial",
+         fontSize: 14,
+         fontWight: "bold"
+      }})
+      this.trashText.anchor.set(0, 0.5)
+      this.trashText.x = trashX + 28
+      this.trashText.y = trashY + 15
+      this.addChild(this.trashText)
    
       let btnY = Filler.TILES_TOP + Tile.HEIGHT+15
       this.giveUpButton = new Button( 10, btnY, "Give Up", 
@@ -90,8 +112,30 @@ export default class Filler extends BaseGame {
       this.addChild(this.scoreDisplay)
    }
 
-   blankClicked( blank) {
-      console.log(blank)
+   blankClicked( blank ) {
+      const tile = this.nextTiles.pop()
+      new TWEEDLE.Tween(tile).to({ x: blank.x, y: blank.y}, 250).
+         easing(TWEEDLE.Easing.Linear.None).
+         onComplete( () => {
+            this.grid[blank.row][blank.col] = tile
+            this.removeChild( blank )
+         }).
+         start()
+
+      let x =  Filler.TILES_LEFT - Tile.WIDTH
+      let letter = this.pool.popScoringLetter()
+      let newTile = new Tile(letter, x, Filler.TILES_TOP, this.tileClicked.bind(this))
+      tile.setEnabled(newTile)
+      this.nextTiles.unshift(newTile)
+      this.addChild( newTile )
+      this.nextTiles.forEach( (nt,idx) => {
+         x += Tile.WIDTH 
+         if ( idx == Filler.PREVIEW_CNT-1) {
+            x += 10
+         }   
+         new TWEEDLE.Tween(nt).to({ x: x}, 250).
+            easing(TWEEDLE.Easing.Linear.None).start()
+      })
    }
 
    tileClicked( tile ) {
@@ -101,6 +145,14 @@ export default class Filler extends BaseGame {
    submitWord() {
 
    }
+
+   trashTile() {
+      this.trashCnt-- 
+      if (this.trashCnt == 0) {
+         this.trashButton.setEnabled(false)
+      }
+      this.trashText.text = "x "+this.trashCnt
+   }  
 
    giveUpClicked() {
       console.log("loseer")

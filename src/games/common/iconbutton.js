@@ -8,6 +8,8 @@ export default class IconButton extends Container {
    btnSprite = null
    gfx = null
    bkgColor = null
+   padding = 0
+   outline = false
    
    constructor( x,y, image, bkgColor = null) {
       super()
@@ -28,13 +30,23 @@ export default class IconButton extends Container {
       this.draw()
    }
 
+   setPadding( p ) {
+      this.padding = p 
+      this.draw()
+   }
+
+   setOutlined( flag ) {
+      this.outline = flag 
+      this.draw()
+   }
+ 
    setEnabled( flag ) {
       this.enabled = flag 
       this.btnSprite.alpha = 1
       this.gfx.alpha = 1
       if ( this.enabled == false) {
-         this.btnSprite.alpha = 0.2
-         this.gfx.alpha = 0.2
+         this.btnSprite.alpha = 0.3
+         this.gfx.alpha = 0.3
       }
    }
 
@@ -57,7 +69,11 @@ export default class IconButton extends Container {
    draw() {
       if ( this.bkgColor ) {
          this.gfx.clear() 
-         this.gfx.circle(0,0,IconButton.RADIUS/2).fill(this.bkgColor)
+         let r = IconButton.RADIUS/2 + this.padding
+         this.gfx.circle(0,0,r).fill(this.bkgColor)
+         if ( this.outline ) {
+            this.gfx.stroke( {width:1, color: 0x333333})
+         }
       }
    }
 }
