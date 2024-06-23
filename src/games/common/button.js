@@ -16,6 +16,7 @@ export default class Button extends Container {
             fill: this.txtColor,
             fontFamily: "Arial",
             fontSize: 18,
+            fontWright: "bold",
             align: "center",
          },
       })
@@ -63,6 +64,7 @@ export default class Button extends Container {
    small() {
       this.btnTxt.style.lineHeight = 14    
       this.btnTxt.style.fontSize = 14  
+      this.btnTxt.style.fontWeight = "normal"  
       
       this.btnWidth = this.btnTxt.width + 25
       this.btnHeight = this.btnTxt.height + 15
@@ -89,10 +91,10 @@ export default class Button extends Container {
       }
       if ( this.round ) {
          this.graphics.circle(this.btnWidth/2,this.btnHeight/2, this.btnWidth/2).
-            stroke({width: 1, color: this.txtColor, alpha: alpha})
+            stroke({width: 1, color: 0x333333, alpha: alpha})
       } else {
          this.graphics.rect(0,0, this.btnWidth, this.btnHeight). 
-            stroke({width: 1, color: this.txtColor, alpha: alpha})
+            stroke({width: 1, color: 0x333333, alpha: alpha})
       }
       if ( this.pointerDown) {
          this.graphics.fill( this.highlight)

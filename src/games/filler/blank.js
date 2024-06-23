@@ -25,6 +25,10 @@ export default class Tile extends Container {
       this.addChild(this.graphics)
    }
 
+   setHighlight(_flag) {
+      this.draw()
+   }
+
    draw() {
       this.graphics.clear()
 

@@ -8,10 +8,15 @@ export default class Tile extends Container {
    constructor(scoredLetter, x,y, clickHandler ) {
       super()
 
+      this.row = -1 
+      this.col = -1
       this.x = x
       this.y = y
       this.selected = false
       this.disabled = false
+      this.target = false
+      this.highlight = false
+      this.used = false
       this.tileValue = scoredLetter.value
 
       this.graphics = new Graphics()
@@ -61,7 +66,7 @@ export default class Tile extends Container {
       this.cursor ="pointer"
       this.pointerDown = false
       this.on('pointerdown', () => {
-         if ( this.disabled ) {
+         if ( this.disabled || this.used ) {
             return
          }
          clickHandler( this )
@@ -93,6 +98,11 @@ export default class Tile extends Container {
       return this.tileValue
    }
 
+   setGridLocation( r,c ) {
+      this.row = r 
+      this.col = c
+   }
+
    setEnabled( isEnabled ) {
       if ( isEnabled == false) {
          this.disabled = true
@@ -118,14 +128,37 @@ export default class Tile extends Container {
       }
    }
 
+   setTarget( flag) {
+      this.target = flag
+      this.letter.style.fill = 0x073B4C 
+      if (this.extra ) {
+         this.extra.style.fill = 0x073B4C 
+      }
+      if ( flag ) {
+         this.letter.style.fill = 0xEDF6F9 
+         if (this.extra ) {
+            this.extra.style.fill = 0xEDF6F9
+         }
+      }
+   }
+
+   setHighlight( flag ) {
+      this.highlight = flag
+      this.draw()
+   }
+
    draw() {
       this.graphics.clear()
 
       this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT).stroke({width: 1, color: 0x03045E})
       if (this.selected) {
-         this.graphics.fill(0x00B4D8)
+         this.graphics.fill(0xA06CD5)//0x00B4D8)
       } else {
-         this.graphics.fill(0x83C5BE)
+         if ( this.highlight ) {
+            this.graphics.fill(0xb3f5eE)//0x00B4D8)
+         } else {
+            this.graphics.fill(0x83C5BE)
+         }
       }
    }
 }

@@ -17,6 +17,7 @@ export default class Filler extends BaseGame {
    gameState = "init"
    grid = null
    clock = null
+   selections = []
    word = null
    score = 0 
    scoreDisplay = null
@@ -96,7 +97,7 @@ export default class Filler extends BaseGame {
       this.addChild(this.giveUpButton)
       
       this.submitButton = new Button( this.gameWidth-40, btnY, "Submit", 
-         this.submitWord.bind(this), 0xedf6f9,0x5977b9,0x48CAE4)
+         this.submitWord.bind(this), 0xEDF6F9, 0xA06CD5, 0x48CAE4)
       this.submitButton.disable()
       this.submitButton.alignTopRight()
       this.addChild(this.submitButton)
@@ -138,7 +139,9 @@ export default class Filler extends BaseGame {
          easing(TWEEDLE.Easing.Linear.None).
          onComplete( () => {
             this.grid[blank.row][blank.col] = tile
+            tile.setGridLocation(blank.row, blank.col)
             this.removeChild( blank )
+            tile.setEnabled(true)
          }).
          start()
 
@@ -146,7 +149,54 @@ export default class Filler extends BaseGame {
    }
 
    tileClicked( tile ) {
-      console.log(tile)
+      let activeTile = tile
+      if (tile.selected == false ) {
+         tile.select()
+         this.selections.push(tile)
+      } else {
+         if ( tile.target ) {
+            tile.deselect()
+            tile.setTarget(false)
+            this.selections.pop()
+            activeTile = this.selections[ this.selections.length-1]
+         } else {
+            return
+         }
+      }
+
+      for (let r = 0; r < Filler.ROWS; r++) {
+         for (let c = 0; c < Filler.COLS; c++) {
+            const cell = this.grid[r][c]
+            if ( cell instanceof Tile) {
+               cell.setHighlight(false)
+            }
+         }
+      }
+
+      if ( this.selections.length > 0 ) {
+         this.selections.forEach( s => s.setTarget( false ) )
+         this.selections[ this.selections.length-1 ].setTarget( true )
+         if ( this.selections.length == 1) {
+            if ( activeTile.col+1 < Filler.COLS) {
+               this.grid[activeTile.row][activeTile.col+1].setHighlight(true)
+            }
+            if ( activeTile.row+1 < Filler.ROWS) {
+               this.grid[activeTile.row+1][activeTile.col].setHighlight(true)
+            }
+         } else {
+            const head = this.selections[0]
+            if (head.col < activeTile.col) {
+               if ( activeTile.col+1 < Filler.COLS) {
+                  this.grid[activeTile.row][activeTile.col+1].setHighlight(true)
+               }
+            } else {
+               if ( activeTile.row+1 < Filler.ROWS) {
+                  this.grid[activeTile.row+1][activeTile.col].setHighlight(true)
+               }
+            }
+         }
+      } 
+      this.submitButton.setEnabled( this.selections.length >= 4 )
    }
 
    submitWord() {
