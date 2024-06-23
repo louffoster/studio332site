@@ -8,6 +8,7 @@ import Button from "@/games/common/button"
 import IconButton from "@/games/common/iconbutton"
 import Tile from "@/games/filler/tile"
 import Blank from "@/games/filler/blank"
+import TrashAnim from "@/games/filler/trashanim"
 
 export default class Filler extends BaseGame {
    dictionary = new Dictionary()
@@ -32,6 +33,8 @@ export default class Filler extends BaseGame {
    // palette: https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
    async initialize(replayHandler, backHandler) {
       await super.initialize()
+
+      this.smoke = await Assets.load('/smoke.png')
 
       this.app.ticker.add(() => TWEEDLE.Group.shared.update())
       
@@ -112,20 +115,11 @@ export default class Filler extends BaseGame {
       this.addChild(this.scoreDisplay)
    }
 
-   blankClicked( blank ) {
-      const tile = this.nextTiles.pop()
-      new TWEEDLE.Tween(tile).to({ x: blank.x, y: blank.y}, 250).
-         easing(TWEEDLE.Easing.Linear.None).
-         onComplete( () => {
-            this.grid[blank.row][blank.col] = tile
-            this.removeChild( blank )
-         }).
-         start()
-
+   addTile() {
       let x =  Filler.TILES_LEFT - Tile.WIDTH
       let letter = this.pool.popScoringLetter()
       let newTile = new Tile(letter, x, Filler.TILES_TOP, this.tileClicked.bind(this))
-      tile.setEnabled(newTile)
+      newTile.setEnabled(false)
       this.nextTiles.unshift(newTile)
       this.addChild( newTile )
       this.nextTiles.forEach( (nt,idx) => {
@@ -138,6 +132,19 @@ export default class Filler extends BaseGame {
       })
    }
 
+   blankClicked( blank ) {
+      const tile = this.nextTiles.pop()
+      new TWEEDLE.Tween(tile).to({ x: blank.x, y: blank.y}, 250).
+         easing(TWEEDLE.Easing.Linear.None).
+         onComplete( () => {
+            this.grid[blank.row][blank.col] = tile
+            this.removeChild( blank )
+         }).
+         start()
+
+      this.addTile()
+   }
+
    tileClicked( tile ) {
       console.log(tile)
    }
@@ -147,6 +154,11 @@ export default class Filler extends BaseGame {
    }
 
    trashTile() {
+      const tile = this.nextTiles.pop()
+      new TrashAnim(this.app.stage, this.smoke, tile.center.x, tile.center.y)
+      this.removeChild( tile )
+      this.addTile()
+      
       this.trashCnt-- 
       if (this.trashCnt == 0) {
          this.trashButton.setEnabled(false)
