@@ -147,17 +147,52 @@ export default class Tile extends Container {
       this.draw()
    }
 
+   setUsed( ) {
+      this.highlight = false
+      this.setTarget( false )
+      this.error = false
+      this.selected = false
+      this.used = true
+      this.removeChild(this.letter)
+      this.removeChild(this.value)
+      if (this.extra ) {
+         this.removeChild(this.extra)
+      }
+      this.disabled = true
+      this.eventMode = 'none'
+      this.cursor ="default"
+      this.draw()
+   }
+
+   setError( ) {
+      this.highlight = false
+      this.setTarget( false )
+      this.error = true 
+      this.selected = false
+      this.draw()
+      setTimeout( () => {
+         this.error = false 
+         this.draw()
+      }, 750)
+   }
+
    draw() {
       this.graphics.clear()
 
       this.graphics.rect(0,0, Tile.WIDTH, Tile.HEIGHT).stroke({width: 1, color: 0x03045E})
-      if (this.selected) {
-         this.graphics.fill(0xA06CD5)//0x00B4D8)
+      if ( this.used ) {
+         this.graphics.fill(0x804Cb5)
       } else {
-         if ( this.highlight ) {
-            this.graphics.fill(0xb3f5eE)//0x00B4D8)
+         if ( this.error ) {
+            this.graphics.fill(0xe0adc1) 
+         } else if (this.selected) {
+            this.graphics.fill(0xA06CD5)//0x00B4D8)
          } else {
-            this.graphics.fill(0x83C5BE)
+            if ( this.highlight ) {
+               this.graphics.fill(0xb3f5eE)//0x00B4D8)
+            } else {
+               this.graphics.fill(0x83C5BE)
+            }
          }
       }
    }

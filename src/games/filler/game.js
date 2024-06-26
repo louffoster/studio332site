@@ -151,8 +151,12 @@ export default class Filler extends BaseGame {
    tileClicked( tile ) {
       let activeTile = tile
       if (tile.selected == false ) {
-         tile.select()
-         this.selections.push(tile)
+         if ( this.selections.length == 0 || tile.highlight) {
+            tile.select()
+            this.selections.push(tile)
+         } else {
+            return
+         }
       } else {
          if ( tile.target ) {
             tile.deselect()
@@ -164,14 +168,7 @@ export default class Filler extends BaseGame {
          }
       }
 
-      for (let r = 0; r < Filler.ROWS; r++) {
-         for (let c = 0; c < Filler.COLS; c++) {
-            const cell = this.grid[r][c]
-            if ( cell instanceof Tile) {
-               cell.setHighlight(false)
-            }
-         }
-      }
+      this.clearHighlight()
 
       if ( this.selections.length > 0 ) {
          this.selections.forEach( s => s.setTarget( false ) )
@@ -199,8 +196,43 @@ export default class Filler extends BaseGame {
       this.submitButton.setEnabled( this.selections.length >= 4 )
    }
 
-   submitWord() {
+   clearHighlight() {
+      for (let r = 0; r < Filler.ROWS; r++) {
+         for (let c = 0; c < Filler.COLS; c++) {
+            const cell = this.grid[r][c]
+            if ( cell instanceof Tile) {
+               cell.setHighlight(false)
+            }
+         }
+      }
+   }
 
+   submitWord() {
+      let word = "" 
+      this.selections.forEach( s => word += s.text )
+      if ( this.dictionary.isValid(word) ) {
+         this.submitSuccess(word)
+      } else {
+         this.submitFailed()
+      }
+
+      this.submitButton.setEnabled( false )
+      this.selections = []
+      this.clearHighlight()
+   }
+
+   submitSuccess(word) {
+      let value = 0
+      this.selections.forEach( s => {
+         value += s.score
+         s.setUsed()
+      })
+      this.score += (value * word.length) 
+      this.scoreDisplay.text = `${this.score}`.padStart(5,"0")
+   }
+
+   submitFailed() {
+      this.selections.forEach( s => s.setError())
    }
 
    trashTile() {
