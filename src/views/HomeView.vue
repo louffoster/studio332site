@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import Button from 'primevue/button'
-import OverlayPanel from 'primevue/overlaypanel'
+import Popover from 'primevue/popover'
 
 const charromhelp = ref()
 const dwhelp = ref()
@@ -43,31 +43,31 @@ const toggleWMHelp = ((event) => {
                <router-link to="/wordmine">WordMine</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleWMHelp" />
             </div>
-            <OverlayPanel ref="wmhelp">
+            <Popover ref="wmhelp">
                <div class="rules">
                   <h3>WordMine</h3>
                   <p>Its a physics based word game. Maybe.</p>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
          <li>
             <div class="game-info">
                <router-link to="/charrom">Charrom</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleCharromHelp" />
             </div>
-            <OverlayPanel ref="charromhelp">
+            <Popover ref="charromhelp">
                <div class="rules">
                   <h3>Charrom</h3>
                   <p>Charrom is a cross between Carrom and a word game.</p>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
          <li>
             <div class="game-info">
                <router-link to="/letterdrop">Letter Drop</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleDWHelp" />
             </div>
-            <OverlayPanel ref="dwhelp">
+            <Popover ref="dwhelp">
                <div class="rules">
                   <h3>Letter Drop</h3>
                   <p>Drop letters onto the board then join adjacent letters to form words.</p>
@@ -80,14 +80,14 @@ const toggleWMHelp = ((event) => {
                      <li>Invalid words will cause the entire row of letter options to drop on the board.</li>
                   </ul>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
          <li>
             <div class="game-info">
                <router-link to="/mosaic">Mosaic</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleMosiacHelp" />
             </div>
-            <OverlayPanel ref="mosaichelp">
+            <Popover ref="mosaichelp">
                <div class="rules">
                   <h3>Mosaic</h3>
                   <p>Match mosaic patterns by rotating groups of tiles.</p>
@@ -103,14 +103,14 @@ const toggleWMHelp = ((event) => {
                      </li>
                   </ul>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
          <li>
             <div class="game-info">
                <router-link to="/virus">Virus</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleVirusHelp" />
             </div>
-            <OverlayPanel ref="vhelp">
+            <Popover ref="vhelp">
                <div class="rules">
                   <h3>Virus</h3>
                   <p>The system has a virus! Repel it by entering codewords.</p>
@@ -133,31 +133,31 @@ const toggleWMHelp = ((event) => {
                      </li>
                   </ul>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
          <li>
             <div class="game-info">
                <router-link to="/sweep">Sweep</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleSweepHelp" />
             </div>
-            <OverlayPanel ref="sweephelp">
+            <Popover ref="sweephelp">
                <div class="rules">
                   <h3>Sweep</h3>
                   <p>Clear all letters from the board by uing them in 3-10 letter words.</p>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
          <li>
             <div class="game-info">
                <router-link to="/filler">Filler</router-link>
                <Button  icon="pi pi-question" class="p-button-sm p-button-rounded p-button-info"  @click="toggleFillerHelp" />
             </div>
-            <OverlayPanel ref="fillerhelp">
+            <Popover ref="fillerhelp">
                <div class="rules">
                   <h3>Filler</h3>
                   <p>Fill the board with words.</p>
                </div>
-            </OverlayPanel>
+            </Popover>
          </li>
       </ul>
    </div>

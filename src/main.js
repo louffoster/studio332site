@@ -5,15 +5,18 @@ import App from './App.vue'
 import router from './router'
 
 const app = createApp(App)
-
-app.use(createPinia())
 app.use(router)
 
 import PrimeVue from 'primevue/config'
-app.use(PrimeVue)
-
-import 'primevue/resources/themes/saga-blue/theme.css'
-import 'primevue/resources/primevue.min.css'
+import Aura from '@primevue/themes/aura'
 import 'primeicons/primeicons.css'
 
+
+app.use(PrimeVue, {
+    theme: {
+        preset: Aura
+    }
+})
+
+app.use(createPinia())
 app.mount('#app')
