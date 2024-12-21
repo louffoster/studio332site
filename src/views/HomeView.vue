@@ -36,7 +36,7 @@ const toggleWMHelp = ((event) => {
 
 <template>
    <div class="content">
-      <h2>Games</h2>
+      <h2>Games!</h2>
       <ul>
          <li>
             <div class="game-info">
