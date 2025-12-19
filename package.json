@@ -7,21 +7,21 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@primevue/themes": "^4.2.5",
-    "axios": "^1.7.9",
+    "@primevue/themes": "^4.5.4",
+    "axios": "^1.13.2",
     "matter-js": "^0.20.0",
-    "pinia": "^2.3.1",
-    "pixi.js": "^8.7.3",
+    "pinia": "^3.0.4",
+    "pixi.js": "^8.14.3",
     "primeicons": "^7.0.0",
-    "primevue": "^4.2.5",
+    "primevue": "^4.5.4",
     "tweedle.js": "^2.1.0",
-    "vue": "^3.5.13",
+    "vue": "^3.5.26",
     "vue-cookies": "^1.8.6",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
-    "sass-embedded": "^1.83.4",
-    "vite": "^6.1.0"
+    "@vitejs/plugin-vue": "^6.0.3",
+    "sass-embedded": "^1.97.0",
+    "vite": "^7.3.0"
   }
 }
